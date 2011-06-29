@@ -46,6 +46,16 @@ class OrmAutoClassCodeConstructor extends OrmRelatedClassCodeConstructor
 
 		$this->classMethods[] = <<<EOT
 	/**
+	 * @return {$this->ormClass->getEntityName()}
+	 */
+	static function create()
+	{
+		return new {$this->ormClass->getEntityName()};
+	}
+EOT;
+
+		$this->classMethods[] = <<<EOT
+	/**
 	 * @return {$ormEntityHolder}
 	 */
 	static function orm()
