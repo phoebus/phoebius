@@ -275,6 +275,7 @@ class PgSqlDB extends DB
 
 		LoggerPool::log(parent::LOG_QUERY, $queryAsString);
 
+		while(pg_connection_busy($this->link));
 		$executeResult = pg_send_query($this->link, $queryAsString);
 		if (!$isAsync || !$executeResult) {
 			$result = pg_get_result($this->link);
@@ -322,7 +323,7 @@ class PgSqlDB extends DB
 	{
 		$query =
 			SelectQuery::create()
-				->get(
+				->addSelectExpression(
 					new SqlFunction(
 						'nextval', new SqlValue($this->getDialect()->getSequenceName($tableName, $columnName))
 					)

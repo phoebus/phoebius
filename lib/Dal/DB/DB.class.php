@@ -290,6 +290,11 @@ abstract class DB
 
 		return $this->transaction;
 	}
+	
+	function __destruct()
+	{
+		$this->disconnect();
+	}
 
 	/**
 	 * Whether a database handle is connected
