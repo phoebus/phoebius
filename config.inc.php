@@ -115,6 +115,17 @@ $phoebiusNamespaces = array(
 	'Web',
 	'Web/UrlRouting',
 	'Web/Exceptions',
+
+	// OQL2
+	'OQL2',
+	'OQL2/Grammar',
+	'OQL2/Parsers',
+	'OQL2/Parsers/Tokenizer',
+	'OQL2/SyntaxTree',
+	'OQL2/SyntaxTree/Criteria',
+	'OQL2/SyntaxTree/Iterators',
+	'OQL2/SyntaxTree/Mutators',
+	'OQL2/SyntaxTree/Statements',
 );
 
 foreach ($phoebiusNamespaces as $namespace) {
