@@ -39,7 +39,18 @@
 			
 			return $criteria;
 		}
+				
+		/**
+		 * @return OqlSelectQuery
+		**/
+		public function bindAll(array $parameters)
+		{
+			return parent::bindAll($parameters);
+		}
 		
+		/**
+		 * @return EntityQuery
+		 */
 		public function toCriteria()
 		{
 			Assert::isNotNull($this->node);
