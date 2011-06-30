@@ -91,13 +91,63 @@ class Route
 	private $queryStringRegs = array();
 	private $routeData = array();
 	private $method;
+	private $name;
+	
+	/**
+	 * @return Route
+	 */
+	static function create(
+			$name = null,
+			$pattern = null,
+			array $data = array(),
+			WebRequestPart $method = null
+	) {
+		return new self ($name, $pattern, $data, $method);
+	}
+	
+	/**
+	 * @return Route
+	 */
+	static function get(
+			$name = null,
+			$pattern = null,
+			array $data = array()
+	) {
+		return new self ($name, $pattern, $data, WebRequestPart::get());
+	}
+	
+	/**
+	 * @return Route
+	 */
+	static function post(
+			$name = null,
+			$pattern = null,
+			array $data = array()
+	) {
+		return new self ($name, $pattern, $data, WebRequestPart::get());
+	}
+	
+	/**
+	 * @return Route
+	 */
+	static function any(
+			$name = null,
+			$pattern = null,
+			array $data = array()
+	) {
+		return new self ($name, $pattern, $data);
+	}
 	
 	function __construct(
+			$name = null,
 			$pattern = null,
 			array $data = array(),
 			WebRequestPart $method = null
 		)
 	{
+		Assert::isScalarOrNull($name);
+		Assert::isScalarOrNull($pattern);
+		
 		if ($pattern) {
 			$path = parse_url($pattern, PHP_URL_PATH);
 			$query = parse_url($pattern, PHP_URL_QUERY);		
@@ -111,8 +161,18 @@ class Route
 			}
 		}
 		
+		$this->name = $name;
 		$this->routeData = $data;
 		$this->method = $method;
+	}
+	
+	/**
+	 * Gets the route name
+	 * @return string|null
+	 */
+	function getName()
+	{
+		return $this->name;
 	}
 	
 	function match(WebRequest $request)
@@ -138,7 +198,7 @@ class Route
 		foreach ($this->queryStringRegs as $qsArg => $qsReg) {
 			if (
 					isset($query[$qsArg])
-					&& preg_match($qsReg, $query[$qsArg])
+					&& ($qsReg || preg_match($qsReg, $query[$qsArg]))
 			) {
 				$data[$qsArg] = $query[$qsArg];
 			}
@@ -146,6 +206,43 @@ class Route
 		}
 		
 		return $data;
+	}
+	
+	/**
+	 * @return HttpUrl
+	 */
+	function makeUrl(array $data, HttpUrl $url = null)
+	{
+		$data = array_replace_recursive($this->routeData, $data);
+		if (!$url)
+			$url = new HttpUrl();
+			
+		if ($this->pathMatcher)
+			$url->setPath($this->pathMatcher->reverse($data));
+		
+		foreach ($this->queryStringRegs as $qsArg => $qsReg) {
+			if ($qsReg) {
+				Assert::hasIndex($data, $qsArg);
+				Assert::isTrue(preg_match($qsReg, $data[$qsArg]));
+			}
+			
+			if (isset($data[$qsArg]))
+				$url->addQueryArgument($qsArg, $data[$qsArg]);
+		}
+		
+		// import untouched data variables
+		$used = array_replace(
+			$this->routeData, 
+			$this->pathMatcher? $this->pathMatcher->getPlaceholderKeys(): array()
+		);
+		$onlyNew = array_diff_key(
+			array_replace($data, $used), 
+			$used
+		);
+		foreach ($onlyNew as $key => $value)
+			$url->addQueryArgument($key, $value);
+		
+		return $url;
 	}
 }
 
@@ -157,6 +254,7 @@ final class _PathPattern
 	const DELIMITER = '/';
 	
 	private $pattern;
+	private $parts = array();
 	private $particles = array();
 	private $placeholders = array();
 	
@@ -167,6 +265,11 @@ final class _PathPattern
 		$this->pattern = $pattern;
 		
 		$this->setupPattern();
+	}
+	
+	function getPlaceholderKeys()
+	{
+		return array_diff($this->placeholders, array(""));
 	}
 	
 	function match($path)
@@ -182,7 +285,6 @@ final class _PathPattern
 		foreach ($this->particles as $idx => $partRegex) {				
 			$part = $path_parts[$idx];
 			$placeholder = $this->placeholders[$idx];
-			
 			if (preg_match($partRegex, $part)) {
 				if ($placeholder)
 					$data[$placeholder] = $part;
@@ -194,6 +296,38 @@ final class _PathPattern
 		}
 		
 		return $data;
+	}
+	
+	function reverse(array $data)
+	{
+		$path = array();
+		
+		foreach ($this->parts as $i => $part) {
+			$placeholderName = $this->placeholders[$i];
+				
+			if ($this->placeholders[$i]) {
+				Assert::hasIndex(
+					$data, $this->placeholders[$i], 
+					'specify value for placehodler `%s` to reverse path `%s`',
+					$this->placeholders[$i], $this->pattern
+				);
+				
+				$placeholderValue = $data[$this->placeholders[$i]];
+				
+				Assert::isTrue(
+					preg_match($this->particles[$i], $placeholderValue),
+					'value `%sz for placeholder `%s` should match regex %s',
+					$placeholderValue, $placeholderValue, $this->particles[$i]
+				);
+				
+				$path[] = $data[$this->placeholders[$i]];
+			}
+			else {
+				$path[] = $part;
+			}
+		}
+		
+		return join('/', $path);
 	}
 	
 	private function setupPattern()
@@ -211,6 +345,7 @@ final class _PathPattern
 				}
 			}
 			
+			$this->parts[] = $part;
 			$this->particles[] = "{^{$part}$}";
 			$this->placeholders[] = $placeholder;
 		}

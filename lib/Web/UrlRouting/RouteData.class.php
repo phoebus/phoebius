@@ -18,5 +18,30 @@
 
 class RouteData extends Collection
 {
-	// nothing here
+	private $route;
+	private $router;
+	
+	function __construct(Route $route, Router $router, array $values = array())
+	{
+		$this->routeObject = $route;
+		$this->router = $router;
+		
+		parent::__construct($values);
+	}
+	
+	/**
+	 * @return Route
+	 */
+	function getRoute()
+	{
+		return $this->route;
+	}
+	
+	/**
+	 * @return Router
+	 */
+	function getRouter()
+	{
+		return $this->router;
+	}
 }

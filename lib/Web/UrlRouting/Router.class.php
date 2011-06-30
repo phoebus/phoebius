@@ -30,6 +30,7 @@ class Router implements IRouter
 {
 	private $routeData = array();
 	private $routes = array();
+	private $routeNames = array();
 	
 	function __construct(array $defaultRouteData = array())
 	{
@@ -41,48 +42,52 @@ class Router implements IRouter
 		return $this->lookup($this->routes, $request);
 	}
 	
-	function getDefaultRouteData()
+	/**
+	 * @return Router
+	 */
+	function addRoute(Route $route)
 	{
-		return $this->routeData;
+		if (($name = $route->getName())) {
+			Assert::isFalse(isset($this->routeNames[$name]), 'route with name `%s` already defined', $name);
+			
+			$this->routeNames[$name] = $route;
+		}
+		
+		$this->routes[] = $route;
+		
+		return $this;
 	}
 	
-	function get($uri, array $routeData = array())
+	/**
+	 * @return Router
+	 */
+	function addRoutes(array $routes)
 	{
-		$this->routes[] = new Route($uri, $routeData, WebRequestPart::get());
-	}
-	
-	function post($uri, array $routeData = array())
-	{
-		$this->routes[] = new Route($uri, $routeData, WebRequestPart::post());
-	}
-	
-	function any($uri, array $routeData = array())
-	{
-		$this->routes[] = new Route($uri, $routeData);
-	}
-	
-	function all(array $routeData)
-	{
-		$this->routes[] = new Route(null, $routeData);
+		foreach ($routes as $route)
+			$this->addRoute($route);
+		
+		return $this;
 	}
 	
 	private function lookup(array $routes, WebRequest $request)
 	{
 		foreach ($routes as $route) {
 			$result = $route->match($request);
-			
-			if ($result)
-				return 
+
+			if (is_array($result)) {
+				return
 					new RouteData(
-						array_merge(
+						$route, $this,
+						array_replace(
 							$this->routeData, 
 							$result
 						)
 					);
+			}
 		}
 		
 		if (!empty($this->routeData)) {
-			return new RouteData($this->routeData);
+			return new RouteData(new Route(), $this, $this->routeData);
 		}
 		
 		throw new RouteException($request->getHttpUrl());
