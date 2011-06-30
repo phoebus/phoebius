@@ -218,7 +218,7 @@ class Route
 			$url = new HttpUrl();
 			
 		if ($this->pathMatcher)
-			$url->setPath($this->pathMatcher->reverse($data));
+			$url->setVirtualPath($this->pathMatcher->reverse($data));
 		
 		foreach ($this->queryStringRegs as $qsArg => $qsReg) {
 			if ($qsReg) {
