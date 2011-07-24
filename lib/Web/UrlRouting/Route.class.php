@@ -100,7 +100,7 @@ class Route
 			$name = null,
 			$pattern = null,
 			array $data = array(),
-			WebRequestPart $method = null
+			RequestMethod $method = null
 	) {
 		return new self ($name, $pattern, $data, $method);
 	}
@@ -113,7 +113,7 @@ class Route
 			$pattern = null,
 			array $data = array()
 	) {
-		return new self ($name, $pattern, $data, WebRequestPart::get());
+		return new self ($name, $pattern, $data, RequestMethod::get());
 	}
 	
 	/**
@@ -124,7 +124,7 @@ class Route
 			$pattern = null,
 			array $data = array()
 	) {
-		return new self ($name, $pattern, $data, WebRequestPart::get());
+		return new self ($name, $pattern, $data, RequestMethod::get());
 	}
 	
 	/**
@@ -142,7 +142,7 @@ class Route
 			$name = null,
 			$pattern = null,
 			array $data = array(),
-			WebRequestPart $method = null
+			RequestMethod $method = null
 		)
 	{
 		Assert::isScalarOrNull($name);

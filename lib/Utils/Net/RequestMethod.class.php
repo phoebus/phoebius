@@ -27,6 +27,22 @@ final class RequestMethod extends Enumeration
 	const GET = 'GET';
 	const PUT = 'PUT';
 	const HEAD = 'HEAD';
+	
+	/**
+	 * @return RequestMethod
+	 */
+	static function get()
+	{
+		return new self (self::GET);
+	}
+	
+	/**
+	 * @return RequestMethod
+	 */
+	static function post()
+	{
+		return new self (self::POST);
+	}
 }
 
 ?>
