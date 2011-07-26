@@ -26,7 +26,7 @@ abstract class InputFormControl extends FormControlScalar
 		Assert::isFalse(isset($htmlAttributes['type']));
 		Assert::isFalse(isset($htmlAttributes['value']));
 		
-		$htmlAttributes['name'] = $this->getId();
+		$htmlAttributes['name'] = $this->getName();
 		$htmlAttributes['type'] = $this->getType();
 		$htmlAttributes['value'] = $this->getValue();
 		

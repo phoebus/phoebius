@@ -16,41 +16,47 @@
  *
  ************************************************************************************************/
 
-class CallbackFormControlConstraint implements IFormControlConstraint
+abstract class OptionalValueFormControl extends InputFormControl
 {
-	private $id, $message, $callback, $resetImportedValue;
+	private $value;
 
-	function __construct($id, $message, $callback, $resetImportedValue)
+	function __construct($name, $label, $value)
 	{
-		Assert::isScalar($id);
-		Assert::isScalar($message);
-		Assert::isCallback($callback);
-		Assert::isBoolean($resetImportedValue);
-		
-		$this->id = $id;
-		$this->message = $message;
-		$this->callback = $callback;
-		$this->resetImportedValue = $resetImportedValue;
+		Assert::isScalar($value);
+
+		$this->value = $value;
+
+		parent::__construct($name, $label);
 	}
 
-	function getId()
+	final function getFixedValue()
 	{
-		return $this->id;
+		return $this->value;
 	}
 
-	function getMessage()
+	final function isOptional()
 	{
-		return $this->message;
+		return true;
 	}
 
-	function check($value)
+	final function markRequired()
 	{
-		return call_user_func($this->callback, $value);
+		Assert::isUnreachable('control is hard-coded optional');
 	}
 
-	function isRejectsImportedValue()
+	final function markMissing($message = null)
 	{
-		return $this->resetImportedValue;
+		Assert::isUnreachable('control can be missing, it is ok');
+	}
+
+	function setValue($value)
+	{
+		if ($value !== null && $value != $this->value) {
+			$this->markWrong('unexpected control value');
+		}
+		else {
+			parent::setValue($value);
+		}
 	}
 }
 

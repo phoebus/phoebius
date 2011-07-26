@@ -20,12 +20,7 @@ class HiddenFormControlSet extends FormControlSet
 {
 	protected function spawnSingle()
 	{
-		$control = new HiddenFormControl($this->getInnerId());
-		foreach ($this->getConstraints() as $constraint) {
-			$control->addConstraint($constraint);
-		}
-		
-		return $control;
+		return new HiddenFormControl($this->getInnerName());
 	}
 }
 

@@ -16,150 +16,210 @@
  *
  ************************************************************************************************/
 
+// missing - means that value is not an array
+// wrong - means there are inner errors
 abstract class FormControlSet implements IFormControl
 {
 	const ID_PATTERN = '/^[a-z0-9_]+$/i';
-	const ERROR_VALUE_NOT_AN_ARRAY = 'not_array';
 
-	private $id;
+	private $name;
 	private $label;
-	private $skipWrong;
-	private $constraints = array();
+
+	private $skipMissing = true;
+	private $skipWrong = true;
+	private $distinct = true;
 
 	private $defaultValue = array();
+
 	private $value = array();
+	/**
+	 * @var IFormControl[]
+	 */
 	private $controls = array();
-		
-	private $errors = array();
-	private $hasInnerErrors = false;
+
+	private $errorId;
+	private $errorMessage;
 
 	/**
-	 * @return FormControl
+	 * @return IFormControl
 	 */
 	abstract protected function spawnSingle();
-	
-	function __construct(
-			$id, $label, 
-			array $defaultValue = array(),
-			$skipWrong = true
-		)
+
+	function __construct($name, $label)
 	{
-		Assert::isScalar($id);
-		Assert::isTrue(preg_match(self::ID_PATTERN, $id));
+		Assert::isScalar($name);
+		Assert::isTrue(preg_match(self::ID_PATTERN, $name));
 		Assert::isScalar($label);
-		Assert::isBoolean($skipWrong);
-		
-		$this->id = $id;
+
+		$this->name = $name;
 		$this->label = $label;
-		$this->skipWrong = $skipWrong;
-		
-		$this->defaultValue = $defaultValue;
-		
-		$this->makeDefaults();
 	}
-	
-	function getId()
+
+	// sets are optional
+	final function isOptional()
 	{
-		return $this->id;
+		return true;
 	}
-	
-	function getStub($defaultValue)
+
+	function skipWrong($flag = true)
 	{
-		return $this->spawnSingle($defaultValue);
+		Assert::isBoolean($flag);
+
+		$this->skipWrong = $flag;
+
+		return $this;
 	}
-	
-	function getInnerId()
+
+	function isSkipsWrong()
 	{
-		return $this->id . '[]';
+		return $this->skipWrong;
 	}
-	
+
+	function skipMissing($flag = true)
+	{
+		Assert::isBoolean($flag);
+
+		$this->skipMissing = $flag;
+
+		return $this;
+	}
+
+	function isSkipsMissing()
+	{
+		return $this->skipMissing;
+	}
+
+	function setDistinct($flag = true)
+	{
+		Assert::isBoolean($flag);
+
+		$this->distinct = $flag;
+
+		return $this;
+	}
+
+	function isDistinct()
+	{
+		return $this->distinct;
+	}
+
+	function getName()
+	{
+		return $this->name;
+	}
+
+	function getInnerName()
+	{
+		return $this->name . '[]';
+	}
+
 	function getLabel()
 	{
 		return $this->label;
 	}
-	
+
 	function getControls()
 	{
 		return $this->controls;
 	}
-	
+
 	function getIterator()
 	{
 		return new ArrayIterator($this->controls);
 	}
-	
+
 	function count()
 	{
 		return sizeof($this->controls);
 	}
-	
-	function hasInnerErrors()
+
+	function hasError()
 	{
-		return $this->hasInnerErrors;
+		return !!$this->errorId;
 	}
-	
-	function hasErrors()
+
+	function isMissing()
 	{
-		return !empty($this->errors);
+		return
+			($this->errorId && $this->errorId->is(FormControlError::MISSING))
+				? ($this->errorMessage ? $this->errorMessage : true)
+				: false;
 	}
-	
-	function hasError($id)
+
+	function isWrong()
 	{
-		return isset($this->errors[$id]);
+		return
+			($this->errorId && $this->errorId->is(FormControlError::WRONG))
+				? ($this->errorMessage ? $this->errorMessage : true)
+				: false;
 	}
-	
-	function getErrors()
+
+	function reset()
 	{
-		return $this->errors;
+		$this->errorId = null;
+		$this->errorMessage = null;
+		$this->controls = array();
+		$this->value = array();
+		$this->makeDefaults();
 	}
-	
+
 	function getValue()
 	{
 		return $this->value;
 	}
-	
+
 	function importValue($value)
-	{		
-		$this->errors = array();
-		$this->controls = array();
-		$this->hasInnerErrors = false;
-		
+	{
+		$this->reset();
+
 		if (is_array($value)) {
-			$setValue = array();
-			
+			$controls = array();
+
 			foreach ($value as $innerValue) {
+				if (!$innerValue && $this->isSkipsMissing())
+					continue;
+
 				$control = $this->spawnSingle();
-				if ($control->importValue($innerValue)) {
-					$this->controls[] = $control;
-					$setValue[] = $control->getValue();
+
+				// if import failed...
+				if (!$control->importValue($innerValue)) {
+					if (
+						// if we can skip the specified error - do this
+							($control->isMissing() && $this->isSkipsMissing())
+							|| ($control->isWrong() && $this->isSkipsWrong())
+					) {
+						continue;
+					}
+					else { // otherwise mark the surrounding control as wrong
+						$this->markWrong();
+					}
 				}
-				else if (!$this->skipWrong) {
-					$this->controls[] = $control;
-					$setValue[] = $control->getValue();
-					$this->hasInnerErrors = true;
-				}				
+
+				$controls[] = $control;
 			}
-			
-			$this->setValue($setValue);
+
+			$this->setControls($controls);
 		}
 		else if (!empty($value) && !is_array($value)) {
-			$this->makeDefaults();
-			$this->addError(self::ERROR_VALUE_NOT_AN_ARRAY, 'value is not an array');
+			$this->markMissing();
 		}
-		
-		return $this->hasErrors();
+
+		return !$this->hasErrors();
 	}
-	
-	function getConstraints()
+
+	function setDefaultValue($value)
 	{
-		return $this->constraints;
-	}
-	
-	function addConstraint(IFormControlConstraint $constraint)
-	{
-		$this->constraints[] = $constraint;
-		
+		Assert::isScalarOrNull($value);
+
+		$this->defaultValue = $value;
+		$this->makeDefaults();
+
 		return $this;
+	}
+
+	function getDefaultValue()
+	{
+		return $this->defaultValue;
 	}
 
 	function toHtml(array $htmlAttributes = array())
@@ -168,38 +228,51 @@ abstract class FormControlSet implements IFormControl
 		foreach ($this->controls as $control) {
 			$s .= $control->toHtml($htmlAttributes);
 		}
-		
+
 		return $s;
 	}
-	
-	protected function setValue(array $value)
+
+	protected function markMissing($message = null)
 	{
+		$this->errorId = FormControlError::missing();
+		$this->errorMessage = $message;
+	}
+
+	protected function markWrong($message = null)
+	{
+		$this->errorId = FormControlError::wrong();
+		$this->errorMessage = $message;
+	}
+
+	protected function setControls(array $controls)
+	{
+		$value = array();
+		foreach ($controls as $control) {
+			if (($_ = $control->getValue()))
+				$value[] = $_;
+		}
+
+		if ($this->isDistinct()) {
+			$value = array_unique($value);
+		}
+
 		$this->value = $value;
-		
+		$this->controls = $controls;
+
 		return $this;
 	}
-	
-	protected function addError($id, $message)
-	{
-		Assert::isScalar($id);
-		
-		$this->errors[$id] = $message;
-		
-		return $this;
-	}
-	
+
 	protected function makeDefaults()
 	{
-		$this->value = $this->defaultValue;
-		
-		foreach ($this->value as $value) {
+		$controls = array();
+		foreach ($this->defaultValue as $value) {
 			$control = $this->spawnSingle();
-			$success = $control->importValue($value);
-			
-			Assert::isTrue($success, 'default value should pass constraints, this one didn`t: %s', $value);
-			
-			$this->controls[] = $control;
+			$control->setDefaultValue($value);
+
+			$controls[] = $control;
 		}
+
+		$this->setControls($controls);
 	}
 }
 

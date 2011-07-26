@@ -20,12 +20,7 @@ class StringFormControlSet extends FormControlSet
 {
 	protected function spawnSingle()
 	{
-		$control = new StringFormControl($this->getInnerId(), $this->getLabel());
-		foreach ($this->getConstraints() as $constraint) {
-			$control->addConstraint($constraint);
-		}
-		
-		return $control;
+		return new StringFormControl($this->getInnerName(), $this->getLabel());
 	}
 }
 

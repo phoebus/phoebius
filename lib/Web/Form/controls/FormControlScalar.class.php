@@ -17,32 +17,51 @@
  ************************************************************************************************/
 
 abstract class FormControlScalar implements IFormControl
-{	
-	private $id;
+{
+	private $name;
 	private $label;
+	private $isOptional;
 
+	private $isImported;
 	private $defaultValue;
 	private $importedValue;
-	
-	private $errors = array();
-	private $constraints = array();
-	
-	function __construct($id, $label, $defaultValue = null)
+
+	private $errorId;
+	private $errorMessage;
+
+	function __construct($name, $label)
 	{
-		Assert::isScalar($id);
+		Assert::isScalar($name);
 		Assert::isScalar($label);
-		Assert::isScalarOrNull($defaultValue);
-		
-		$this->id = $id;
+
+		$this->name = $name;
 		$this->label = $label;
-		$this->defaultValue = $defaultValue;
 	}
 
-	function getId()
+	function isOptional()
 	{
-		return $this->id;
+		return $this->isOptional;
 	}
-	
+
+	function markOptional()
+	{
+		$this->isOptional = true;
+
+		return $this;
+	}
+
+	function markRequired()
+	{
+		$this->isOptional = false;
+
+		return $this;
+	}
+
+	function getName()
+	{
+		return $this->name;
+	}
+
 	function getLabel()
 	{
 		return $this->label;
@@ -50,72 +69,86 @@ abstract class FormControlScalar implements IFormControl
 
 	function getValue()
 	{
-		return 
-			is_null($this->importedValue)
-				? $this->defaultValue
-				: $this->importedValue;	
+		return
+			$this->isImported
+				? $this->importedValue
+				: $this->defaultValue;
 	}
 
-	/**
-	 * @return boolean whether import was successful or not
-	 */
 	function importValue($value)
 	{
-		// reset control state
-		$this->errors = array();
-		$this->importedValue = null;
-		
-		$noImport = false;
-		foreach ($this->constraints as $constraint) {
-			if (!$constraint->check($value)) {
-				$this->addError($constraint->getId(), $constraint->getMessage());
-				if ($constraint->rejectsImportedValue()) {
-					$noImport = true;
-				}
-			}
+		$this->reset();
+
+		if ($value && !is_scalar($value)) {
+			$this->markMissing('not a scalar value given');
 		}
-		
-		if (!$noImport)
-			$this->importedValue = $value;
-		
-		return $this->hasErrors();
+		else {
+			$this->setValue($value);
+		}
+
+		return !$this->hasError();
 	}
-	
-	function hasErrors()
+
+	function setDefaultValue($value)
 	{
-		return !empty($this->errors);
-	}
-	
-	function hasError($id)
-	{
-		return isset($this->errors[$id]);
-	}
-	
-	function getErrors()
-	{
-		return $this->errors;
-	}
-	
-	/**
-	 * @return FormControlScalar
-	 */
-	function addError($id, $message)
-	{
-		Assert::isScalar($id);
-		Assert::isScalar($message);
-		
-		$this->errors[$id] = $message;
-		
+		Assert::isScalarOrNull($value);
+
+		$this->defaultValue = $value;
+
 		return $this;
 	}
-	
-	/**
-	 * @return FormControlScalar
-	 */
-	function addConstraint(IFormControlConstraint $constraint)
+
+	function getDefaultValue()
 	{
-		$this->constraints[] = $constraint;
-		
+		return $this->defaultValue;
+	}
+
+	function hasError()
+	{
+		return !!$this->errorId;
+	}
+
+	function isMissing()
+	{
+		return
+			($this->errorId && $this->errorId->is(FormControlError::MISSING))
+				? ($this->errorMessage ? $this->errorMessage : true)
+				: false;
+	}
+
+	function isWrong()
+	{
+		return
+			($this->errorId && $this->errorId->is(FormControlError::WRONG))
+				? ($this->errorMessage ? $this->errorMessage : true)
+				: false;
+	}
+
+	function reset()
+	{
+		$this->errorId = null;
+		$this->errorMessage = null;
+		$this->isImported = false;
+		$this->importedValue = null;
+	}
+
+	function markMissing($message = null)
+	{
+		$this->errorId = FormControlError::missing();
+		$this->errorMessage = $message;
+	}
+
+	function markWrong($message = null)
+	{
+		$this->errorId = FormControlError::wrong();
+		$this->errorMessage = $message;
+	}
+
+	protected function setValue($value)
+	{
+		$this->isImported = true;
+		$this->importedValue = $value;
+
 		return $this;
 	}
 }

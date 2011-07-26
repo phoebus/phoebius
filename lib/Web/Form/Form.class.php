@@ -154,9 +154,24 @@ class Form
 		return $this->hasErrors;
 	}
 	
+	function export()
+	{
+		$yield = array();
+		foreach ($this->controls as $control) {
+			$yield[$control->getId()] = $control->getValue();
+		}
+		
+		return $yield;
+	}
+	
+	/**
+	 * Overridden. Called when form is submitted
+	 */
 	protected function process(array $variables)
 	{
-		 $this->import($variables);
+		 if ($this->import($variables)) {
+		 	// process me
+		 }
 	}
 
 	/**

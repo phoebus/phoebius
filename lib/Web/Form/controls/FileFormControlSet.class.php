@@ -18,19 +18,16 @@
 
 class FileFormControlSet extends FormControlSet
 {
-	function __construct($id, $label, $defaultInputCount = 1, $skipWrong = true)
+	function __construct($name, $label, $defaultInputCount = 1)
 	{
-		parent::__construct($id, $label, array_fill(0, $defaultInputCount, null), $skipWrong);
+		parent::__construct($name, $label);
+
+		$this->setDefaultValue(array_fill(0, $defaultInputCount, $this->getLabel()));
 	}
 
 	protected function spawnSingle()
 	{
-		$control = new FileFormControl($this->getInnerId(), $this->getLabel());
-		foreach ($this->getConstraints() as $constraint) {
-			$control->addConstraint($constraint);
-		}
-		
-		return $control;
+		return new FileFormControl($this->getInnerName(), $this->getLabel());
 	}
 }
 

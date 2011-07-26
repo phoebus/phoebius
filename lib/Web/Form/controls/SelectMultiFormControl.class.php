@@ -16,27 +16,49 @@
  *
  ************************************************************************************************/
 
-class CheckboxFormControl extends OptionalValueFormControl
+final class SelectMultiFormControl extends SetFormControl
 {
-	function getType()
+	function setDefaultValue($value)
 	{
-		return 'checkbox';
+		Assert::isTrue(is_array($value));
+		Assert::isTrue(is_array($value));
+		Assert::isTrue(
+			sizeof($value)
+			== array_intersect($this->getAvailableValues(), $value)
+		);
+
+		return parent::setDefaultValue($value);
+	}
+
+	function importValue($value)
+	{
+		if (!$value && !$this->isOptional()) {
+			$this->markMissing();
+			return false;
+		}
+
+		if ($value && !is_array($value)) {
+			$this->markWrong();
+			return false;
+		}
+
+		if (sizeof($value) != array_intersect($this->getAvailableValues(), $value)) {
+			$this->markWrong();
+			return false;
+		}
+
+		return parent::importValue($value);
 	}
 
 	function toHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['name']));
-		Assert::isFalse(isset($htmlAttributes['type']));
-		Assert::isFalse(isset($htmlAttributes['value']));
-		Assert::isFalse(isset($htmlAttributes['checked']));
+		Assert::isFalse(isset($htmlAttributes['multiple']));
 
 		$htmlAttributes['name'] = $this->getName();
-		$htmlAttributes['type'] = $this->getType();
-		$htmlAttributes['value'] = $this->getFixedValue();
-		if ($this->getValue())
-			$htmlAttributes['checked'] = 'checked';
+		$htmlAttributes['multiple'] = $this->getName();
 
-		return HtmlUtil::getNode('input', $htmlAttributes);
+		return HtmlUtil::getContainer('select', $htmlAttributes, join("", $this->getOptions()));
 	}
 }
 

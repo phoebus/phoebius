@@ -16,11 +16,18 @@
  *
  ************************************************************************************************/
 
-class FormControlConstraint
+class ButtonFormControl extends OptionalValueFormControl
 {
-	static function notEmpty($message = 'field should not be blank', $id = 'not_empty')
+	function __construct($name, $label)
 	{
-		return new CallbackFormControlConstraint($id, $message, function($value) { return !empty($value); }, false);
+		Assert::isNotEmpty($label, 'label for button should be set');
+
+		parent::__construct($name, $label, $label);
+	}
+
+	function getType()
+	{
+		return 'submit';
 	}
 }
 

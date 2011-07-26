@@ -23,16 +23,29 @@
 interface IFormControl
 {
 	/**
-	 * gets the id of a control
+	 * gets the name of a control
 	 * @return string
 	 */
-	function getId();
+	function getName();
 	
 	/**
-	 * gets the control label
+	 * gets the label of a control
 	 * @return string
 	 */
 	function getLabel();
+	
+	/**
+	 * whether value is optional
+	 * @return boolean
+	 */
+	function isOptional();
+	
+	/**
+	 * tries to import the value
+	 * @param mixed $value
+	 * @return boolean whether import was successful or not (caused import errors)
+	 */
+	function importValue($value);
 	
 	/**
 	 * gets the value, either imported or default (might be null)
@@ -41,36 +54,40 @@ interface IFormControl
 	function getValue();
 	
 	/**
-	 * tries to import the value
-	 * @param mixed $value
-	 * @return boolean wheter import was successful or not (caused import errors)
+	 * Sets the default value
+	 * @return IFormControl
 	 */
-	function importValue($value);
+	function setDefaultValue($value);
 	
 	/**
-	 * @return mixed
+	 * Gets the default value, if any
+	 * @return mixed|null
 	 */
-	function exportValue();
+	function getDefaultValue();
 	
 	/**
 	 * determines whether errors occured during value import
 	 * @return boolean
 	 */
-	function hasErrors();
+	function hasError();
 	
 	/**
-	 * determines whether an error identified by $id occured during import
-	 * @param string $id
-	 * @return boolean
+	 * determines whether value was missing
+	 * @return string|boolean string or true on error, otherwise false/null
 	 */
-	function hasError($id);
+	function isMissing();
 	
 	/**
-	 * gets the hash of errors occured during import (might be empty if no errors occured during
-	 * import)
-	 * @return array
+	 * whether import failed due errors. May return string (a describtion of an error)
+	 * @return string|boolean string or true on error, otherwise false/null
 	 */
-	function getErrors();
+	function isWrong();
+	
+	/**
+	 * Resets the control
+	 * @return void
+	 */
+	function reset();
 	
 	/**
 	 * gets the HTML representation of a form

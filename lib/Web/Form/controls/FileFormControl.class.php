@@ -21,29 +21,35 @@ class FileFormControl extends InputFormControl
 	const ERROR_UPLOAD_FAILED = 'upload_failed';
 	const ERROR_FILETYPE = 'filetype';
 	const ERROR_FILESIZE = 'filesize';
-	
-	private $filepath;
-	
-	function __construct($id, $label)
-	{
-		parent::__construct($id, $label);
-	}
-	
+
 	function getType()
 	{
 		return 'file';
 	}
-	
+
 	function importValue($value)
 	{
+		Assert::notImplemented();
+
 		if (!isset($value['tmp_name']) || !is_uploaded_file($value['tmp_name'])) {
 			$this->addError(self::ERROR_UPLOAD_FAILED, 'file is not uploaded during network lags');
 			return;
 		}
-		
+
 		Assert::notImplemented();
-		
+
 		return parent::importValue($value);
+	}
+
+	function toHtml(array $htmlAttributes = array())
+	{
+		Assert::isFalse(isset($htmlAttributes['name']));
+		Assert::isFalse(isset($htmlAttributes['type']));
+
+		$htmlAttributes['name'] = $this->getName();
+		$htmlAttributes['type'] = $this->getType();
+
+		return HtmlUtil::getNode('input', $htmlAttributes);
 	}
 }
 

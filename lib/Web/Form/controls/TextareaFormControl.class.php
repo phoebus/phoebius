@@ -21,8 +21,8 @@ class TextareaFormControl extends FormControlScalar
 	function toHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['name']));
-		
-		$htmlAttributes['name'] = $this->getId();
+
+		$htmlAttributes['name'] = $this->getName();
 
 		return HtmlUtil::getContainer('textarea', $htmlAttributes, htmlspecialchars($this->getValue()));
 	}

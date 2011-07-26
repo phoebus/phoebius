@@ -16,12 +16,12 @@
  *
  ************************************************************************************************/
 
-interface IFormControlConstraint 
+class SelectFormControlSet extends FormControlSet
 {
-	abstract function check($value);
-	abstract function getId();
-	abstract function getMessage();
-	abstract function rejectsImportedValue();
+	protected function spawnSingle()
+	{
+		return new SelectFormControl($this->getInnerName(), $this->getLabel());
+	}
 }
 
 ?>

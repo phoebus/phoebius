@@ -16,27 +16,43 @@
  *
  ************************************************************************************************/
 
-class CheckboxFormControl extends OptionalValueFormControl
+final class SelectFormControl extends SetFormControl
 {
-	function getType()
+	function setDefaultValue($value)
 	{
-		return 'checkbox';
+		Assert::isScalarOrNull($value);
+		Assert::isTrue(in_array($value, $this->getAvailableValues()));
+
+		return parent::setDefaultValue($value);
+	}
+
+	function importValue($value)
+	{
+		if (!$value && !$this->isOptional()) {
+			$this->markMissing();
+			return false;
+		}
+
+		if ($value && !is_scalar($value)) {
+			$this->markWrong();
+			return false;
+		}
+
+		if (!in_array($value, $this->getAvailableValues())) {
+			$this->markWrong();
+			return false;
+		}
+
+		return parent::importValue($value);
 	}
 
 	function toHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['name']));
-		Assert::isFalse(isset($htmlAttributes['type']));
-		Assert::isFalse(isset($htmlAttributes['value']));
-		Assert::isFalse(isset($htmlAttributes['checked']));
 
 		$htmlAttributes['name'] = $this->getName();
-		$htmlAttributes['type'] = $this->getType();
-		$htmlAttributes['value'] = $this->getFixedValue();
-		if ($this->getValue())
-			$htmlAttributes['checked'] = 'checked';
 
-		return HtmlUtil::getNode('input', $htmlAttributes);
+		return HtmlUtil::getContainer('select', $htmlAttributes, join("", $this->getOptions()));
 	}
 }
 

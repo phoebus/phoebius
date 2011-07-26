@@ -18,11 +18,11 @@
 
 class HiddenFormControl extends InputFormControl
 {
-	function __construct($id, $defaultValue = null)
+	function __construct($name)
 	{
-		parent::__construct($id, '', $defaultValue);
+		parent::__construct($name, 'hidden value ' . $name);
 	}
-	
+
 	function getType()
 	{
 		return 'hidden';

@@ -17,26 +17,11 @@
  ************************************************************************************************/
 
 
-// string   \
-// textarea   -> group with a single base class
-// password /
-// hidden  /
-// string_set
-// hidden_set
-// file
-// file_set
-// checkbox
-// checkbox_set
-
-// select
-// select_multi
-// select_set
-// button
 // radio_group
 
 final class FormControl extends StaticClass
 {
-	static function button($id, $label);
+	// helper methods to access various controls
 }
 
 ?>
