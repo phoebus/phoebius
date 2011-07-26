@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Textarea
+ * @ingroup Form
+ */
 class TextareaFormControl extends FormControlScalar
 {
 	function toHtml(array $htmlAttributes = array())

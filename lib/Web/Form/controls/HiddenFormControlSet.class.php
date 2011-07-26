@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * A set of hidden controls
+ * @ingroup Form
+ */
 class HiddenFormControlSet extends FormControlSet
 {
 	protected function spawnSingle()

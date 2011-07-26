@@ -16,6 +16,9 @@
  *
  ************************************************************************************************/
 
+/**
+ * A set of strings
+ */
 class StringFormControlSet extends FormControlSet
 {
 	protected function spawnSingle()

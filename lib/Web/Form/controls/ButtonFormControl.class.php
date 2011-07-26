@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a submit button
+ * @ingroup Form
+ */
 class ButtonFormControl extends OptionalValueFormControl
 {
 	function __construct($name, $label)

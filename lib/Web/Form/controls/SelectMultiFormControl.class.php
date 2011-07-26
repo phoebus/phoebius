@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Multi-select drop down menu
+ * @ingroup Form
+ */
 final class SelectMultiFormControl extends SetFormControl
 {
 	function setDefaultValue($value)

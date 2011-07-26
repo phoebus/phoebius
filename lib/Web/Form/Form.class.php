@@ -28,38 +28,38 @@ class Form
 	 * @var string
 	 */
 	private $id;
-	
+
 	/**
 	 * @var HttpUrl
 	 */
 	private $action;
-	
+
 	/**
 	 * @var RequestMethod
 	 */
 	private $method;
-	
+
 	/**
-	 * @var array of FormControl by id
+	 * @var array of FormControl by name
 	 */
 	private $controls = array();
-	
+
 	/**
-	 * @var array of FormControl by id
+	 * @var array of FormControl by name
 	 */
 	private $buttons = array();
-	
+
 	/**
 	 * @var array
 	 */
 	private $fieldsToSign = array();
-	
+
 	/**
 	 * @var array
 	 */
 	private $errors = array();
 	private $hasInnerErrors = false;
-	
+
 	function __construct($id, HttpUrl $action)
 	{
 		Assert::isScalar($id);
@@ -68,102 +68,102 @@ class Form
 		$this->action = $action;
 		$this->method = new RequestMethod(RequestMethod::POST);
 	}
-	
+
 	/**
 	 * @return Form itself
 	 */
 	function addControl(IFormControl $control)
 	{
-		$id = $control->getId();
-		Assert::isFalse(isset($this->controls[$id]), 'control with id %s already exists', $id);
-		
-		$this->controls[$id] = $control;
-		
+		$name = $control->getName();
+		Assert::isFalse(isset($this->controls[$name]), 'control with name %s already exists', $name);
+
+		$this->controls[$name] = $control;
+
 		return $this;
 	}
-	
+
 	/**
 	 * @return Form itself
 	 */
-	function addButton($id, $name, $callback = null)
+	function addButton($name, $label, $callback = null)
 	{
 		if (is_string($callback)) {
 			Assert::isTrue(method_exists($this, $callback), 'unknown method %s::%s', get_class($this), $callback);
-			
+
 			$callback = array($this, $callback);
 		}
 
-		$button = FormControl::button($id, $name, $callback);
-		
+		$button = FormControl::button($name, $label, $callback);
+
 		$this->addControl($button);
-		
-		$this->buttons[$id] = $button;
-		
+
+		$this->buttons[$name] = $button;
+
 		return $this;
 	}
-	
+
 	/**
 	 * @return Form itself
 	 */
-	function setHiddenValue($id, $value)
+	function setHiddenValue($name, $value)
 	{
-		$field = FormControl::hidden($id, $value);
-		
+		$field = FormControl::hidden($name, $value);
+
 		$this->addControl($field);
-		
-		$this->fieldsToSign[$id] = $field;
-		
+
+		$this->fieldsToSign[$name] = $field;
+
 		return $this;
 	}
-	
-	function getControl($id)
+
+	function getControl($name)
 	{
-		Assert::hasIndex($this->controls, $id, 'know nothing about control %s within form %s', $id, $this->id);
-		
-		return $this->controls[$id];
+		Assert::hasIndex($this->controls, $name, 'know nothing about control `%s` within form %s', $name, $this->id);
+
+		return $this->controls[$name];
 	}
-	
+
 	/**
-	 * Handles requst
+	 * Handles request
 	 * @return mixed true on success, array of errors on handle failure
 	 */
 	function handle(WebRequest $request)
 	{
 		if (!$request->getRequestMethod()->equals($this->method))
 			return false;
-			
+
 		$variables = $request->getPostVars();
-		
+
 		$this->process($variables);
 	}
-	
+
 	function import(array $variables)
 	{
 		foreach ($this->controls as $control) {
-			$id = $control->getId();
-			$value = 
-				isset($variables[$id])
-					? $variables[$id]
+			$name = $control->getName();
+			$value =
+				isset($variables[$name])
+					? $variables[$name]
 					: null;
-			
+
 			$result = $control->importValue($value);
 			if (!$result)
 				$this->hasErrors = false;
 		}
-		
+
 		return $this->hasErrors;
 	}
-	
+
 	function export()
 	{
 		$yield = array();
 		foreach ($this->controls as $control) {
-			$yield[$control->getId()] = $control->getValue();
+			$yield[$control->getName()] = $control->getValue();
 		}
-		
+
 		return $yield;
 	}
-	
+
 	/**
 	 * Overridden. Called when form is submitted
 	 */
@@ -181,13 +181,13 @@ class Form
 	{
 		Assert::isFalse(isset($htmlAttributes['action']));
 		Assert::isFalse(isset($htmlAttributes['method']));
-		
+
 		$htmlAttributes['action'] = $this->action;
 		$htmlAttributes['method'] = $this->method;
 
 		return HtmlUtil::getTagCap('form', $htmlAttributes);
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -196,7 +196,7 @@ class Form
 		//fieldsToSign
 		//
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -204,27 +204,27 @@ class Form
 	{
 		echo '</form>';
 	}
-	
+
 	function hasErrors()
 	{
 		return !empty($this->errors) || $this->hasInnerErrors;
 	}
-	
+
 	function hasInnerErrors()
 	{
 		return $this->hasInnerErrors;
 	}
-	
+
 	function hasError($id)
 	{
 		return isset($this->errors[$id]);
 	}
-	
+
 	function getErrors()
 	{
 		return $this->errors;
 	}
-	
+
 	/**
 	 * @return FormControlScalar
 	 */
@@ -232,9 +232,9 @@ class Form
 	{
 		Assert::isScalar($id);
 		Assert::isScalar($message);
-		
+
 		$this->errors[$id] = $message;
-		
+
 		return $this;
 	}
 }

@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * A password input field
+ * @ingroup Form
+ */
 class PasswordFormControl extends InputFormControl
 {
 	function getType()

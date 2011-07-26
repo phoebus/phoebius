@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a control that expects scalar value from the outer world
+ * @ingroup Form
+ */
 abstract class FormControlScalar implements IFormControl
 {
 	private $name;
@@ -43,6 +47,10 @@ abstract class FormControlScalar implements IFormControl
 		return $this->isOptional;
 	}
 
+	/**
+	 * Marks control as optional
+	 * @return FormControlScalar
+	 */
 	function markOptional()
 	{
 		$this->isOptional = true;
@@ -50,6 +58,10 @@ abstract class FormControlScalar implements IFormControl
 		return $this;
 	}
 
+	/**
+	 * Marks control as required
+	 * @return FormControlScalar
+	 */
 	function markRequired()
 	{
 		$this->isOptional = false;
@@ -130,26 +142,42 @@ abstract class FormControlScalar implements IFormControl
 		$this->errorMessage = null;
 		$this->isImported = false;
 		$this->importedValue = null;
+
+		return $this;
 	}
 
+	/**
+	 * Marks control as failed during import because of a missing value
+	 * @param string $message
+	 * @return void
+	 */
 	function markMissing($message = null)
 	{
 		$this->errorId = FormControlError::missing();
 		$this->errorMessage = $message;
 	}
 
+	/**
+	 * Marks control as failed during import because of a wrong value
+	 * @param string $message
+	 * @return void
+	 */
 	function markWrong($message = null)
 	{
 		$this->errorId = FormControlError::wrong();
 		$this->errorMessage = $message;
 	}
 
+	/**
+	 * Sets the value and marks it as imported. This is called by IFormControl::importValue() where all checks are
+	 * performed
+	 * @param  $value
+	 * @return void
+	 */
 	protected function setValue($value)
 	{
 		$this->isImported = true;
 		$this->importedValue = $value;
-
-		return $this;
 	}
 }
 

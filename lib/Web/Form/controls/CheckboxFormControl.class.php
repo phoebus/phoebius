@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a checkbox
+ * @ingroup Form
+ */
 class CheckboxFormControl extends OptionalValueFormControl
 {
 	function getType()

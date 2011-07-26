@@ -16,11 +16,15 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a file control
+ * @ingroup File
+ */
 class FileFormControl extends InputFormControl
 {
-	const ERROR_UPLOAD_FAILED = 'upload_failed';
-	const ERROR_FILETYPE = 'filetype';
-	const ERROR_FILESIZE = 'filesize';
+	const ERROR_UPLOAD_FAILED = 'upload failed';
+	const ERROR_FILETYPE = 'unexpected file type';
+	const ERROR_FILESIZE = 'unexpected file size';
 
 	function getType()
 	{
@@ -38,7 +42,7 @@ class FileFormControl extends InputFormControl
 
 		Assert::notImplemented();
 
-		return parent::importValue($value);
+		return $this->reset()->setValue($value);
 	}
 
 	function toHtml(array $htmlAttributes = array())

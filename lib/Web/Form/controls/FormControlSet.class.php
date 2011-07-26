@@ -18,9 +18,23 @@
 
 // missing - means that value is not an array
 // wrong - means there are inner errors
-abstract class FormControlSet implements IFormControl
+/**
+ * Represents a control set.
+ *
+ * Caveats for the set:
+ *  - "missing" means that incoming value is not of a valid type (not an array)
+ *  - "wrong" means there are import errors withing inner controls (if not supressed)
+ *  - set is always optional as a control in case when user didn't selected anything in a set
+ *  - inner control is a control collected by the set
+ *
+ * @ingroup Form
+ */
+abstract class FormControlSet implements IFormControl, IteratorAggregate, Countable
 {
 	const ID_PATTERN = '/^[a-z0-9_]+$/i';
+
+	const ERROR_INVALID_VALUE = 'incoming value is not of a valid type';
+	const ERROR_HAS_INNER_ERRORS = 'inner controls have import errors';
 
 	private $name;
 	private $label;
@@ -41,6 +55,7 @@ abstract class FormControlSet implements IFormControl
 	private $errorMessage;
 
 	/**
+	 * Gets the instance of inner control
 	 * @return IFormControl
 	 */
 	abstract protected function spawnSingle();
@@ -55,12 +70,16 @@ abstract class FormControlSet implements IFormControl
 		$this->label = $label;
 	}
 
-	// sets are optional
 	final function isOptional()
 	{
 		return true;
 	}
 
+	/**
+	 * Makes control to skip wrong inner values
+	 * @param bool $flag
+	 * @return FormControlSet
+	 */
 	function skipWrong($flag = true)
 	{
 		Assert::isBoolean($flag);
@@ -70,11 +89,20 @@ abstract class FormControlSet implements IFormControl
 		return $this;
 	}
 
+	/**
+	 * Determines whether a control set skips wrong inner values
+	 * @return bool
+	 */
 	function isSkipsWrong()
 	{
 		return $this->skipWrong;
 	}
 
+	/**
+	 * Makes control to skip missing/empty inner values
+	 * @param bool $flag
+	 * @return FormControlSet
+	 */
 	function skipMissing($flag = true)
 	{
 		Assert::isBoolean($flag);
@@ -84,11 +112,21 @@ abstract class FormControlSet implements IFormControl
 		return $this;
 	}
 
+
+	/**
+	 * Determines whether a control set skips missing/empty inner values
+	 * @return bool
+	 */
 	function isSkipsMissing()
 	{
 		return $this->skipMissing;
 	}
 
+	/**
+	 * Makes control to import only distinct set of inner values
+	 * @param bool $flag
+	 * @return FormControlSet
+	 */
 	function setDistinct($flag = true)
 	{
 		Assert::isBoolean($flag);
@@ -98,6 +136,10 @@ abstract class FormControlSet implements IFormControl
 		return $this;
 	}
 
+	/**
+	 * Determines whether a control set imports only distinct set of inner values
+	 * @return bool
+	 */
 	function isDistinct()
 	{
 		return $this->distinct;
@@ -108,6 +150,10 @@ abstract class FormControlSet implements IFormControl
 		return $this->name;
 	}
 
+	/**
+	 * Gets the name for inner controls
+	 * @return string
+	 */
 	function getInnerName()
 	{
 		return $this->name . '[]';
@@ -118,6 +164,10 @@ abstract class FormControlSet implements IFormControl
 		return $this->label;
 	}
 
+	/**
+	 * Gets the inner controls
+	 * @return IFormControl[]
+	 */
 	function getControls()
 	{
 		return $this->controls;
@@ -191,7 +241,7 @@ abstract class FormControlSet implements IFormControl
 						continue;
 					}
 					else { // otherwise mark the surrounding control as wrong
-						$this->markWrong();
+						$this->markWrong(self::ERROR_HAS_INNER_ERRORS);
 					}
 				}
 
@@ -201,7 +251,7 @@ abstract class FormControlSet implements IFormControl
 			$this->setControls($controls);
 		}
 		else if (!empty($value) && !is_array($value)) {
-			$this->markMissing();
+			$this->markMissing(self::ERROR_INVALID_VALUE);
 		}
 
 		return !$this->hasErrors();
@@ -230,18 +280,34 @@ abstract class FormControlSet implements IFormControl
 		return $s;
 	}
 
+	/**
+	 * Marks control as failed during import because of a missing value
+	 * @param string $message
+	 * @return void
+	 */
 	protected function markMissing($message = null)
 	{
 		$this->errorId = FormControlError::missing();
 		$this->errorMessage = $message;
 	}
 
+	/**
+	 * Marks control as failed during import because of a wrong value
+	 * @param string $message
+	 * @return void
+	 */
 	protected function markWrong($message = null)
 	{
 		$this->errorId = FormControlError::wrong();
 		$this->errorMessage = $message;
 	}
 
+	/**
+	 * Sets inner controls and marks the value as imported. This is called by IFormControl::importValue()
+	 * where all checks are performed
+	 * @param array $controls
+	 * @return void
+	 */
 	protected function setControls(array $controls)
 	{
 		$value = array();
@@ -260,10 +326,14 @@ abstract class FormControlSet implements IFormControl
 		return $this;
 	}
 
+	/**
+	 * Creates inner controls for default value
+	 * @return void
+	 */
 	protected function makeDefaults()
 	{
 		$controls = array();
-		foreach ($this->defaultValue as $value) {
+		foreach ($this->getDefaultValue() as $value) {
 			$control = $this->spawnSingle();
 			$control->setDefaultValue($value);
 

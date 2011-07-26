@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * A select drop-down menu
+ * @ingroup Form
+ */
 final class SelectFormControl extends SetFormControl
 {
 	function setDefaultValue($value)

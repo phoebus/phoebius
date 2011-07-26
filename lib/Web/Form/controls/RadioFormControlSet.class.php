@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Radio button group
+ * @ingroup Form
+ */
 class RadioFormControlSet extends LabeledFormControlSet
 {
 	function setDefaultValue($value)

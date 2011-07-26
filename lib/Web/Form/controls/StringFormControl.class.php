@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * A string input
+ * @ingroup Form
+ */
 class StringFormControl extends InputFormControl
 {
 	function getType()

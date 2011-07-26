@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Radio button
+ * @ingroup Form
+ */
 class RadioFormControl extends OptionalValueFormControl
 {
 	function getType()

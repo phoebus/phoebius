@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a checkbox set
+ * @ingroup Form
+ */
 class CheckboxFormControlSet extends LabeledFormControlSet
 {
 	function getSelectedValues()

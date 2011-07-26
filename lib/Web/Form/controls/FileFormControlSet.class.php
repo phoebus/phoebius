@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * File set
+ * @ingroup File
+ */
 class FileFormControlSet extends FormControlSet
 {
 	function __construct($name, $label, $defaultInputCount = 1)

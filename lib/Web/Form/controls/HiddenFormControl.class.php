@@ -16,6 +16,10 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represetns a hidden value
+ * @ingroup Form
+ */
 class HiddenFormControl extends InputFormControl
 {
 	function __construct($name)

@@ -16,8 +16,14 @@
  *
  ************************************************************************************************/
 
+/**
+ * Represents a control that expects a fixed value or null from the outer world
+ * @ingroup Form
+ */
 abstract class OptionalValueFormControl extends InputFormControl
 {
+	const ERROR_UNEXPECTED = 'unexpected control value';
+
 	private $value;
 
 	function __construct($name, $label, $value)
@@ -29,6 +35,10 @@ abstract class OptionalValueFormControl extends InputFormControl
 		parent::__construct($name, $label);
 	}
 
+	/**
+	 * A fixed value we expect from outer world
+	 * @return mixed
+	 */
 	final function getFixedValue()
 	{
 		return $this->value;
@@ -41,18 +51,18 @@ abstract class OptionalValueFormControl extends InputFormControl
 
 	final function markRequired()
 	{
-		Assert::isUnreachable('control is hard-coded optional');
+		Assert::isUnreachable('nonsense');
 	}
 
 	final function markMissing($message = null)
 	{
-		Assert::isUnreachable('control can be missing, it is ok');
+		Assert::isUnreachable('nonsense');
 	}
 
 	function setValue($value)
 	{
 		if ($value !== null && $value != $this->value) {
-			$this->markWrong('unexpected control value');
+			$this->markWrong(self::ERROR_UNEXPECTED);
 		}
 		else {
 			parent::setValue($value);

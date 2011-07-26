@@ -16,11 +16,19 @@
  *
  ************************************************************************************************/
 
-class SelectFormControlSet extends FormControlSet
+class FormControlError extends Enumeration
 {
-	protected function spawnSingle()
+	const MISSING = 1;
+	const WRONG = 2;
+
+	static function missing()
 	{
-		return new SelectFormControl($this->getInnerName(), $this->getLabel());
+		return new self (self::MISSING);
+	}
+
+	static function wrong()
+	{
+		return new self (self::WRONG);
 	}
 }
 
