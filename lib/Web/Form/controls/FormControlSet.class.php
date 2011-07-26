@@ -209,8 +209,6 @@ abstract class FormControlSet implements IFormControl
 
 	function setDefaultValue($value)
 	{
-		Assert::isScalarOrNull($value);
-
 		$this->defaultValue = $value;
 		$this->makeDefaults();
 

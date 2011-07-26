@@ -16,9 +16,12 @@
  *
  ************************************************************************************************/
 
-final class FormControl extends StaticClass
+class RadioFormControl extends OptionalValueFormControl
 {
-	// helper methods to access various controls
+	function getType()
+	{
+		return 'radio';
+	}
 }
 
 ?>

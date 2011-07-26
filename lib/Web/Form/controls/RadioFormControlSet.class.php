@@ -16,43 +16,34 @@
  *
  ************************************************************************************************/
 
-class CheckboxFormControlSet extends LabeledFormControlSet
+class RadioFormControlSet extends LabeledFormControlSet
 {
-	function getSelectedValues()
-	{
-		return $this->getValue();
-	}
-
 	function setDefaultValue($value)
 	{
-		Assert::isTrue(is_array($value));
-		Assert::isTrue(
-			sizeof($value)
-			== array_intersect($this->getAvailableValues(), $value)
-		);
+		Assert::isScalarOrNull($value);
+		if ($value)
+			Assert::isTrue(in_array($value, $this->getAvailableValues()));
 
 		parent::setDefaultValue($value);
 	}
 
 	function importValue($value)
 	{
-		if (!is_array($value)) {
-			$this->markMissing('not an array');
+		if ($value && !is_scalar($value)) {
+			$this->markMissing('not a scalar');
 			return false;
 		}
 
-		// remove unknown values
-		$value = array_intersect($this->getAvailableValues(), $value);
+		if (!in_array($value, $this->getAvailableValues())) {
+			$value = $this->getDefaultValue();
+		}
 
 		// combine all ids (as non checked) and incoming (as checked)
-		$allIds =
-			array_replace(
-				array_fill_keys($this->getAvailableValues(), null),
-				array_combine($value, $value)
-			);
+		$allIds = array_fill_keys($this->getAvailableValues(), null);
+		$allIds[$value] = $value;
 		$controls = array();
 		foreach ($allIds as $id => $value) {
-			$control = new CheckboxFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
+			$control = new RadioFormControlSet($this->getInnerName(), $this->getLabelFor($id), $id);
 			$control->importValue($value);
 
 			Assert::isFalse($control->hasError());
@@ -68,14 +59,11 @@ class CheckboxFormControlSet extends LabeledFormControlSet
 	protected function makeDefaults()
 	{
 		$default = $this->getDefaultValue();
-		$allIds =
-			array_replace(
-				array_fill_keys($this->getAvailableValues(), null),
-				array_combine($default, $default)
-			);
+		$allIds = array_fill_keys($this->getAvailableValues(), null);
+		$allIds[$default] = $default;
 		$controls = array();
 		foreach ($allIds as $id => $value) {
-			$control = new CheckboxFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
+			$control = new RadioFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
 			$control->setDefaultValue($value);
 
 			$controls[] = $control;

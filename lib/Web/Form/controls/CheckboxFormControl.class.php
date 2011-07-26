@@ -22,22 +22,6 @@ class CheckboxFormControl extends OptionalValueFormControl
 	{
 		return 'checkbox';
 	}
-
-	function toHtml(array $htmlAttributes = array())
-	{
-		Assert::isFalse(isset($htmlAttributes['name']));
-		Assert::isFalse(isset($htmlAttributes['type']));
-		Assert::isFalse(isset($htmlAttributes['value']));
-		Assert::isFalse(isset($htmlAttributes['checked']));
-
-		$htmlAttributes['name'] = $this->getName();
-		$htmlAttributes['type'] = $this->getType();
-		$htmlAttributes['value'] = $this->getFixedValue();
-		if ($this->getValue())
-			$htmlAttributes['checked'] = 'checked';
-
-		return HtmlUtil::getNode('input', $htmlAttributes);
-	}
 }
 
 ?>
