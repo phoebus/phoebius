@@ -40,44 +40,79 @@ class Form
 	private $method;
 
 	/**
-	 * @var string
+	 * @var XorCipher
 	 */
-	private $sign;
+	private $signer;
 
 	/**
-	 * @var array of FormControl by name
+	 * @var boolean
+	 */
+	private $signed;
+
+	/**
+	 * @var HttpUrl|null
+	 */
+	private $referrer;
+
+	/**
+	 * @var IFormControl[]
 	 */
 	private $controls = array();
 
 	/**
-	 * @var array of FormControl by name
+	 * @var callback[]
 	 */
 	private $buttons = array();
 
-	/**
-	 * @var array
-	 */
 	private $fieldsToSign = array();
-
-	/**
-	 * @var array
-	 */
 	private $errors = array();
 	private $hasInnerErrors = false;
 
-	function __construct($id, HttpUrl $action, $sign = null)
+	/**
+	 * @param string $id Form identifier
+	 * @param HttpUrl $action form action (url to which it will be sumbitted); may be null
+	 * @param string|null $sign form signature to protect it from vulnerabilities;
+	 */
+	function __construct($id, HttpUrl $action = null, $sign = null)
 	{
 		Assert::isScalar($id);
 
 		$this->id = $id;
 		$this->action = $action;
 		$this->method = new RequestMethod(RequestMethod::POST);
-		$this->sign = $sign;
+
+		if ($sign)
+			$this->signer = new XorCipherer($sign);
 	}
 
+	function setCallerUrl(HttpUrl $url)
+	{
+		$this->referrer = $url;
+
+		return $this;
+	}
+
+	/**
+	 * If the form may be protected from various vulnerabilites
+	 * @return bool
+	 */
+	function isSignable()
+	{
+		return !!$this->signer;
+	}
+
+	/**
+	 * Whether form is already signed
+	 * @return bool
+	 */
 	function isSigned()
 	{
-		return !!$this->sign;
+		return $this->signed;
+	}
+
+	function __get($name)
+	{
+		return $this->getControl($name)->getValue();
 	}
 
 	/**
@@ -104,11 +139,11 @@ class Form
 			$callback = array($this, $callback);
 		}
 
-		$button = FormControl::button($name, $label, $callback);
+		Assert::isCallback($callback);
 
-		$this->addControl($button);
+		$this->addControl(FormControl::button($name, $label));
 
-		$this->buttons[$name] = $button;
+		$this->buttons[$name] = $callback;
 
 		return $this;
 	}
@@ -118,15 +153,24 @@ class Form
 	 */
 	function setHiddenValue($name, $value)
 	{
-		$field = FormControl::hidden($name, $value);
+		if (isset($this->fieldsToSign[$name])) {
+			$this->fieldsToSign[$name]->importValue($value);
+		}
+		else {
+			$field = FormControl::hidden($name, $value);
 
-		$this->addControl($field);
+			$this->addControl($field);
 
-		$this->fieldsToSign[$name] = $field;
+			$this->fieldsToSign[$name] = $field;
+		}
 
 		return $this;
 	}
 
+	/**
+	 * @param  $name
+	 * @return FormControl
+	 */
 	function getControl($name)
 	{
 		Assert::hasIndex($this->controls, $name, 'know nothing about control `%s` within form %s', $name, $this->id);
@@ -152,48 +196,41 @@ class Form
 
 			if (!$this->importSign($variables[$signName]))
 				throw new FormException("Malformed sign");
+
+			if (isset($this[$this->getReferrerName()])) {
+				if ($this[$this->getReferrerName()] != (string)$request->getHttpReferer()) {
+					throw new FormException();
+				}
+			}
 		}
+
+		foreach ($this->buttons as $id => $callback) {
+			if (isset($variables[$id])) {
+				call_user_func($callback, $variables);
+				return;
+			}
+		}
+
 		$this->process($variables);
 	}
 
-	function sign()
+	/**
+	 * Signs the form. This method may be overridden to import fields to be signed, just call Form::setHiddenValue()
+	 * @return Form
+	 */
+	function sign(WebRequest $request = null)
 	{
+		Assert::isNotEmpty($this->signer, 'form cannot be signed');
+		Assert::isFalse($this->signed, 'form already signed');
+
+		if ($request)
+			$this->setHiddenValue($this->getReferrerName(), $request->getHttpReferer());
+
 		$this->addControl(FormControl::hidden($this->getSignName(), $this->exportSign()));
-	}
 
-	protected function importSign($string)
-	{
-		$decrypted = $this->decryptString($string);
-		if (!$decrypted)
-			return false;
+		$this->signed = true;
 
-		$data = unserialize($decrypted);
-
-		foreach ($data as $key => $value)
-			$this->setHiddenValue($key, $value);
-	}
-
-	protected function exportSign()
-	{
-		$decrypted = serialize($this->fieldsToSign);
-		return $this->encryptString($decrypted);
-	}
-
-	protected function getSignName()
-	{
-		return sha1($this->encryptString($this->id));
-	}
-
-	private function encryptString($s)
-	{
-		$c = new XorCipherer($this->sign);
-		return $c->encrypt($s);
-	}
-
-	private function decryptString($s)
-	{
-		$c = new XorCipherer($this->sign);
-		return $c->decrypt($s);
+		return $this;
 	}
 
 	function import(array $variables)
@@ -207,10 +244,20 @@ class Form
 
 			$result = $control->importValue($value);
 			if (!$result)
-				$this->hasErrors = false;
+				$this->hasInnerErrors = false;
 		}
 
-		return $this->hasErrors;
+		return $this->hasErrors();
+	}
+
+	function reset()
+	{
+		$this->errors = true;
+		foreach ($this->controls as $control) {
+			$control->reset();
+		}
+
+		return $this;
 	}
 
 	function export()
@@ -234,26 +281,34 @@ class Form
 	}
 
 	/**
+	 * Signs the form and returns <form> cap and hidden fields
 	 * @return string
 	 */
 	function dumpHead(array $htmlAttributes = array())
 	{
+		Assert::isTrue($this->isSigned(), 'sign me please me');
 		Assert::isFalse(isset($htmlAttributes['action']));
 		Assert::isFalse(isset($htmlAttributes['method']));
 
 		$htmlAttributes['action'] = $this->action;
 		$htmlAttributes['method'] = $this->method;
 
-		return HtmlUtil::getTagCap('form', $htmlAttributes);
+		return
+			HtmlUtil::getTagCap('form', $htmlAttributes)
+			. $this->dumpHidden();
 	}
 
 	/**
 	 * @return string
 	 */
-	function dumpHidden()
+	protected function dumpHidden()
 	{
-		//fieldsToSign
-		//
+		$yield = '';
+		foreach ($this->getHiddenControls() as $control) {
+			$yield .= $control->toHtml();
+		}
+
+		return $yield;
 	}
 
 	/**
@@ -296,6 +351,70 @@ class Form
 
 		return $this;
 	}
+
+	/**
+	 * @return IFormControl[]
+	 */
+	protected function getHiddenControls()
+	{
+		$yield = array();
+		foreach ($this->controls as $control) {
+			if (
+					$control instanceof HiddenFormControl
+					|| $control instanceof HiddenFormControlSet
+			) {
+				$yield[] = $control;
+			}
+		}
+
+		return $yield;
+	}
+
+	protected function importSign($string)
+	{
+		Assert::isNotEmpty($this->signer, 'form is sign-less');
+
+		$decrypted = $this->signer->decrypt($string);
+		if (!$decrypted)
+			return false;
+
+		try {
+			$data = unserialize($decrypted);
+		}
+		catch (ExecutionContextException $e) {
+			return false;
+		}
+
+		foreach ($data as $key => $value)
+			$this->setHiddenValue($key, $value);
+
+		return true;
+	}
+
+	protected function exportSign()
+	{
+		Assert::isNotEmpty($this->signer, 'form is sign-less');
+
+		$data = array();
+		foreach ($this->fieldsToSign as $name => $control) {
+			$data[$name] = $control->getValue();
+		}
+
+		return $this->signer->encrypt($data);
+	}
+
+	protected function getSignName()
+	{
+		Assert::isNotEmpty($this->signer, 'form is sign-less');
+
+		return '__' . sha1($this->signer->encrypt($this->id));
+	}
+
+	protected function getReferrerName()
+	{
+		return $this->getSignName() . '_referrer';
+	}
+
 }
 
 ?>

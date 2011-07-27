@@ -16,6 +16,9 @@
  *
  ************************************************************************************************/
 
+/**
+ * @ingroup Form
+ */
 class FormException extends ApplicationException
 {
 }

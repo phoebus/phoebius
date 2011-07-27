@@ -16,6 +16,9 @@
  *
  ************************************************************************************************/
 
+/**
+ * @ingroup Form
+ */
 class FormControlError extends Enumeration
 {
 	const MISSING = 1;
