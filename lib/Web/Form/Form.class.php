@@ -16,12 +16,10 @@
  *
  ************************************************************************************************/
 
-// reviewed submission process:
-// * initialize
-// * if request method, form id and signature are valid (throw exception):
-//   * choose form handler (may be default: Form::handle())
-//     * import values (control errors)
-//       * process (form errors)
+/**
+ * Primitive form
+ * @ingroup Form
+ */
 class Form
 {
 	/**
@@ -35,24 +33,14 @@ class Form
 	private $action;
 
 	/**
+	 * @var FormEnctype
+	 */
+	private $enctype;
+
+	/**
 	 * @var RequestMethod
 	 */
 	private $method;
-
-	/**
-	 * @var XorCipher
-	 */
-	private $signer;
-
-	/**
-	 * @var boolean
-	 */
-	private $signed;
-
-	/**
-	 * @var HttpUrl|null
-	 */
-	private $referrer;
 
 	/**
 	 * @var IFormControl[]
@@ -60,54 +48,64 @@ class Form
 	private $controls = array();
 
 	/**
-	 * @var callback[]
+	 * @var array
 	 */
-	private $buttons = array();
-
-	private $fieldsToSign = array();
 	private $errors = array();
+
+	/**
+	 * @var bool
+	 */
 	private $hasInnerErrors = false;
 
 	/**
 	 * @param string $id Form identifier
 	 * @param HttpUrl $action form action (url to which it will be sumbitted); may be null
-	 * @param string|null $sign form signature to protect it from vulnerabilities;
+	 * @param RequestMethod $method action method, default is get
 	 */
-	function __construct($id, HttpUrl $action = null, $sign = null)
+	function __construct($id, HttpUrl $action, RequestMethod $method = null)
 	{
 		Assert::isScalar($id);
 
 		$this->id = $id;
 		$this->action = $action;
-		$this->method = new RequestMethod(RequestMethod::POST);
-
-		if ($sign)
-			$this->signer = new XorCipherer($sign);
+		$this->method =
+			$method
+				? $method
+				: RequestMethod::get();
+		$this->enctype = new FormEnctype(FormEnctype::ENCODED);
 	}
 
-	function setCallerUrl(HttpUrl $url)
+	function getId()
 	{
-		$this->referrer = $url;
+		return $this->id;
+	}
+
+	/**
+	 * @return FormEnctype
+	 */
+	function getEnctype()
+	{
+		return $this->enctype;
+	}
+
+	/**
+	 * Sets form enctype. If there are file controls inside, a multipart enctype is set implicitly
+	 * @param FormEnctype $enctype
+	 * @return Form
+	 */
+	function setEnctype(FormEnctype $enctype)
+	{
+		$this->enctype = $enctype;
 
 		return $this;
 	}
 
 	/**
-	 * If the form may be protected from various vulnerabilites
-	 * @return bool
+	 * @return RequestMethod
 	 */
-	function isSignable()
+	function getMethod()
 	{
-		return !!$this->signer;
-	}
-
-	/**
-	 * Whether form is already signed
-	 * @return bool
-	 */
-	function isSigned()
-	{
-		return $this->signed;
+		return $this->method;
 	}
 
 	function __get($name)
@@ -116,6 +114,10 @@ class Form
 	}
 
 	/**
+	 * Adds the control identified by name.
+	 *
+	 * IF control is file then form enctype is changed to multipart.
+	 *
 	 * @return Form itself
 	 */
 	function addControl(IFormControl $control)
@@ -125,25 +127,12 @@ class Form
 
 		$this->controls[$name] = $control;
 
-		return $this;
-	}
-
-	/**
-	 * @return Form itself
-	 */
-	function addButton($name, $label, $callback = null)
-	{
-		if (is_string($callback)) {
-			Assert::isTrue(method_exists($this, $callback), 'unknown method %s::%s', get_class($this), $callback);
-
-			$callback = array($this, $callback);
+		if (
+				$control instanceof FileFormControl
+				|| $control instanceof FileFormControlSet
+		) {
+			$this->setEnctype(new FormEnctype(FormEnctype::MULTIPART));
 		}
-
-		Assert::isCallback($callback);
-
-		$this->addControl(FormControl::button($name, $label));
-
-		$this->buttons[$name] = $callback;
 
 		return $this;
 	}
@@ -176,61 +165,6 @@ class Form
 		Assert::hasIndex($this->controls, $name, 'know nothing about control `%s` within form %s', $name, $this->id);
 
 		return $this->controls[$name];
-	}
-
-	/**
-	 * Handles request
-	 * @return mixed true on success, array of errors on handle failure
-	 */
-	function handle(WebRequest $request)
-	{
-		if (!$request->getRequestMethod()->equals($this->method))
-			throw new FormException("Wrong request method");
-
-		$variables = $request->getPostVars();
-
-		if ($this->isSigned()) {
-			$signName = $this->getSignName();
-			if (!isset($variables[$signName]))
-				throw new FormException("Missing sign");
-
-			if (!$this->importSign($variables[$signName]))
-				throw new FormException("Malformed sign");
-
-			if (isset($this[$this->getReferrerName()])) {
-				if ($this[$this->getReferrerName()] != (string)$request->getHttpReferer()) {
-					throw new FormException();
-				}
-			}
-		}
-
-		foreach ($this->buttons as $id => $callback) {
-			if (isset($variables[$id])) {
-				call_user_func($callback, $variables);
-				return;
-			}
-		}
-
-		$this->process($variables);
-	}
-
-	/**
-	 * Signs the form. This method may be overridden to import fields to be signed, just call Form::setHiddenValue()
-	 * @return Form
-	 */
-	function sign(WebRequest $request = null)
-	{
-		Assert::isNotEmpty($this->signer, 'form cannot be signed');
-		Assert::isFalse($this->signed, 'form already signed');
-
-		if ($request)
-			$this->setHiddenValue($this->getReferrerName(), $request->getHttpReferer());
-
-		$this->addControl(FormControl::hidden($this->getSignName(), $this->exportSign()));
-
-		$this->signed = true;
-
-		return $this;
 	}
 
 	function import(array $variables)
@@ -271,27 +205,18 @@ class Form
 	}
 
 	/**
-	 * Overridden. Called when form is submitted
-	 */
-	protected function process(array $variables)
-	{
-		 if ($this->import($variables)) {
-		 	// process me
-		 }
-	}
-
-	/**
 	 * Signs the form and returns <form> cap and hidden fields
 	 * @return string
 	 */
 	function dumpHead(array $htmlAttributes = array())
 	{
-		Assert::isTrue($this->isSigned(), 'sign me please me');
 		Assert::isFalse(isset($htmlAttributes['action']));
 		Assert::isFalse(isset($htmlAttributes['method']));
+		Assert::isFalse(isset($htmlAttributes['enctype']));
 
 		$htmlAttributes['action'] = $this->action;
 		$htmlAttributes['method'] = $this->method;
+		$htmlAttributes['enctype'] = $this->enctype->getValue();
 
 		return
 			HtmlUtil::getTagCap('form', $htmlAttributes)
@@ -369,52 +294,6 @@ class Form
 
 		return $yield;
 	}
-
-	protected function importSign($string)
-	{
-		Assert::isNotEmpty($this->signer, 'form is sign-less');
-
-		$decrypted = $this->signer->decrypt($string);
-		if (!$decrypted)
-			return false;
-
-		try {
-			$data = unserialize($decrypted);
-		}
-		catch (ExecutionContextException $e) {
-			return false;
-		}
-
-		foreach ($data as $key => $value)
-			$this->setHiddenValue($key, $value);
-
-		return true;
-	}
-
-	protected function exportSign()
-	{
-		Assert::isNotEmpty($this->signer, 'form is sign-less');
-
-		$data = array();
-		foreach ($this->fieldsToSign as $name => $control) {
-			$data[$name] = $control->getValue();
-		}
-
-		return $this->signer->encrypt($data);
-	}
-
-	protected function getSignName()
-	{
-		Assert::isNotEmpty($this->signer, 'form is sign-less');
-
-		return '__' . sha1($this->signer->encrypt($this->id));
-	}
-
-	protected function getReferrerName()
-	{
-		return $this->getSignName() . '_referrer';
-	}
-
 }
 
 ?>
