@@ -22,6 +22,14 @@
  */
 class TextareaFormControl extends FormControlScalar
 {
+	/**
+	 * @return TextareaFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function toHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['name']));

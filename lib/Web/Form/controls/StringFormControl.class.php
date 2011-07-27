@@ -22,6 +22,14 @@
  */
 class StringFormControl extends InputFormControl
 {
+	/**
+	 * @return StringFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function getType()
 	{
 		return 'text';

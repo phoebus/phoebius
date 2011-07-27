@@ -22,6 +22,14 @@
  */
 class ButtonFormControl extends OptionalValueFormControl
 {
+	/**
+	 * @return ButtonFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function __construct($name, $label)
 	{
 		Assert::isNotEmpty($label, 'label for button should be set');

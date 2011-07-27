@@ -22,6 +22,14 @@
  */
 final class SelectMultiFormControl extends SetFormControl
 {
+	/**
+	 * @return SelectMultiFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function setDefaultValue($value)
 	{
 		Assert::isTrue(is_array($value));

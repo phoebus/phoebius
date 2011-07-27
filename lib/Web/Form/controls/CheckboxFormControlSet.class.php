@@ -22,6 +22,14 @@
  */
 class CheckboxFormControlSet extends LabeledFormControlSet
 {
+	/**
+	 * @return CheckboxFormControlSet
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function getSelectedValues()
 	{
 		return $this->getValue();

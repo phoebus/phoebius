@@ -22,6 +22,14 @@
  */
 final class SelectFormControl extends SetFormControl
 {
+	/**
+	 * @return SelectFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	function setDefaultValue($value)
 	{
 		Assert::isScalarOrNull($value);

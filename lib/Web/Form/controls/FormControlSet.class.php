@@ -16,8 +16,6 @@
  *
  ************************************************************************************************/
 
-// missing - means that value is not an array
-// wrong - means there are inner errors
 /**
  * Represents a control set.
  *

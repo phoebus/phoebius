@@ -32,9 +32,16 @@ class FileFormControl extends InputFormControl
 
 	// asserts: UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
 
-	private $filepath;
 	private $maxSize;
 	private $noEmpty = true;
+
+	/**
+	 * @return FileFormControl
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
 
 	function setMaxSize($bytes)
 	{

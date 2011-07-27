@@ -21,6 +21,14 @@
  */
 class StringFormControlSet extends FormControlSet
 {
+	/**
+	 * @return StringFormControlSet
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	protected function spawnSingle()
 	{
 		return new StringFormControl($this->getInnerName(), $this->getLabel());

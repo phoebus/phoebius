@@ -22,6 +22,14 @@
  */
 class HiddenFormControlSet extends FormControlSet
 {
+	/**
+	 * @return HiddenFormControlSet
+	 */
+	static function create($name, $label)
+	{
+		return new self ($name, $label);
+	}
+
 	protected function spawnSingle()
 	{
 		return new HiddenFormControl($this->getInnerName());

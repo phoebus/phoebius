@@ -22,6 +22,14 @@
  */
 class FileFormControlSet extends FormControlSet
 {
+	/**
+	 * @return FileFormControlSet
+	 */
+	static function create($name, $label, $defaultInputCount = 1)
+	{
+		return new self ($name, $label, $defaultInputCount);
+	}
+
 	function __construct($name, $label, $defaultInputCount = 1)
 	{
 		parent::__construct($name, $label);
