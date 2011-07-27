@@ -115,6 +115,24 @@ final class FormControl extends StaticClass
 	/**
 	 * @return StringFormControl
 	 */
+	static function url($name, $label, $value = null)
+	{
+		return self::string($name, $label, $value)
+				->setPattern(StringFormControl::URL_PATTERN);
+	}
+
+	/**
+	 * @return StringFormControl
+	 */
+	static function email($name, $label, $value = null)
+	{
+		return self::string($name, $label, $value)
+				->setPattern(StringFormControl::MAIL_PATTERN);
+	}
+
+	/**
+	 * @return StringFormControl
+	 */
 	static function string($name, $label, $value = null)
 	{
 		return StringFormControl::create($name, $label)
