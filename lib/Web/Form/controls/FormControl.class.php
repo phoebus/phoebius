@@ -18,7 +18,126 @@
 
 final class FormControl extends StaticClass
 {
-	// helper methods to access various controls
+	/**
+	 * @return ButtonFormControl
+	 */
+	static function button($name, $label)
+	{
+		return ButtonFormControl::create($name, $label);
+	}
+
+	/**
+	 * @return CheckboxFormControl
+	 */
+	static function checkbox($name, $label, $value = '1')
+	{
+		return CheckboxFormControl::create($name, $label, $value);
+	}
+
+	/**
+	 * @return CheckboxFormControlSet
+	 */
+	static function checkboxSet($name, $label, array $options)
+	{
+		return CheckboxFormControlSet::create($name, $label)
+				->setLabels($options);
+	}
+
+	/**
+	 * @return FileFormControl
+	 */
+	static function file($name, $label)
+	{
+		return FileFormControl::create($name, $label);
+	}
+
+	/**
+	 * @return FileFormControlSet
+	 */
+	static function fileSet($name, $label, $defaultCount = 1)
+	{
+		return FileFormControlSet::create($name, $label, $defaultCount);
+	}
+
+	/**
+	 * @return HiddenFormControl
+	 */
+	static function hidden($name, $value)
+	{
+		return HiddenFormControl::create($name)
+				->setDefaultValue($value);
+	}
+
+	/**
+	 * @return HiddenFormControlSet
+	 */
+	static function hiddenSet($name, $label, array $values = array())
+	{
+		return HiddenFormControlSet::create($name, $label)
+				->setDefaultValue($values);
+	}
+
+	/**
+	 * @return PasswordFormControl
+	 */
+	static function password($name, $label)
+	{
+		return PasswordFormControl::create($name, $label);
+	}
+
+	/**
+	 * @return RadioFormControlSet
+	 */
+	static function radioGroup($name, $label, array $options)
+	{
+		return RadioFormControlSet::create($name, $label)
+				->setLabels($options);
+	}
+
+	/**
+	 * @return SelectFormControl
+	 */
+	static function select($name, $label, array $options)
+	{
+		return SelectFormControl::create($name, $label)
+				->setLabels($options);
+	}
+
+	/**
+	 * @return SelectMultiFormControl
+	 */
+	static function selectMulti($name, $label, array $options)
+	{
+		return SelectMultiFormControl::create($name, $label)
+				->setLabels($options);
+	}
+
+	/**
+	 * @return StringFormControl
+	 */
+	static function string($name, $label, $value = null)
+	{
+		return StringFormControl::create($name, $label)
+				->setDefaultValue($value);
+	}
+
+	/**
+	 * @return StringFormControlSet
+	 */
+	static function stringSet($name, $label, array $values = array())
+	{
+		return StringFormControlSet::create($name, $label)
+				->setDefaultValue($values);
+	}
+
+	/**
+	 * @return TextareaFormControl
+	 */
+	static function textarea($name, $label, $value)
+	{
+		return TextareaFormControl::create($name, $label)
+				->setDefaultValue($value);
+	}
 }
 
 ?>

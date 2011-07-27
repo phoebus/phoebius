@@ -4,7 +4,7 @@
 $form = new SomeForm();
 $form->import($request->getPost());
 if ($form->hasErrors()) {
-	//auth failed
+	// import failed
 }
 else {
 	// all ok
@@ -16,13 +16,13 @@ return new View("auth", array('form' => $form));
 // signed:
 $form = new SomeForm(..., $signed = true);
 try {
-	$form->process($request);
+	$form->handle($request);
 	if (!$form->hasErrors())
 		return "/";
 }
 catch (FormSubmitException $e) {
-	// not submitted, not matched or invalidated	
-	$form->setup();
+	// not matched or invalidated
+	$form->sign($request);
 }
 return new View("auth", array('form' => $form));
 
@@ -45,7 +45,7 @@ function __construct(Photo $photo, HttpUrl $url)
 	$this->addControl(FormControl::select("quality", array(0 => 'low', 1 => 'normal', 2 => 'high'), 0));
 	$this->addControl(FormControl::selectMultiple("license", array(0 => 'free', 1 => 'pay'), array(0, 1)));
 	$this->addControl(FormControl::radioGroup("priority", array(0 => 'low', 1 => 'normal', 2 => 'high'), 0));
-	
+
 	$this->addButton("save", "Save", array($this, 'onSave'), false);
 	$this->addButton("delete", "Delete", array($this, 'onDelete'), true);
 }
