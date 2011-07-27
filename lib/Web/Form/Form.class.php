@@ -40,6 +40,11 @@ class Form
 	private $method;
 
 	/**
+	 * @var string
+	 */
+	private $sign;
+
+	/**
 	 * @var array of FormControl by name
 	 */
 	private $controls = array();
@@ -60,13 +65,19 @@ class Form
 	private $errors = array();
 	private $hasInnerErrors = false;
 
-	function __construct($id, HttpUrl $action)
+	function __construct($id, HttpUrl $action, $sign = null)
 	{
 		Assert::isScalar($id);
 
 		$this->id = $id;
 		$this->action = $action;
 		$this->method = new RequestMethod(RequestMethod::POST);
+		$this->sign = $sign;
+	}
+
+	function isSigned()
+	{
+		return !!$this->sign;
 	}
 
 	/**
@@ -130,11 +141,59 @@ class Form
 	function handle(WebRequest $request)
 	{
 		if (!$request->getRequestMethod()->equals($this->method))
-			return false;
+			throw new FormException("Wrong request method");
 
 		$variables = $request->getPostVars();
 
+		if ($this->isSigned()) {
+			$signName = $this->getSignName();
+			if (!isset($variables[$signName]))
+				throw new FormException("Missing sign");
+
+			if (!$this->importSign($variables[$signName]))
+				throw new FormException("Malformed sign");
+		}
 		$this->process($variables);
+	}
+
+	function sign()
+	{
+		$this->addControl(FormControl::hidden($this->getSignName(), $this->exportSign()));
+	}
+
+	protected function importSign($string)
+	{
+		$decrypted = $this->decryptString($string);
+		if (!$decrypted)
+			return false;
+
+		$data = unserialize($decrypted);
+
+		foreach ($data as $key => $value)
+			$this->setHiddenValue($key, $value);
+	}
+
+	protected function exportSign()
+	{
+		$decrypted = serialize($this->fieldsToSign);
+		return $this->encryptString($decrypted);
+	}
+
+	protected function getSignName()
+	{
+		return sha1($this->encryptString($this->id));
+	}
+
+	private function encryptString($s)
+	{
+		$c = new XorCipherer($this->sign);
+		return $c->encrypt($s);
+	}
+
+	private function decryptString($s)
+	{
+		$c = new XorCipherer($this->sign);
+		return $c->decrypt($s);
 	}
 
 	function import(array $variables)
