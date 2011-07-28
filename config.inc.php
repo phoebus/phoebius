@@ -40,11 +40,11 @@ if (!defined('PHOEBIUS_APP_ID')) {
 
 if (!defined('PHOEBIUS_TMP_ROOT')) {
 	define(
-		'PHOEBIUS_TMP_ROOT', 
+		'PHOEBIUS_TMP_ROOT',
 		sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Phoebius-v' . PHOEBIUS_VERSION . '-' . PHOEBIUS_APP_ID
 	);
 }
-		
+
 if (!defined('PHOEBIUS_LOADER')) {
 	define('PHOEBIUS_LOADER', 'ondemand');
 }
@@ -108,11 +108,13 @@ $phoebiusNamespaces = array(
 	'Dal/DB/Type',
 	'Dal/Expression',
 	'Dal/Expression/LogicalOperators',
-	
+
 	'Dal/Cache',
 	'Dal/Cache/Peers',
 
 	'Web',
+	'Web/Form',
+	'Web/Form/controls',
 	'Web/UrlRouting',
 	'Web/Exceptions',
 
@@ -130,9 +132,9 @@ $phoebiusNamespaces = array(
 
 foreach ($phoebiusNamespaces as $namespace) {
 	set_include_path(
-		PHOEBIUS_BASE_ROOT . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $namespace 
+		PHOEBIUS_BASE_ROOT . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $namespace
 		. PATH_SEPARATOR . get_include_path()
-	);	
+	);
 }
 
 require PHOEBIUS_BASE_ROOT . '/loader/' . PHOEBIUS_LOADER . '.loader.php';
@@ -144,7 +146,7 @@ Exceptionizer::getInstance()
 
 try {
 	$result = is_dir(PHOEBIUS_TMP_ROOT);
-	
+
 	if (!$result) {
 		mkdir(PHOEBIUS_TMP_ROOT, 0777, true);
 	}

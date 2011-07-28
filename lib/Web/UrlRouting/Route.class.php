@@ -76,7 +76,7 @@
  *
  * For example, if you pass the following array:
  * > { id: /^[0-9]+$/ }
- * 
+ *
  * then route will match the request only if it contains a numeric "id" parameter:
  * Will match: /?id=100
  * Will NOT match: /?id=blah
@@ -92,7 +92,7 @@ class Route
 	private $routeData = array();
 	private $method;
 	private $name;
-	
+
 	/**
 	 * @return Route
 	 */
@@ -104,7 +104,7 @@ class Route
 	) {
 		return new self ($name, $pattern, $data, $method);
 	}
-	
+
 	/**
 	 * @return Route
 	 */
@@ -115,7 +115,7 @@ class Route
 	) {
 		return new self ($name, $pattern, $data, RequestMethod::get());
 	}
-	
+
 	/**
 	 * @return Route
 	 */
@@ -126,7 +126,7 @@ class Route
 	) {
 		return new self ($name, $pattern, $data, RequestMethod::get());
 	}
-	
+
 	/**
 	 * @return Route
 	 */
@@ -137,7 +137,7 @@ class Route
 	) {
 		return new self ($name, $pattern, $data);
 	}
-	
+
 	function __construct(
 			$name = null,
 			$pattern = null,
@@ -147,25 +147,25 @@ class Route
 	{
 		Assert::isScalarOrNull($name);
 		Assert::isScalarOrNull($pattern);
-		
+
 		if ($pattern) {
 			$path = parse_url($pattern, PHP_URL_PATH);
-			$query = parse_url($pattern, PHP_URL_QUERY);		
-			
+			$query = parse_url($pattern, PHP_URL_QUERY);
+
 			if ($path) {
 				$this->pathMatcher = new _PathPattern($path);
 			}
-			
+
 			if ($query) {
 				parse_str($query, $this->queryStringRegs);
 			}
 		}
-		
+
 		$this->name = $name;
 		$this->routeData = $data;
 		$this->method = $method;
 	}
-	
+
 	/**
 	 * Gets the route name
 	 * @return string|null
@@ -174,15 +174,15 @@ class Route
 	{
 		return $this->name;
 	}
-	
+
 	function match(WebRequest $request)
 	{
 		if ($this->method) {
 			if ($this->method->getValue() != $request->getRequestMethod()) {
 				return;
-			}	
+			}
 		}
-		
+
 		$url = $request->getHttpUrl();
 		$data = $this->routeData;
 
@@ -193,7 +193,7 @@ class Route
 
 			$data = array_merge($data, $pathData);
 		}
-		
+
 		$query = $url->getQuery();
 		foreach ($this->queryStringRegs as $qsArg => $qsReg) {
 			if (
@@ -204,10 +204,10 @@ class Route
 			}
 			else return;
 		}
-		
+
 		return $data;
 	}
-	
+
 	/**
 	 * @return HttpUrl
 	 */
@@ -216,32 +216,34 @@ class Route
 		$data = array_replace_recursive($this->routeData, $data);
 		if (!$url)
 			$url = new HttpUrl();
-			
+
 		if ($this->pathMatcher)
-			$url->setVirtualPath($this->pathMatcher->reverse($data));
-		
+			$url->setPath($this->pathMatcher->reverse($data));
+
 		foreach ($this->queryStringRegs as $qsArg => $qsReg) {
 			if ($qsReg) {
 				Assert::hasIndex($data, $qsArg);
 				Assert::isTrue(preg_match($qsReg, $data[$qsArg]));
 			}
-			
+
 			if (isset($data[$qsArg]))
 				$url->addQueryArgument($qsArg, $data[$qsArg]);
 		}
-		
+
 		// import untouched data variables
 		$used = array_replace(
-			$this->routeData, 
-			$this->pathMatcher? $this->pathMatcher->getPlaceholderKeys(): array()
+			$this->pathMatcher
+				? array_fill_keys($this->pathMatcher->getPlaceholderKeys(), null)
+				: array(),
+			$this->routeData
 		);
 		$onlyNew = array_diff_key(
-			array_replace($data, $used), 
+			$data,
 			$used
 		);
 		foreach ($onlyNew as $key => $value)
 			$url->addQueryArgument($key, $value);
-		
+
 		return $url;
 	}
 }
@@ -252,37 +254,37 @@ class Route
 final class _PathPattern
 {
 	const DELIMITER = '/';
-	
+
 	private $pattern;
 	private $parts = array();
 	private $particles = array();
 	private $placeholders = array();
-	
+
 	function __construct($pattern)
 	{
 		Assert::isScalar($pattern);
-		
+
 		$this->pattern = $pattern;
-		
+
 		$this->setupPattern();
 	}
-	
+
 	function getPlaceholderKeys()
 	{
 		return array_diff($this->placeholders, array(""));
 	}
-	
+
 	function match($path)
 	{
 		$path_parts = explode(self::DELIMITER, $path);
-		
+
 		if (sizeof($path_parts) < sizeof($this->particles)) {
 			return false;
 		}
-		
+
 		$data = array();
-		
-		foreach ($this->particles as $idx => $partRegex) {				
+
+		foreach ($this->particles as $idx => $partRegex) {
 			$part = $path_parts[$idx];
 			$placeholder = $this->placeholders[$idx];
 			if (preg_match($partRegex, $part)) {
@@ -294,57 +296,57 @@ final class _PathPattern
 				break;
 			}
 		}
-		
+
 		return $data;
 	}
-	
+
 	function reverse(array $data)
 	{
 		$path = array();
-		
+
 		foreach ($this->parts as $i => $part) {
 			$placeholderName = $this->placeholders[$i];
-				
+
 			if ($this->placeholders[$i]) {
 				Assert::hasIndex(
-					$data, $this->placeholders[$i], 
+					$data, $this->placeholders[$i],
 					'specify value for placehodler `%s` to reverse path `%s`',
 					$this->placeholders[$i], $this->pattern
 				);
-				
+
 				$placeholderValue = $data[$this->placeholders[$i]];
-				
+
 				Assert::isTrue(
 					preg_match($this->particles[$i], $placeholderValue),
 					'value `%sz for placeholder `%s` should match regex %s',
 					$placeholderValue, $placeholderValue, $this->particles[$i]
 				);
-				
+
 				$path[] = $data[$this->placeholders[$i]];
 			}
 			else {
 				$path[] = $part;
 			}
 		}
-		
+
 		return join('/', $path);
 	}
-	
+
 	private function setupPattern()
 	{
 		foreach (explode(self::DELIMITER, $this->pattern) as $part) {
 			$placeholder = null;
-			
+
 			if (preg_match('/:[a-zA-Z0-9]+$/', $part)) {
 				$p = explode(":", $part);
 				$placeholder = end($p);
 				$part = join(":", array_slice($p, 0, -1));
-				
+
 				if (!$part) {
 					$part = ".+"; // empty named part matched everything
 				}
 			}
-			
+
 			$this->parts[] = $part;
 			$this->particles[] = "{^{$part}$}";
 			$this->placeholders[] = $placeholder;

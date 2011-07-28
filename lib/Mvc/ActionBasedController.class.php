@@ -33,17 +33,17 @@
 abstract class ActionBasedController implements IController
 {
 	const ROUTE_DATA_ACTION = 'action';
-	
+
 	/**
 	 * @var RouteData
 	 */
 	private $routeData;
-	
+
 	/**
 	 * @var WebRequest
 	 */
 	private $request;
-	
+
 	/**
 	 * @return WebRequest
 	 */
@@ -52,12 +52,20 @@ abstract class ActionBasedController implements IController
 		$this->request;
 	}
 
+	/**
+	 * @return RouteData
+	 */
+	protected function getRouteData()
+	{
+		$this->routeData;
+	}
+
 	function handle(RouteData $routeData, WebRequest $request)
 	{
 		$this->routeData = $routeData;
 		$this->request = $request;
 
-		$action = 
+		$action =
 			isset($this->routeData[self::ROUTE_DATA_ACTION])
 				? $this->routeData[self::ROUTE_DATA_ACTION]
 				: null;
@@ -100,9 +108,13 @@ abstract class ActionBasedController implements IController
 		if (!is_null($value)) {
 			return $value;
 		}
-		
-		if ($argument->getClass() == 'WebRequest') {
+
+		if ($argument->getClass()->getName() == 'WebRequest') {
 			return $this->request;
+		}
+
+		if ($argument->getClass()->getName() == 'RouteData') {
+			return $this->routeData;
 		}
 
 		// check whether it is optional or have the default value
@@ -118,6 +130,7 @@ abstract class ActionBasedController implements IController
 		else {
 			Assert::isUnreachable(
 				'nothing to pass to %s argument', $argument->name
+
 			);
 		}
 	}
@@ -265,7 +278,7 @@ abstract class ActionBasedController implements IController
 		if ($actionResult instanceof IActionResult) {
 			return $actionResult;
 		}
-		
+
 		if ($actionResult instanceof View) {
 			return new ViewResult($actionResult);
 		}

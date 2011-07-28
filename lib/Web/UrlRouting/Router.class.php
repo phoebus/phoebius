@@ -31,47 +31,20 @@ class Router implements IRouter
 	private $routeData = array();
 	private $routes = array();
 	private $routeNames = array();
-	
+
 	function __construct(array $defaultRouteData = array())
 	{
 		$this->routeData = $defaultRouteData;
 	}
-	
+
+	/**
+	 * @param WebRequest $request
+	 * @return RouteData
+	 * @throws RouteException
+	 */
 	function process(WebRequest $request)
 	{
-		return $this->lookup($this->routes, $request);
-	}
-	
-	/**
-	 * @return Router
-	 */
-	function addRoute(Route $route)
-	{
-		if (($name = $route->getName())) {
-			Assert::isFalse(isset($this->routeNames[$name]), 'route with name `%s` already defined', $name);
-			
-			$this->routeNames[$name] = $route;
-		}
-		
-		$this->routes[] = $route;
-		
-		return $this;
-	}
-	
-	/**
-	 * @return Router
-	 */
-	function addRoutes(array $routes)
-	{
-		foreach ($routes as $route)
-			$this->addRoute($route);
-		
-		return $this;
-	}
-	
-	private function lookup(array $routes, WebRequest $request)
-	{
-		foreach ($routes as $route) {
+		foreach ($this->routes as $route) {
 			$result = $route->match($request);
 
 			if (is_array($result)) {
@@ -79,17 +52,63 @@ class Router implements IRouter
 					new RouteData(
 						$route, $this,
 						array_replace(
-							$this->routeData, 
+							$this->routeData,
 							$result
 						)
 					);
 			}
 		}
-		
+
 		if (!empty($this->routeData)) {
 			return new RouteData(new Route(), $this, $this->routeData);
 		}
-		
+
 		throw new RouteException($request->getHttpUrl());
+	}
+
+	/**
+	 * @return HttpUrl
+	 */
+	function makeUrl($routeName, array $data = array(), HttpUrl $url = null)
+	{
+		return $this->getRoute($routeName)->makeUrl($data, $url);
+	}
+
+	/**
+	 * @return Router
+	 */
+	function addRoute(Route $route)
+	{
+		if (($name = $route->getName())) {
+			Assert::isFalse(isset($this->routeNames[$name]), 'route with name `%s` already defined', $name);
+
+			$this->routeNames[$name] = $route;
+		}
+
+		$this->routes[] = $route;
+
+		return $this;
+	}
+
+	/**
+	 * @param string $name
+	 * @return Route
+	 */
+	function getRoute($name)
+	{
+		Assert::hasIndex($this->routeNames, $name);
+
+		return $this->routeNames[$name];
+	}
+
+	/**
+	 * @return Router
+	 */
+	function addRoutes(array $routes)
+	{
+		foreach ($routes as $route)
+			$this->addRoute($route);
+
+		return $this;
 	}
 }

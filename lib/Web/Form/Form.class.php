@@ -178,7 +178,7 @@ class Form
 
 			$result = $control->importValue($value);
 			if (!$result)
-				$this->hasInnerErrors = false;
+				$this->hasInnerErrors = true;
 		}
 
 		return $this->hasErrors();
@@ -186,7 +186,8 @@ class Form
 
 	function reset()
 	{
-		$this->errors = true;
+		$this->errors = array();
+		$this->hasInnerErrors = false;
 		foreach ($this->controls as $control) {
 			$control->reset();
 		}
@@ -246,7 +247,7 @@ class Form
 
 	function hasErrors()
 	{
-		return !empty($this->errors) || $this->hasInnerErrors;
+		return !empty($this->errors); // || $this->hasInnerErrors;
 	}
 
 	function hasInnerErrors()

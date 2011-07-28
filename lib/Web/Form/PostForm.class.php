@@ -76,8 +76,6 @@ class PostForm extends Form
 			$callback = array($this, $callback);
 		}
 
-		Assert::isCallback($callback);
-
 		$this->addControl(FormControl::button($name, $label));
 
 		$this->buttons[$name] = $callback;
@@ -135,7 +133,7 @@ class PostForm extends Form
 		}
 
 		foreach ($this->buttons as $id => $callback) {
-			if (isset($variables[$id])) {
+			if (isset($variables[$id]) && is_callable($callback)) {
 				call_user_func($callback, $variables);
 				return;
 			}
@@ -152,7 +150,7 @@ class PostForm extends Form
 	{
 		Assert::isFalse($this->isSigned(), 'form already signed');
 
-		$this->setHiddenValue($this->getReferrerName(), $request->getHttpReferer());
+		$this->setHiddenValue($this->getReferrerName(), (string) $request->getHttpUrl());
 
 		$this->addControl(FormControl::hidden($this->getSignName(), $this->exportSign()));
 
@@ -207,7 +205,7 @@ class PostForm extends Form
 			$data[$name] = $control->getValue();
 		}
 
-		return $this->signer->encrypt($data);
+		return $this->signer->encrypt(serialize($data));
 	}
 
 	protected function getSignName()

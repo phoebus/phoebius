@@ -28,7 +28,7 @@ class WebRequest implements ArrayAccess
 		'HTTP_X_FORWARDED_FOR', 'CLIENT_IP', 'HTTP_FROM', 'HTTP_CLIENT_IP', 'HTTP_CLIENTIP',
 		'HTTP_CLIENT', 'HTTP_X_FORWARDED', 'HTTP_X_DELEGATE_REMOTE_HOST', 'HTTP_SP_HOST',
 	);
-	
+
 	private $getVars;
 	private $postVars;
 	private $cookieVars;
@@ -46,7 +46,7 @@ class WebRequest implements ArrayAccess
 	 */
 	private $serverVars;
 	private $envVars;
-	
+
 	/**
 	 * @var WebResponse
 	 */
@@ -59,7 +59,7 @@ class WebRequest implements ArrayAccess
 				array $filesVars,
 				array $serverVars,
 				array $envVars,
-				$baseHost = null, 
+				$baseHost = null,
 				$baseUri = '/'
 		)
 	{
@@ -71,10 +71,10 @@ class WebRequest implements ArrayAccess
 		$this->filesVars = $filesVars;
 		$this->serverVars = $serverVars;
 		$this->envVars = $envVars;
-		
+
 		// GPCF
 		$this->allVars = array_replace_recursive($cookieVars, $getVars, $postVars, $filesVars);
-		
+
 		$this->httpUrl = SiteUrl::import(
 			$this->isSecured() ? 'https' : 'http',
 			$this->serverVars['HTTP_HOST'],
@@ -83,7 +83,7 @@ class WebRequest implements ArrayAccess
 			$baseHost, $baseUri
 		);
 	}
-	
+
 	/**
 	 * @return IWebResponse
 	 */
@@ -353,7 +353,7 @@ class WebRequest implements ArrayAccess
 
 		throw new ArgumentException('header', 'header not recognized');
 	}
-	
+
 	/**
 	 * Aka SERVER_ADDR
 	 *
