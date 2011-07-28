@@ -73,6 +73,16 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 		return true;
 	}
 
+	function isHidden()
+	{
+		return false;
+	}
+
+	function isCollection()
+	{
+		return true;
+	}
+
 	/**
 	 * Makes control to skip wrong inner values
 	 * @param bool $flag
@@ -202,6 +212,16 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 				: false;
 	}
 
+	function getErrorId()
+	{
+		return $this->errorId;
+	}
+
+	function getErrorMessage()
+	{
+		return $this->errorMessage;
+	}
+
 	function reset()
 	{
 		$this->errorId = null;
@@ -252,7 +272,7 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 			$this->markMissing(self::ERROR_INVALID_VALUE);
 		}
 
-		return !$this->hasErrors();
+		return !$this->hasError();
 	}
 
 	function setDefaultValue($value)

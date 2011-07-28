@@ -41,6 +41,18 @@ interface IFormControl
 	function isOptional();
 
 	/**
+	 * If control is hidden
+	 * @return bool
+	 */
+	function isHidden();
+
+	/**
+	 * If control implements the set of inner controls
+	 * @return void
+	 */
+	function isCollection();
+
+	/**
 	 * tries to import the value
 	 * @param mixed $value
 	 * @return boolean whether import was successful or not (caused import errors)
@@ -70,6 +82,16 @@ interface IFormControl
 	 * @return boolean
 	 */
 	function hasError();
+
+	/**
+	 * @return FormControlError
+	 */
+	function getErrorId();
+
+	/**
+	 * @return string
+	 */
+	function getErrorMessage();
 
 	/**
 	 * determines whether value was missing

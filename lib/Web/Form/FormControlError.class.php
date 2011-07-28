@@ -21,8 +21,8 @@
  */
 class FormControlError extends Enumeration
 {
-	const MISSING = 1;
-	const WRONG = 2;
+	const MISSING = 'missing';
+	const WRONG = 'wrong';
 
 	static function missing()
 	{

@@ -47,6 +47,16 @@ abstract class FormControlScalar implements IFormControl
 		return $this->isOptional;
 	}
 
+	function isHidden()
+	{
+		return false;
+	}
+
+	function isCollection()
+	{
+		return false;
+	}
+
 	/**
 	 * Marks control as optional
 	 * @return FormControlScalar
@@ -93,6 +103,9 @@ abstract class FormControlScalar implements IFormControl
 
 		if ($value && !is_scalar($value)) {
 			$this->markMissing('not a scalar value given');
+		}
+		else if (!$value && !$this->isOptional()) {
+			$this->markMissing('value is not specified');
 		}
 		else {
 			$this->setValue($value);
@@ -144,6 +157,16 @@ abstract class FormControlScalar implements IFormControl
 		$this->importedValue = null;
 
 		return $this;
+	}
+
+	function getErrorId()
+	{
+		return $this->errorId;
+	}
+
+	function getErrorMessage()
+	{
+		return $this->errorMessage;
 	}
 
 	/**

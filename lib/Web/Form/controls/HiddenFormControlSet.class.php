@@ -30,6 +30,11 @@ class HiddenFormControlSet extends FormControlSet
 		return new self ($name, $label);
 	}
 
+	function isHidden()
+	{
+		return true;
+	}
+
 	protected function spawnSingle()
 	{
 		return new HiddenFormControl($this->getInnerName());

@@ -138,33 +138,22 @@ class Form
 	}
 
 	/**
-	 * @return Form itself
-	 */
-	function setHiddenValue($name, $value)
-	{
-		if (isset($this->fieldsToSign[$name])) {
-			$this->fieldsToSign[$name]->importValue($value);
-		}
-		else {
-			$field = FormControl::hidden($name, $value);
-
-			$this->addControl($field);
-
-			$this->fieldsToSign[$name] = $field;
-		}
-
-		return $this;
-	}
-
-	/**
 	 * @param  $name
-	 * @return FormControl
+	 * @return IFormControl
 	 */
 	function getControl($name)
 	{
 		Assert::hasIndex($this->controls, $name, 'know nothing about control `%s` within form %s', $name, $this->id);
 
 		return $this->controls[$name];
+	}
+
+	/**
+	 * @return IFormControl[]
+	 */
+	function getControls()
+	{
+		return $this->controls;
 	}
 
 	function import(array $variables)
@@ -181,7 +170,7 @@ class Form
 				$this->hasInnerErrors = true;
 		}
 
-		return $this->hasErrors();
+		return !$this->hasErrors();
 	}
 
 	function reset()
@@ -209,7 +198,7 @@ class Form
 	 * Signs the form and returns <form> cap and hidden fields
 	 * @return string
 	 */
-	function dumpHead(array $htmlAttributes = array())
+	function getHeadHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['action']));
 		Assert::isFalse(isset($htmlAttributes['method']));
@@ -230,8 +219,9 @@ class Form
 	protected function dumpHidden()
 	{
 		$yield = '';
-		foreach ($this->getHiddenControls() as $control) {
-			$yield .= $control->toHtml();
+		foreach ($this->getControls() as $control) {
+			if ($control->isHidden())
+				$yield .= $control->toHtml();
 		}
 
 		return $yield;
@@ -240,14 +230,19 @@ class Form
 	/**
 	 * @return string
 	 */
-	function dumpHeel()
+	function getHeelHtml()
 	{
 		echo '</form>';
 	}
 
 	function hasErrors()
 	{
-		return !empty($this->errors); // || $this->hasInnerErrors;
+		return !empty($this->errors) || $this->hasInnerErrors;
+	}
+
+	function hasFormErrors()
+	{
+		return !empty($this->errors);
 	}
 
 	function hasInnerErrors()
@@ -276,24 +271,6 @@ class Form
 		$this->errors[$id] = $message;
 
 		return $this;
-	}
-
-	/**
-	 * @return IFormControl[]
-	 */
-	protected function getHiddenControls()
-	{
-		$yield = array();
-		foreach ($this->controls as $control) {
-			if (
-					$control instanceof HiddenFormControl
-					|| $control instanceof HiddenFormControlSet
-			) {
-				$yield[] = $control;
-			}
-		}
-
-		return $yield;
 	}
 }
 
