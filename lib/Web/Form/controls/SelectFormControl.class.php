@@ -32,7 +32,6 @@ final class SelectFormControl extends SetFormControl
 
 	function setDefaultValue($value)
 	{
-		Assert::isScalarOrNull($value);
 		Assert::isTrue(in_array($value, $this->getAvailableValues()));
 
 		return parent::setDefaultValue($value);
@@ -40,18 +39,18 @@ final class SelectFormControl extends SetFormControl
 
 	function importValue($value)
 	{
+		if (!in_array($value, $this->getAvailableValues())) {
+			$this->setError(FormControlError::missing());
+			return false;
+		}
+
 		if (!$value && !$this->isOptional()) {
-			$this->markMissing();
+			$this->setError(FormControlError::missing());
 			return false;
 		}
 
 		if ($value && !is_scalar($value)) {
-			$this->markWrong();
-			return false;
-		}
-
-		if (!in_array($value, $this->getAvailableValues())) {
-			$this->markWrong();
+			$this->setError(FormControlError::invalid());
 			return false;
 		}
 

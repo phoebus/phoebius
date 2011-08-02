@@ -22,13 +22,10 @@
  */
 class StringFormControl extends InputFormControl
 {
-	const ERROR_PATTERN = 'value didn`t pass a pattern';
-
 	const MAIL_PATTERN 	= '/^[a-zA-Z0-9\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+(\.[a-zA-Z0-9\!\#\$\%\&\'\*\+\-\/\=\?\^\_\`\{\|\}\~]+)*@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$/Ds';
 	const URL_PATTERN 	= '/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}((:[0-9]{1,5})?\/.*)?$/is';
 
 	private $pattern;
-	private $rejectWrong;
 
 	/**
 	 * @return StringFormControl
@@ -38,6 +35,11 @@ class StringFormControl extends InputFormControl
 		return new self ($name, $label);
 	}
 
+    /**
+     * Sets the PCRE pattern to check value against. If pattern check fails, FormControlError::WRONG is set.
+     * @param $pattern
+     * @return StringFormControl
+     */
 	function setPattern($pattern)
 	{
 		Assert::isScalar($pattern);
@@ -52,32 +54,15 @@ class StringFormControl extends InputFormControl
 		return $this->pattern;
 	}
 
-	function rejectWrong($flag = true)
-	{
-		Assert::isBoolean($flag);
-
-		$this->rejectWrong = $flag;
-
-		return $this;
-	}
-
-	function isRejectsWrong()
-	{
-		return $this->rejectWrong;
-	}
-
-	function setValue($value)
+	function setImportedValue($value)
 	{
 		if ($this->pattern) {
 			if (!preg_match($this->pattern, $value)) {
-				$this->markWrong(self::ERROR_PATTERN);
-				if ($this->isRejectsWrong()) {
-					$value = null;
-				}
+				$this->setError(FormControlError::wrong());
 			}
 		}
 
-		parent::setValue($value);
+		parent::setImportedValue($value);
 	}
 
 	function getType()

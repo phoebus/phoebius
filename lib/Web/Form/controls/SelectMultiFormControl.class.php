@@ -22,6 +22,8 @@
  */
 final class SelectMultiFormControl extends SetFormControl
 {
+	private $defaultValue;
+
 	/**
 	 * @return SelectMultiFormControl
 	 */
@@ -32,34 +34,53 @@ final class SelectMultiFormControl extends SetFormControl
 
 	function setDefaultValue($value)
 	{
-		Assert::isTrue(is_array($value));
-		Assert::isTrue(is_array($value));
-		Assert::isTrue(
-			sizeof($value)
-			== array_intersect($this->getAvailableValues(), $value)
-		);
+		if ($value) {
+			if (!is_array($value))
+				$value = array($value);
 
-		return parent::setDefaultValue($value);
+			Assert::isTrue(
+				sizeof($value)
+				== sizeof(array_intersect($this->getAvailableValues(), $value))
+			);
+		}
+
+		$this->defaultValue = $value;
+
+		return $this;
+	}
+
+	function getDefaultValue()
+	{
+		return $this->defaultValue;
+	}
+
+	function getSelectedValues()
+	{
+		$value = $this->getValue();
+		return
+			$value
+				? $value
+				: array();
 	}
 
 	function importValue($value)
 	{
-		if (!$value && !$this->isOptional()) {
-			$this->markMissing();
-			return false;
-		}
-
 		if ($value && !is_array($value)) {
-			$this->markWrong();
+			$this->setError(FormControlError::invalid());
 			return false;
 		}
 
-		if (sizeof($value) != array_intersect($this->getAvailableValues(), $value)) {
-			$this->markWrong();
+		$value = array_intersect($this->getAvailableValues(), $value);
+
+		if (!$value && !$this->isOptional()) {
+			$this->setError(FormControlError::missing());
 			return false;
 		}
 
-		return parent::importValue($value);
+
+		$this->setImportedValue($value);
+
+		return true;
 	}
 
 	function toHtml(array $htmlAttributes = array())
@@ -68,7 +89,7 @@ final class SelectMultiFormControl extends SetFormControl
 		Assert::isFalse(isset($htmlAttributes['multiple']));
 
 		$htmlAttributes['name'] = $this->getName();
-		$htmlAttributes['multiple'] = $this->getName();
+		$htmlAttributes['multiple'] = 'multiple';
 
 		return HtmlUtil::getContainer('select', $htmlAttributes, join("", $this->getOptions()));
 	}

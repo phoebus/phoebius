@@ -20,36 +20,71 @@
  * Represents a control set.
  *
  * Caveats for the set:
- *  - "missing" means that incoming value is not of a valid type (not an array)
- *  - "wrong" means there are import errors withing inner controls (if not supressed)
+ *  - "missing" means nothing - set can be empty by design
+ *  - "invalid" means what is should - scope value has wrong type, unable even to try import
+ *  - "wrong" means there are import errors withing inner controls (if not supressed). You may disable importing of such
  *  - set is always optional as a control in case when user didn't selected anything in a set
  *  - inner control is a control collected by the set
  *
  * @ingroup Form
  */
-abstract class FormControlSet implements IFormControl, IteratorAggregate, Countable
+abstract class FormControlSet extends BaseFormControl implements IteratorAggregate, Countable
 {
 	const ID_PATTERN = '/^[a-z0-9_]+$/i';
 
-	const ERROR_INVALID_VALUE = 'incoming value is not of a valid type';
-	const ERROR_HAS_INNER_ERRORS = 'inner controls have import errors';
-
+	/**
+	 * @var string
+	 */
 	private $name;
+
+	/**
+	 * @var string
+	 */
 	private $label;
 
-	private $skipMissing = true;
-	private $skipWrong = true;
-	private $distinct = true;
+	/**
+	 * @var bool
+	 */
+	private $importMissing = false;
 
-	private $defaultValue = array();
+	/**
+	 * @var bool
+	 */
+	private $importWrong = false;
 
+	/**
+	 * @var bool
+	 */
+	private $importDistinct = true;
+
+	/**
+	 * @var array
+	 */
+	private $default = array();
+
+	/**
+	 * @var array
+	 */
 	private $value = array();
+
+	/**
+	 * @var bool
+	 */
+	private $isImported = false;
+
 	/**
 	 * @var IFormControl[]
 	 */
 	private $controls = array();
 
-	private $errorId;
+	/**
+	 * @var FormControlError
+	 */
+	private $error;
+
+	/**
+	 * @var string|null
+	 */
 	private $errorMessage;
 
 	/**
@@ -73,49 +108,16 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 		return true;
 	}
 
-	function isHidden()
-	{
-		return false;
-	}
-
-	function isCollection()
-	{
-		return true;
-	}
-
-	/**
-	 * Makes control to skip wrong inner values
-	 * @param bool $flag
-	 * @return FormControlSet
-	 */
-	function skipWrong($flag = true)
-	{
-		Assert::isBoolean($flag);
-
-		$this->skipWrong = $flag;
-
-		return $this;
-	}
-
-	/**
-	 * Determines whether a control set skips wrong inner values
-	 * @return bool
-	 */
-	function isSkipsWrong()
-	{
-		return $this->skipWrong;
-	}
-
 	/**
 	 * Makes control to skip missing/empty inner values
 	 * @param bool $flag
 	 * @return FormControlSet
 	 */
-	function skipMissing($flag = true)
+	function enableImportMissing($flag = true)
 	{
 		Assert::isBoolean($flag);
 
-		$this->skipMissing = $flag;
+		$this->importMissing = $flag;
 
 		return $this;
 	}
@@ -125,9 +127,31 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 	 * Determines whether a control set skips missing/empty inner values
 	 * @return bool
 	 */
-	function isSkipsMissing()
+	function importsMissing()
 	{
-		return $this->skipMissing;
+		return $this->importMissing;
+	}
+
+	/**
+	 * Makes control to import wrong
+	 * @return FormControlSet
+	 */
+	function enableImportWrong($flag = true)
+	{
+		Assert::isBoolean($flag);
+
+		$this->importWrong = $flag;
+
+		return $this;
+	}
+
+	/**
+	 * Determines whether a control set skips wrong inner values
+	 * @return bool
+	 */
+	function importsWrong()
+	{
+		return $this->importWrong;
 	}
 
 	/**
@@ -135,11 +159,11 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 	 * @param bool $flag
 	 * @return FormControlSet
 	 */
-	function setDistinct($flag = true)
+	function enableImportDistinct($flag = true)
 	{
 		Assert::isBoolean($flag);
 
-		$this->distinct = $flag;
+		$this->importDistinct = $flag;
 
 		return $this;
 	}
@@ -148,9 +172,9 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 	 * Determines whether a control set imports only distinct set of inner values
 	 * @return bool
 	 */
-	function isDistinct()
+	function importsDistinct()
 	{
-		return $this->distinct;
+		return $this->importDistinct;
 	}
 
 	function getName()
@@ -183,7 +207,7 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function getIterator()
 	{
-		return new ArrayIterator($this->controls);
+		return new ArrayIterator($this->getControls());
 	}
 
 	function count()
@@ -193,28 +217,12 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function hasError()
 	{
-		return !!$this->errorId;
+		return !!$this->error;
 	}
 
-	function isMissing()
+	function getError()
 	{
-		return
-			($this->errorId && $this->errorId->is(FormControlError::MISSING))
-				? ($this->errorMessage ? $this->errorMessage : true)
-				: false;
-	}
-
-	function isWrong()
-	{
-		return
-			($this->errorId && $this->errorId->is(FormControlError::WRONG))
-				? ($this->errorMessage ? $this->errorMessage : true)
-				: false;
-	}
-
-	function getErrorId()
-	{
-		return $this->errorId;
+		return $this->error;
 	}
 
 	function getErrorMessage()
@@ -224,11 +232,8 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function reset()
 	{
-		$this->errorId = null;
-		$this->errorMessage = null;
-		$this->controls = array();
-		$this->value = array();
-		$this->makeDefaults();
+		$this->dropError();
+		$this->dropControls();
 	}
 
 	function getValue()
@@ -238,28 +243,38 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function importValue($value)
 	{
-		$this->reset();
-
 		if (is_array($value)) {
 			$controls = array();
+			$takenValues = array(); // track distinct
 
 			foreach ($value as $innerValue) {
-				if (!$innerValue && $this->isSkipsMissing())
+				if (!$innerValue && !$this->importsMissing())
 					continue;
 
 				$control = $this->spawnSingle();
+				$control->importValue($innerValue);
 
 				// if import failed...
-				if (!$control->importValue($innerValue)) {
+				if ($control->hasError()) {
+					$error = $control->getError();
 					if (
 						// if we can skip the specified error - do this
-							($control->isMissing() && $this->isSkipsMissing())
-							|| ($control->isWrong() && $this->isSkipsWrong())
+							($error->is(FormControlError::MISSING) && !$this->importsMissing())
+							|| ($error->is(FormControlError::WRONG) && !$this->importsWrong())
 					) {
 						continue;
 					}
 					else { // otherwise mark the surrounding control as wrong
-						$this->markWrong(self::ERROR_HAS_INNER_ERRORS);
+						$this->setError(FormControlError::wrong());
+					}
+				}
+				else if ($this->importsDistinct()) {
+					$importedValue = $control->getValue();
+					if (in_array($importedValue, $takenValues)) {
+						continue;
+					}
+					else {
+						$takenValues[] = $control->getValue();
 					}
 				}
 
@@ -268,8 +283,8 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 			$this->setControls($controls);
 		}
-		else if (!empty($value) && !is_array($value)) {
-			$this->markMissing(self::ERROR_INVALID_VALUE);
+		else if ($value && !is_array($value)) {
+			$this->setError(FormControlError::invalid());
 		}
 
 		return !$this->hasError();
@@ -277,7 +292,11 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function setDefaultValue($value)
 	{
-		$this->defaultValue = $value;
+		if ($value && !is_array($value)) {
+			$value = array($value);
+		}
+
+		$this->default = $value;
 		$this->makeDefaults();
 
 		return $this;
@@ -285,7 +304,7 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 
 	function getDefaultValue()
 	{
-		return $this->defaultValue;
+		return $this->default;
 	}
 
 	function toHtml(array $htmlAttributes = array())
@@ -299,49 +318,34 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 	}
 
 	/**
-	 * Marks control as failed during import because of a missing value
-	 * @param string $message
-	 * @return void
-	 */
-	protected function markMissing($message = null)
-	{
-		$this->errorId = FormControlError::missing();
-		$this->errorMessage = $message;
-	}
-
-	/**
-	 * Marks control as failed during import because of a wrong value
-	 * @param string $message
-	 * @return void
-	 */
-	protected function markWrong($message = null)
-	{
-		$this->errorId = FormControlError::wrong();
-		$this->errorMessage = $message;
-	}
-
-	/**
 	 * Sets inner controls and marks the value as imported. This is called by IFormControl::importValue()
 	 * where all checks are performed
-	 * @param array $controls
+	 * @param IFormControl[] $controls
 	 * @return void
 	 */
 	protected function setControls(array $controls)
 	{
-		$value = array();
+		$this->value = array();
+		$this->controls = array();
+		$this->isImported = true;
+
 		foreach ($controls as $control) {
-			if (($_ = $control->getValue()))
-				$value[] = $_;
+			$this->value[] = $control->getValue();
+			$this->controls[] = $control;
 		}
-
-		if ($this->isDistinct()) {
-			$value = array_unique($value);
-		}
-
-		$this->value = $value;
-		$this->controls = $controls;
 
 		return $this;
+	}
+
+	protected function isImported()
+	{
+		return $this->isImported;
+	}
+
+	protected function dropControls()
+	{
+		$this->makeDefaults();
+		$this->isImported = false;
 	}
 
 	/**
@@ -350,15 +354,28 @@ abstract class FormControlSet implements IFormControl, IteratorAggregate, Counta
 	 */
 	protected function makeDefaults()
 	{
-		$controls = array();
+		$this->value = array();
+		$this->controls = array();
+		$this->isImported = false;
+
 		foreach ($this->getDefaultValue() as $value) {
-			$control = $this->spawnSingle();
-			$control->setDefaultValue($value);
-
-			$controls[] = $control;
+			$this->value[] = $value;
+			$this->controls[] = $this->spawnSingle()->setDefaultValue($value);
 		}
+	}
 
-		$this->setControls($controls);
+	protected function setError(FormControlError $error, $message = null)
+	{
+		Assert::isFalse($error->is(FormControlError::MISSING), '%s cannot be missing', get_class($this));
+
+		$this->error = $error;
+		$this->errorMessage = $message;
+	}
+
+	protected function dropError()
+	{
+		$this->error = null;
+		$this->errorMessage = null;
 	}
 }
 

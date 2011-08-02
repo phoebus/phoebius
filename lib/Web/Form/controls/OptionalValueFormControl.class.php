@@ -22,8 +22,6 @@
  */
 abstract class OptionalValueFormControl extends InputFormControl
 {
-	const ERROR_UNEXPECTED = 'unexpected control value';
-
 	private $value;
 
 	function __construct($name, $label, $value)
@@ -54,21 +52,6 @@ abstract class OptionalValueFormControl extends InputFormControl
 		Assert::isUnreachable('nonsense');
 	}
 
-	final function markMissing($message = null)
-	{
-		Assert::isUnreachable('nonsense');
-	}
-
-	function setValue($value)
-	{
-		if ($value !== null && $value != $this->value) {
-			$this->markWrong(self::ERROR_UNEXPECTED);
-		}
-		else {
-			parent::setValue($value);
-		}
-	}
-
 	function toHtml(array $htmlAttributes = array())
 	{
 		Assert::isFalse(isset($htmlAttributes['name']));
@@ -83,6 +66,16 @@ abstract class OptionalValueFormControl extends InputFormControl
 			$htmlAttributes['checked'] = 'checked';
 
 		return HtmlUtil::getNode('input', $htmlAttributes);
+	}
+
+	protected function setImportedValue($value)
+	{
+		if ($value !== null && $value != $this->getFixedValue()) {
+			$this->setError(FormControlError::invalid());
+		}
+		else {
+			parent::setImportedValue($value);
+		}
 	}
 }
 

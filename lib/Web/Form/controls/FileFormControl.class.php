@@ -23,12 +23,13 @@
 class FileFormControl extends InputFormControl
 {
 	// missing
-	const ERROR_NOTHING = 'nothing was uploaded'; // UPLOAD_ERR_NO_FILE
+	const ERROR_MISSING_FILE = 'nothing was uploaded'; // UPLOAD_ERR_NO_FILE
 
 	// wrong
-	const ERROR_SIZE = 'file exceeds the allowed size'; //UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE,
-	const ERROR_PARTIAL = 'file was partially uploaded'; // UPLOAD_ERR_PARTIAL
-	const ERROR_DENIED = 'file of that type is not allowed'; // UPLOAD_ERR_EXTENSION
+	const ERROR_WRONG_MAX_SIZE = 'file exceeds the allowed size'; //UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE,
+	const ERROR_WRONG_MIN_SIZE = 'file is empty';
+	const ERROR_WRONG_UPLOAD_IS_PARTIAL = 'file was partially uploaded'; // UPLOAD_ERR_PARTIAL
+	const ERROR_WRONG_FILE = 'file of that type is not allowed'; // UPLOAD_ERR_EXTENSION
 
 	// asserts: UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
 
@@ -63,6 +64,10 @@ class FileFormControl extends InputFormControl
 
 	function move($filepath)
 	{
+		Assert::isScalar($filepath);
+		Assert::isTrue(is_dir(dirname($filepath)));
+		Assert::isTrue(is_writable(dirname($filepath)));
+
 		return move_uploaded_file($this->getImportedFilepath(), $filepath);
 	}
 
@@ -110,30 +115,30 @@ class FileFormControl extends InputFormControl
 				|| !isset($value['error'])
 				|| !isset($value['size'])
 		) {
-			$this->markMissing(self::ERROR_NOTHING);
+			$this->markMissing(self::ERROR_MISSING_FILE);
 			return false;
 		}
 		else if ($value['error']) {
 			switch ($value['error']) {
 
 				case UPLOAD_ERR_NO_FILE: {
-					$this->markMissing(self::ERROR_NOTHING);
+					$this->markMissing(self::ERROR_MISSING_FILE);
 					break;
 				}
 
 				case UPLOAD_ERR_INI_SIZE:
 				case UPLOAD_ERR_FORM_SIZE: {
-					$this->markWrong(self::ERROR_SIZE);
+					$this->markWrong(self::ERROR_WRONG_MAX_SIZE);
 					break;
 				}
 
 				case UPLOAD_ERR_PARTIAL: {
-					$this->markWrong(self::ERROR_PARTIAL);
+					$this->markWrong(self::ERROR_WRONG_UPLOAD_IS_PARTIAL);
 					break;
 				}
 
 				case UPLOAD_ERR_EXTENSION: {
-					$this->markWrong(self::ERROR_DENIED);
+					$this->markWrong(self::ERROR_WRONG_FILE);
 					break;
 				}
 
@@ -147,18 +152,18 @@ class FileFormControl extends InputFormControl
 			return false;
 		}
 		else if (!is_uploaded_file($value['tmp_name'])) {
-			$this->markMissing(self::ERROR_NOTHING);
+			$this->markMissing(self::ERROR_MISSING_FILE);
 			return false;
 		}
 
 		// perform extra checks
 		if ($this->noEmpty && !$value['size']) {
-			$this->markMissing(self::ERROR_NOTHING);
+			$this->markWrong(self::ERROR_WRONG_MIN_SIZE);
 			return false;
 		}
 
 		if ($this->maxSize && $this->maxSize < $value['size']) {
-			$this->markWrong(self::ERROR_SIZE);
+			$this->markWrong(self::ERROR_WRONG_MAX_SIZE);
 			return false;
 		}
 

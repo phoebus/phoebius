@@ -32,7 +32,7 @@ class ButtonFormControl extends OptionalValueFormControl
 
 	function __construct($name, $label)
 	{
-		Assert::isNotEmpty($label, 'label for button should be set');
+		Assert::isNotEmpty($label, 'label should be specified');
 
 		parent::__construct($name, $label, $label);
 	}

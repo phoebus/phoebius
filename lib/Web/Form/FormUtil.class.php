@@ -41,10 +41,7 @@ class FormUtil
 		$s = '<dl>';
 
 		foreach ($form->getControls() as $control) {
-			if ($control->isHidden()) continue;
-			if ($control instanceof ButtonFormControl) continue;
-			if ($control instanceof FormControlScalar) $s .= self::dumpScalar($control);
-			if ($control instanceof FormControlSet) $s .= self::dumpSet($control);
+			$s .= self::dumpControl($control);
 		}
 
 		$s .= '</dl>';
@@ -55,6 +52,15 @@ class FormUtil
 		}
 
 		return $s;
+	}
+
+	static function dumpControl(IFormControl $control)
+	{
+		if ($control->isHidden()) return;
+		if ($control instanceof ButtonFormControl) return;
+		if ($control instanceof CheckboxFormControl) return self::dumpCb($control);
+		if ($control instanceof FormControlScalar) return self::dumpScalar($control);
+		if ($control instanceof FormControlSet) return self::dumpSet($control);
 	}
 
 	static private function dumpSet(FormControlSet $control)
@@ -84,6 +90,18 @@ EOT;
 EOT;
 	}
 
+	static private function dumpCb(CheckboxFormControl $control)
+	{
+		return <<<EOT
+<dt>{$control->toHtml(
+			$control->hasError()
+					? array('style' => 'border:1px solid red;')
+					: array()
+		)}</dt>
+<dd>{$control->getLabel()}</dd>
+EOT;
+	}
+
 	static function dumpErrors(Form $form)
 	{
 		if (!$form->hasErrors()) return '';
@@ -110,7 +128,7 @@ EOT;
 
 		if ($control instanceof FormControlSet && $control->isWrong()) {
 			$message = '<ul>';
-			foreach ($control->getControls() as $innerControl) {
+			foreach ($control as $innerControl) {
 				$message .= self::dumpControlError($innerControl);
 			}
 			$message .= '</ul>';
@@ -121,7 +139,7 @@ EOT;
 
 		return
 			'<li>' . $control->getName() . (($label = $control->getLabel()) ? " ($label)" : '')
-			. ' is ' . $control->getErrorId()->getValue()
+			. ' is ' . $control->getErrorId()
 			. ': <i>' . $message . '</i></li>';
 	}
 }

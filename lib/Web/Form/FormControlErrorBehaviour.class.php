@@ -17,31 +17,29 @@
  ************************************************************************************************/
 
 /**
- * Represents a control that expects scalar value from the outer world
+ * Defines the behaviour of control on import error (usually, FormControlError::WRONG for StringFormControl)
  * @ingroup Form
  */
-abstract class FormControlScalar extends BaseFormControl
+final class FormControlErrorBehaviour extends Enumeration
 {
-	function importValue($value)
-	{
-		if (!$value && !$this->isOptional()) {
-			$this->setError(FormControlError::missing());
-		}
-		else if ($value && !is_scalar($value)) {
-			$this->setError(FormControlError::invalid());
-		}
+	const LEAVE_AS_IS = 0;
+	const SET_EMPTY = 1;
+	const USE_DEFAULT = 2;
 
-		$this->setImportedValue($value);
+    static function leaveAsIs()
+    {
+        return new self (self::LEAVE_AS_IS);
+    }
 
-		return !$this->hasError();
-	}
+    static function setEmpty()
+    {
+        return new self (self::SET_EMPTY);
+    }
 
-	function setDefaultValue($value)
-	{
-		Assert::isScalarOrNull($value);
-
-		return parent::setDefaultValue($value);
-	}
+    static function useDefault()
+    {
+        return new self (self::USE_DEFAULT);
+    }
 }
 
 ?>

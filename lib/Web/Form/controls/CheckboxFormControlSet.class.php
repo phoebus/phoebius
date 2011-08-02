@@ -30,11 +30,6 @@ class CheckboxFormControlSet extends LabeledFormControlSet
 		return new self ($name, $label);
 	}
 
-	function getSelectedValues()
-	{
-		return $this->getValue();
-	}
-
 	function setDefaultValue($value)
 	{
 		Assert::isTrue(is_array($value));

@@ -18,6 +18,11 @@
 
 /**
  * Rather tight form element interface
+ *
+ *  - selectmulti (scalar impl) - array
+ *  - radio group (array impl) - scalar
+ *
+ *
  * @ingroup Form
  */
 interface IFormControl
@@ -35,22 +40,10 @@ interface IFormControl
 	function getLabel();
 
 	/**
-	 * whether value is optional
+	 * whether control is optional
 	 * @return boolean
 	 */
 	function isOptional();
-
-	/**
-	 * If control is hidden
-	 * @return bool
-	 */
-	function isHidden();
-
-	/**
-	 * If control implements the set of inner controls
-	 * @return void
-	 */
-	function isCollection();
 
 	/**
 	 * tries to import the value
@@ -60,25 +53,20 @@ interface IFormControl
 	function importValue($value);
 
 	/**
+	 * sets the default value
+	 * @param mixed $value
+	 * @return IFormControl
+	 */
+	function setDefaultValue($value);
+
+	/**
 	 * gets the value, either imported or default (might be null)
 	 * @return mixed
 	 */
 	function getValue();
 
 	/**
-	 * Sets the default value
-	 * @return IFormControl
-	 */
-	function setDefaultValue($value);
-
-	/**
-	 * Gets the default value, if any
-	 * @return mixed|null
-	 */
-	function getDefaultValue();
-
-	/**
-	 * determines whether errors occured during value import
+	 * determines whether errors occurred during value import
 	 * @return boolean
 	 */
 	function hasError();
@@ -86,7 +74,7 @@ interface IFormControl
 	/**
 	 * @return FormControlError
 	 */
-	function getErrorId();
+	function getError();
 
 	/**
 	 * @return string
@@ -94,19 +82,7 @@ interface IFormControl
 	function getErrorMessage();
 
 	/**
-	 * determines whether value was missing
-	 * @return string|boolean string or true on error, otherwise false/null
-	 */
-	function isMissing();
-
-	/**
-	 * whether import failed due errors. May return string (a describtion of an error)
-	 * @return string|boolean string or true on error, otherwise false/null
-	 */
-	function isWrong();
-
-	/**
-	 * Resets the control
+	 * Resets the import state and errors
 	 * @return IFormControl
 	 */
 	function reset();
