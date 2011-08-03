@@ -20,8 +20,8 @@
  * Represents a control set.
  *
  * Caveats for the set:
- *  - "missing" means nothing - set can be empty by design
- *  - "invalid" means what is should - scope value has wrong type, unable even to try import
+ *  - "missing" means nothing - set cannot be empty by design
+ *  - "invalid" means what is should - scope value has wrong type, unable even to try the import
  *  - "wrong" means there are import errors withing inner controls (if not supressed). You may disable importing of such
  *  - set is always optional as a control in case when user didn't selected anything in a set
  *  - inner control is a control collected by the set
@@ -31,16 +31,6 @@
 abstract class FormControlSet extends BaseFormControl implements IteratorAggregate, Countable
 {
 	const ID_PATTERN = '/^[a-z0-9_]+$/i';
-
-	/**
-	 * @var string
-	 */
-	private $name;
-
-	/**
-	 * @var string
-	 */
-	private $label;
 
 	/**
 	 * @var bool
@@ -58,34 +48,9 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 	private $importDistinct = true;
 
 	/**
-	 * @var array
-	 */
-	private $default = array();
-
-	/**
-	 * @var array
-	 */
-	private $value = array();
-
-	/**
-	 * @var bool
-	 */
-	private $isImported = false;
-
-	/**
 	 * @var IFormControl[]
 	 */
 	private $controls = array();
-
-	/**
-	 * @var FormControlError
-	 */
-	private $error;
-
-	/**
-	 * @var string|null
-	 */
-	private $errorMessage;
 
 	/**
 	 * Gets the instance of inner control
@@ -95,14 +60,24 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 
 	function __construct($name, $label)
 	{
-		Assert::isScalar($name);
 		Assert::isTrue(preg_match(self::ID_PATTERN, $name));
-		Assert::isScalar($label);
 
-		$this->name = $name;
-		$this->label = $label;
+		parent::__construct($name, $label);
 	}
 
+	function getValue()
+	{
+		$value = parent::getValue();
+        return
+			$value
+                ? $value
+                : array();
+	}
+
+	/**
+	 * Overridden. Set is always optional as can consist of 0 elements by design.
+	 * @return bool
+	 */
 	final function isOptional()
 	{
 		return true;
@@ -177,23 +152,13 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 		return $this->importDistinct;
 	}
 
-	function getName()
-	{
-		return $this->name;
-	}
-
 	/**
 	 * Gets the name for inner controls
 	 * @return string
 	 */
 	function getInnerName()
 	{
-		return $this->name . '[]';
-	}
-
-	function getLabel()
-	{
-		return $this->label;
+		return $this->getName() . '[]';
 	}
 
 	/**
@@ -213,32 +178,6 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 	function count()
 	{
 		return sizeof($this->controls);
-	}
-
-	function hasError()
-	{
-		return !!$this->error;
-	}
-
-	function getError()
-	{
-		return $this->error;
-	}
-
-	function getErrorMessage()
-	{
-		return $this->errorMessage;
-	}
-
-	function reset()
-	{
-		$this->dropError();
-		$this->dropControls();
-	}
-
-	function getValue()
-	{
-		return $this->value;
 	}
 
 	function importValue($value)
@@ -261,6 +200,7 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 						// if we can skip the specified error - do this
 							($error->is(FormControlError::MISSING) && !$this->importsMissing())
 							|| ($error->is(FormControlError::WRONG) && !$this->importsWrong())
+							|| $error->is(FormControlError::INVALID)
 					) {
 						continue;
 					}
@@ -290,21 +230,27 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 		return !$this->hasError();
 	}
 
+	function getDefaultValue()
+	{
+		$value = parent::getDefaultValue();
+		return $value
+				? $value
+				: array();
+	}
+
 	function setDefaultValue($value)
 	{
-		if ($value && !is_array($value)) {
-			$value = array($value);
+		if (!is_array($value)) {
+			$value =
+				$value
+					? array($value)
+					: array();
 		}
 
-		$this->default = $value;
+		parent::setDefaultValue($value);
 		$this->makeDefaults();
 
 		return $this;
-	}
-
-	function getDefaultValue()
-	{
-		return $this->default;
 	}
 
 	function toHtml(array $htmlAttributes = array())
@@ -325,27 +271,21 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 	 */
 	protected function setControls(array $controls)
 	{
-		$this->value = array();
+		$value = array();
 		$this->controls = array();
-		$this->isImported = true;
 
 		foreach ($controls as $control) {
-			$this->value[] = $control->getValue();
+			$value[] = $control->getValue();
 			$this->controls[] = $control;
 		}
 
-		return $this;
+		parent::setImportedValue($value);
 	}
 
-	protected function isImported()
-	{
-		return $this->isImported;
-	}
-
-	protected function dropControls()
+	protected function dropImportedValue()
 	{
 		$this->makeDefaults();
-		$this->isImported = false;
+		parent::dropImportedValue();
 	}
 
 	/**
@@ -354,28 +294,18 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 	 */
 	protected function makeDefaults()
 	{
-		$this->value = array();
 		$this->controls = array();
-		$this->isImported = false;
 
 		foreach ($this->getDefaultValue() as $value) {
-			$this->value[] = $value;
 			$this->controls[] = $this->spawnSingle()->setDefaultValue($value);
 		}
 	}
 
-	protected function setError(FormControlError $error, $message = null)
+	protected function setError(FormControlError $error)
 	{
 		Assert::isFalse($error->is(FormControlError::MISSING), '%s cannot be missing', get_class($this));
 
-		$this->error = $error;
-		$this->errorMessage = $message;
-	}
-
-	protected function dropError()
-	{
-		$this->error = null;
-		$this->errorMessage = null;
+		return parent::setError($error);
 	}
 }
 

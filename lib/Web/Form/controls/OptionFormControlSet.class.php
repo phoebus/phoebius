@@ -20,29 +20,29 @@
  * Represents a control set of controls that have custom labels inside
  * @ingroup Form
  */
-abstract class LabeledFormControlSet extends FormControlSet
+abstract class OptionFormControlSet extends FormControlSet
 {
 	private $values = array();
-	private $labels = array();
+	private $options = array();
 
-	final function skipMissing($flag = true)
+	final function enableImportMissing($flag = true)
 	{
 		Assert::isUnreachable('nonsense');
 	}
 
-	final function isSkipsMissing()
+	final function importsMissing()
 	{
-		return true;
+		return false;
 	}
 
-	final function skipWrong($flag = true)
+	final function enableImportWrong($flag = true)
 	{
 		Assert::isUnreachable('nonsense');
 	}
 
-	final function isSkipsWrong()
+	final function importsWrong()
 	{
-		return true;
+		return false;
 	}
 
 	/**
@@ -50,10 +50,10 @@ abstract class LabeledFormControlSet extends FormControlSet
 	 * @param array $labels
 	 * @return LabeledFormControlSet
 	 */
-	function setLabels(array $labels)
+	function setOptions(array $options)
 	{
-		$this->values = array_keys($labels);
-		$this->labels = $labels;
+		$this->values = array_keys($options);
+		$this->options = $options;
 
 		return $this;
 	}
@@ -62,9 +62,9 @@ abstract class LabeledFormControlSet extends FormControlSet
 	 * Gets the set of values and their labels
 	 * @return array
 	 */
-	function getLabels()
+	function getOptions()
 	{
-		return $this->labels;
+		return $this->options;
 	}
 
 	/**
@@ -74,9 +74,9 @@ abstract class LabeledFormControlSet extends FormControlSet
 	 */
 	function getLabelFor($value)
 	{
-		Assert::hasIndex($this->labels, $value, 'unable to find label for value=%s', $value);
+		Assert::hasIndex($this->options, $value, 'unable to find label for value=%s', $value);
 
-		return $this->labels[$value];
+		return $this->options[$value];
 	}
 
 	/**
@@ -94,13 +94,7 @@ abstract class LabeledFormControlSet extends FormControlSet
 	 */
 	function getSelectedValues()
 	{
-		Assert::isNotEmpty($this->values, 'labels not yet set');
-
-		$value = $this->getValue();
-		return
-			$value
-				? array($value)
-				: array();
+		return $this->getValue();
 	}
 
 	/**

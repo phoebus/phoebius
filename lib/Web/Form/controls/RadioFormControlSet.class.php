@@ -20,8 +20,11 @@
  * Radio button group
  * @ingroup Form
  */
-class RadioFormControlSet extends LabeledFormControlSet
+class RadioFormControlSet extends OptionFormControlSet
 {
+	private $defaultValue;
+	private $importedValue;
+
 	/**
 	 * @return RadioFormControlSet
 	 */
@@ -32,22 +35,56 @@ class RadioFormControlSet extends LabeledFormControlSet
 
 	function setDefaultValue($value)
 	{
-		Assert::isScalarOrNull($value);
-		if ($value)
-			Assert::isTrue(in_array($value, $this->getAvailableValues()));
+		Assert::isScalar($value, 'default value shall be scalar');
+		Assert::isTrue(in_array($value, $this->getAvailableValues()));
 
-		parent::setDefaultValue($value);
+		$this->defaultValue = $value;
+
+		return $this;
+	}
+
+	function getDefaultValue()
+	{
+		return $this->defaultValue;
+	}
+
+	protected function setImportedValue($value)
+	{
+		$this->importedValue = $value;
+
+		parent::setImportedValue($value);
+	}
+
+	protected function getImportedValue()
+	{
+		return $this->importedValue;
+	}
+
+	function getSelectedValues()
+	{
+		$value = $this->getValue();
+		return
+				$value
+					? array($value)
+					: array();
 	}
 
 	function importValue($value)
 	{
 		if ($value && !is_scalar($value)) {
-			$this->markMissing('not a scalar');
-			return false;
+			$this->setError(FormControlError::invalid());
+			$value =
+				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
+					? $this->getDefaultValue()
+					: null;
 		}
 
 		if (!in_array($value, $this->getAvailableValues())) {
-			$value = $this->getDefaultValue();
+			$this->setError(FormControlError::invalid());
+			$value =
+				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
+					? $this->getDefaultValue()
+					: null;
 		}
 
 		// combine all ids (as non checked) and incoming (as checked)

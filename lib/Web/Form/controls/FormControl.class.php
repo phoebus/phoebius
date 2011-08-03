@@ -40,7 +40,7 @@ final class FormControl extends StaticClass
 	static function checkboxSet($name, $label, array $options)
 	{
 		return CheckboxFormControlSet::create($name, $label)
-				->setLabels($options);
+				->setOptions($options);
 	}
 
 	/**
@@ -91,7 +91,7 @@ final class FormControl extends StaticClass
 	static function radioGroup($name, $label, array $options)
 	{
 		return RadioFormControlSet::create($name, $label)
-				->setLabels($options);
+				->setOptions($options);
 	}
 
 	/**

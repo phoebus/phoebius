@@ -72,10 +72,10 @@ abstract class OptionalValueFormControl extends InputFormControl
 	{
 		if ($value !== null && $value != $this->getFixedValue()) {
 			$this->setError(FormControlError::invalid());
+			$value = null;
 		}
-		else {
-			parent::setImportedValue($value);
-		}
+
+		parent::setImportedValue($value);
 	}
 }
 

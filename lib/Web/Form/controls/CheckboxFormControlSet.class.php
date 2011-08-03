@@ -20,7 +20,7 @@
  * Represents a checkbox set
  * @ingroup Form
  */
-class CheckboxFormControlSet extends LabeledFormControlSet
+class CheckboxFormControlSet extends OptionFormControlSet
 {
 	/**
 	 * @return CheckboxFormControlSet
@@ -32,10 +32,16 @@ class CheckboxFormControlSet extends LabeledFormControlSet
 
 	function setDefaultValue($value)
 	{
-		Assert::isTrue(is_array($value));
+		if (!is_array($value)) {
+			$value =
+				$value
+					? array($value)
+					: array();
+		}
+
 		Assert::isTrue(
-			sizeof($value)
-			== array_intersect($this->getAvailableValues(), $value)
+			sizeof($value) == array_intersect($this->getAvailableValues(), $value),
+			'trying to set the default value that is out of options range'
 		);
 
 		parent::setDefaultValue($value);
@@ -44,8 +50,11 @@ class CheckboxFormControlSet extends LabeledFormControlSet
 	function importValue($value)
 	{
 		if (!is_array($value)) {
-			$this->markMissing('not an array');
-			return false;
+			$this->setError(FormControlError::invalid());
+			$value =
+				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
+					? $this->getDefaultValue()
+					: array();
 		}
 
 		// remove unknown values

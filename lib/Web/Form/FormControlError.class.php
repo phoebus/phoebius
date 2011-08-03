@@ -68,7 +68,7 @@ final class FormControlError extends Enumeration
 	{
 		if (!$this->behaviour) {
 			if ($this->is(self::INVALID))
-				$this->behaviour = FormControlErrorBehaviour::SET_EMPTY
+				$this->behaviour = FormControlErrorBehaviour::SET_EMPTY;
 			else
 				$this->behaviour = FormControlErrorBehaviour::leaveAsIs();
 		}

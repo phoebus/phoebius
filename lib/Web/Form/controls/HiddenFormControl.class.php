@@ -39,11 +39,6 @@ class HiddenFormControl extends InputFormControl
 	{
 		return 'hidden';
 	}
-
-	function isHidden()
-	{
-		return true;
-	}
 }
 
 ?>

@@ -225,9 +225,9 @@ abstract class BaseFormControl implements IFormControl
      * @param bool $considerBehaviour
      * @return void
      */
-	protected function setImportedValue($value, $considerBehaviour = true)
+	protected function setImportedValue($value)
 	{
-        if ($considerBehaviour && $this->hasError()) {
+        if ($this->hasError()) {
             $behaviour = $this->getError()->getBehaviour();
             if ($behaviour->is(FormControlErrorBehaviour::SET_EMPTY)) {
                 $value = null;
