@@ -45,6 +45,11 @@ class PostForm extends Form
 	private $fieldsToSign = array();
 
 	/**
+	 * @var array
+	 */
+	private $privateValues = array();
+
+	/**
 	 * @param string $id Form identifier
 	 * @param HttpUrl $action form action (url to which it will be sumbitted)
 	 * @param string $sign form signature to protect it from vulnerabilities;
@@ -117,18 +122,18 @@ class PostForm extends Form
 			$request->getFilesVars()
 		);
 
-		if ($this->isSigned()) {
-			$signName = $this->getSignName();
-			if (!isset($variables[$signName]))
-				throw new PostFormException("Missing sign");
+		$signName = $this->getSignatureFieldName();
+		if (!isset($variables[$signName]))
+			throw new PostFormException('Missing signature');
 
-			if (!$this->importSign($variables[$signName]))
-				throw new PostFormException("Malformed sign");
+		if (!$this->importSignature($variables[$signName]))
+			throw new PostFormException('Malformed signature');
 
-			if (isset($this[$this->getReferrerName()])) {
-				if ($this[$this->getReferrerName()] != (string)$request->getHttpReferer()) {
-					throw new PostFormException();
-				}
+		if (isset($this->privateValues['referrer'])) {
+			if ($this->privateValues['referrer'] != (string)$request->getHttpReferer()) {
+				throw new PostFormException(
+					'Unexpected referrer `'.$this->privateValues['referrer'].'`, expected `'.$request->getHttpReferer().'`'
+				);
 			}
 		}
 
@@ -150,9 +155,9 @@ class PostForm extends Form
 	{
 		Assert::isFalse($this->isSigned(), 'form already signed');
 
-		$this->setHiddenValue($this->getReferrerName(), (string) $request->getHttpUrl());
+		$this->privateValues['referrer'] = (string) $request->getHttpUrl();
 
-		$this->addControl(FormControl::hidden($this->getSignName(), $this->exportSign()));
+		$this->addControl(FormControl::hidden($this->getSignatureFieldName(), $this->exportSignature()));
 
 		$this->signed = true;
 
@@ -179,7 +184,7 @@ class PostForm extends Form
 		return parent::dumpHidden();
 	}
 
-	protected function importSign($string)
+	protected function importSignature($string)
 	{
 		$decrypted = $this->signer->decrypt($string);
 		if (!$decrypted)
@@ -192,30 +197,33 @@ class PostForm extends Form
 			return false;
 		}
 
-		foreach ($data as $key => $value)
+		foreach ($data['fields'] as $key => $value)
 			$this->setHiddenValue($key, $value);
+
+		foreach ($data['values'] as $key => $value)
+			$this->privateValues[$key] = $value;
 
 		return true;
 	}
 
-	protected function exportSign()
+	protected function exportSignature()
 	{
-		$data = array();
+		$fields = array();
 		foreach ($this->fieldsToSign as $name => $control) {
-			$data[$name] = $control->getValue();
+			$fields[$name] = $control->getValue();
 		}
 
-		return $this->signer->encrypt(serialize($data));
+		$values = $this->privateValues;
+
+		return $this->signer->encrypt(serialize(array(
+			                                        'fields' => $fields,
+			                                        'values' => $values
+		                                        )));
 	}
 
-	protected function getSignName()
+	protected function getSignatureFieldName()
 	{
-		return '__' . sha1($this->signer->encrypt($this->getId()));
-	}
-
-	protected function getReferrerName()
-	{
-		return $this->getSignName() . '_referrer';
+		return 'signature:' . sha1($this->signer->encrypt($this->getId()));
 	}
 }
 
