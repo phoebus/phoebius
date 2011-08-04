@@ -20,8 +20,19 @@
  * File set
  * @ingroup File
  */
-class FileFormControlSet extends FormControlSet
+class FileFormControlSet extends InputFormControlSet
 {
+
+	/**
+	 * @var bool
+	 */
+	private $importMissing = false;
+
+	/**
+	 * @var bool
+	 */
+	private $importWrong = false;
+
 	/**
 	 * @return FileFormControlSet
 	 */
@@ -32,9 +43,11 @@ class FileFormControlSet extends FormControlSet
 
 	function __construct($name, $label, $defaultInputCount = 1)
 	{
+		Assert::isPositiveInteger($defaultInputCount);
+
 		parent::__construct($name, $label);
 
-		$this->setDefaultValue(array_fill(0, $defaultInputCount, $this->getLabel()));
+		$this->setDefaultValue(array_fill(0, $defaultInputCount, null));
 	}
 
 	function importValue($value)
@@ -48,14 +61,16 @@ class FileFormControlSet extends FormControlSet
 				&& isset($value['size'])
 		) {
 			$fixed = array();
-			foreach ($value['tmp_name'] as $idx => $_) {
-				$fixed[$idx] = array(
-					'name'     => $value['name'][$idx],
-					'tmp_name' => $value['tmp_name'][$idx],
-					'size'     => $value['size'][$idx],
-					'error'    => $value['error'][$idx],
-					'type'     => (isset($value['type'][$idx])? $value['type'][$idx]: null),
-				);
+			foreach (array_keys($value['tmp_name']) as $idx) {
+				if (!$value['error'][$idx]) {
+					$fixed[$idx] = array(
+						'name'     => $value['name'][$idx],
+						'tmp_name' => $value['tmp_name'][$idx],
+						'size'     => $value['size'][$idx],
+						'error'    => $value['error'][$idx],
+						'type'     => $value['type'][$idx],
+					);
+				}
 			}
 
 			$value = $fixed;
@@ -64,7 +79,7 @@ class FileFormControlSet extends FormControlSet
 		return parent::importValue($value);
 	}
 
-	protected function spawnSingle()
+	protected function spawnControl()
 	{
 		return new FileFormControl($this->getInnerName(), $this->getLabel());
 	}

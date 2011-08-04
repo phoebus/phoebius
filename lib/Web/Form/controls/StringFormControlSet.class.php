@@ -18,8 +18,9 @@
 
 /**
  * A set of strings
+ * @ingroup Form
  */
-class StringFormControlSet extends FormControlSet
+class StringFormControlSet extends InputFormControlSet
 {
 	/**
 	 * @return StringFormControlSet
@@ -29,7 +30,7 @@ class StringFormControlSet extends FormControlSet
 		return new self ($name, $label);
 	}
 
-	protected function spawnSingle()
+	protected function spawnControl()
 	{
 		return new StringFormControl($this->getInnerName(), $this->getLabel());
 	}

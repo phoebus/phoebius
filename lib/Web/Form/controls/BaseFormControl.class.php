@@ -187,9 +187,8 @@ abstract class BaseFormControl implements IFormControl
 
 	function getErrorMessage()
 	{
-        Assert::isNotEmpty($this->error);
-
-		return $this->error->getMessage();
+        if ($this->error)
+			return $this->error->getMessage();
 	}
 
 	function reset()
@@ -243,7 +242,7 @@ abstract class BaseFormControl implements IFormControl
 
 	protected function isImported()
 	{
-		return $this->isImported();
+		return $this->isImported;
 	}
 
 	protected function getImportedValue()

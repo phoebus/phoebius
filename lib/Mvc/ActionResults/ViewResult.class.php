@@ -28,9 +28,37 @@ class ViewResult implements IActionResult
 	 */
 	private $view;
 
+	/**
+	 * @var string
+	 */
+	private $contentType = 'text/html';
+
+	/**
+	 * @var string
+	 */
+	private $charset = 'UTF-8';
+
 	function __construct(View $view)
 	{
 		$this->view = $view;
+	}
+
+	function setContentType($contentType)
+	{
+		Assert::isScalar($contentType);
+
+		$this->contentType = $contentType;
+
+		return $this;
+	}
+
+	function setCharset($charset)
+	{
+		Assert::isScalar($charset);
+
+		$this->charset = $charset;
+
+		return $this;
 	}
 
 	function handleResult(WebResponse $response)
@@ -38,6 +66,7 @@ class ViewResult implements IActionResult
 		$result = $this->view->render();
 
 		$response
+			->addHeader('Content-Type', $this->contentType . ';charset=' . $this->charset)
 			->write($result)
 			->finish();
 	}

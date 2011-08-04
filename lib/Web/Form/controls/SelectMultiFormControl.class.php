@@ -32,6 +32,13 @@ final class SelectMultiFormControl extends SetFormControl
 		return new self ($name, $label);
 	}
 
+	function __construct($name, $label)
+	{
+		Assert::isTrue(preg_match(FormControlSet::NAME_PATTERN, $name));
+
+		parent::__construct($name, $label);
+	}
+
 	function setDefaultValue($value)
 	{
 		if ($value) {
@@ -70,6 +77,9 @@ final class SelectMultiFormControl extends SetFormControl
 			return false;
 		}
 
+		if (!$value)
+			$value = array();
+
 		$value = array_intersect($this->getAvailableValues(), $value);
 
 		if (!$value && !$this->isOptional()) {
@@ -88,7 +98,7 @@ final class SelectMultiFormControl extends SetFormControl
 		Assert::isFalse(isset($htmlAttributes['name']));
 		Assert::isFalse(isset($htmlAttributes['multiple']));
 
-		$htmlAttributes['name'] = $this->getName();
+		$htmlAttributes['name'] = $this->getName() . '[]';
 		$htmlAttributes['multiple'] = 'multiple';
 
 		return HtmlUtil::getContainer('select', $htmlAttributes, join("", $this->getOptions()));

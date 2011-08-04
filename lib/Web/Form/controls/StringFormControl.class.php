@@ -56,7 +56,7 @@ class StringFormControl extends InputFormControl
 
 	function setImportedValue($value)
 	{
-		if ($this->pattern) {
+		if ($this->pattern && !$this->hasError()) {
 			if (!preg_match($this->pattern, $value)) {
 				$this->setError(FormControlError::wrong());
 			}

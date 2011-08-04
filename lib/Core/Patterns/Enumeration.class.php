@@ -157,7 +157,7 @@ abstract class Enumeration implements IStringCastable
 	 */
 	function is($value)
 	{
-        if ($value instanceof get_class($this))
+        if ($value instanceof Enumeration)
             $value = $value->getValue();
 
 		Assert::isTrue(

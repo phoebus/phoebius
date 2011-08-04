@@ -20,7 +20,7 @@
  * A set of hidden controls
  * @ingroup Form
  */
-class HiddenFormControlSet extends FormControlSet
+class HiddenFormControlSet extends InputFormControlSet
 {
 	/**
 	 * @return HiddenFormControlSet
@@ -30,7 +30,7 @@ class HiddenFormControlSet extends FormControlSet
 		return new self ($name, $label);
 	}
 
-	protected function spawnSingle()
+	protected function spawnControl()
 	{
 		return new HiddenFormControl($this->getInnerName());
 	}

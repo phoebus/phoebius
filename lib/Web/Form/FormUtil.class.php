@@ -24,16 +24,26 @@ class FormUtil
 	static function dump(Form $form)
 	{
 		return
-			$form->getHeadHtml(
-				array(
-					'style' => 'border:1px solid #000;padding:10px;margin:10px;'
-								. ($form->hasFormErrors() ? 'border-color:red;' : '')
+				$form->getHeadHtml(
+					array(
+						'style' => 'border:1px solid #000;padding:10px;margin:10px;'
+									. ($form->hasFormErrors() ? 'border-color:red;' : '')
+					)
 				)
-			)
 				. '<h3>' . $form->getId() . '</h3>'
+				. self::dumpValues($form)
 				. self::dumpErrors($form)
 				. self::dumpControls($form)
-			. $form->getHeelHtml();
+				. $form->getHeelHtml();
+	}
+
+	static function dumpValues(Form $form)
+	{
+		return
+				'<h4 onclick="var e = document.getElementById(\''.$form->getId().'\'); e.style.display = e.style.display == \'none\' ? \'block\' : \'none\'" style="border-bottom:1px dashed #000;">Dump</h4>'
+				. '<pre id="'.$form->getId().'">'
+				. print_r($form->export(), true)
+				. '</pre>';
 	}
 
 	static function dumpControls(Form $form)
@@ -56,11 +66,13 @@ class FormUtil
 
 	static function dumpControl(IFormControl $control)
 	{
-		if ($control->isHidden()) return;
+		if ($control instanceof HiddenFormControl || $control instanceof HiddenFormControlSet) return;
 		if ($control instanceof ButtonFormControl) return;
 		if ($control instanceof CheckboxFormControl) return self::dumpCb($control);
 		if ($control instanceof FormControlScalar) return self::dumpScalar($control);
 		if ($control instanceof FormControlSet) return self::dumpSet($control);
+
+		Assert::isUnreachable('don`t know how to dump %s', get_class($control));
 	}
 
 	static private function dumpSet(FormControlSet $control)
@@ -126,7 +138,7 @@ EOT;
 	{
 		if (!$control->hasError()) return '';
 
-		if ($control instanceof FormControlSet && $control->isWrong()) {
+		if ($control instanceof FormControlSet && $control->hasError(FormControlError::WRONG)) {
 			$message = '<ul>';
 			foreach ($control as $innerControl) {
 				$message .= self::dumpControlError($innerControl);
@@ -139,7 +151,7 @@ EOT;
 
 		return
 			'<li>' . $control->getName() . (($label = $control->getLabel()) ? " ($label)" : '')
-			. ' is ' . $control->getErrorId()
+			. ' is ' . $control->getError()
 			. ': <i>' . $message . '</i></li>';
 	}
 }

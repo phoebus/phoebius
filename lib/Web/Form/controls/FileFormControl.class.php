@@ -115,14 +115,15 @@ class FileFormControl extends InputFormControl
 				|| !isset($value['error'])
 				|| !isset($value['size'])
 		) {
-			$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
-			return false;
+			$value = null;
+			if (!$this->isOptional())
+				$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
 		}
 		else if ($value['error']) {
 			switch ($value['error']) {
-
 				case UPLOAD_ERR_NO_FILE: {
-					$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
+					if (!$this->isOptional())
+						$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
 					break;
 				}
 
@@ -149,33 +150,30 @@ class FileFormControl extends InputFormControl
 				}
 			}
 
-			return false;
+			$value = null;
 		}
 		else if (!is_uploaded_file($value['tmp_name'])) {
-			$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
-			return false;
+			$value = null;
+			if (!$this->isOptional())
+				$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
 		}
-
-		// perform extra checks
-		if ($this->noEmpty && !$value['size']) {
+		else if ($this->noEmpty && !$value['size']) {
 			$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MIN_SIZE));
-			return false;
 		}
-
-		if ($this->maxSize && $this->maxSize < $value['size']) {
+		else if ($this->maxSize && $this->maxSize < $value['size']) {
 			$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MAX_SIZE));
-			return false;
 		}
 
-		return parent::importValue($value);
+		$this->setImportedValue($value);
+
+		return !$this->hasError();
 	}
 
 	function __destruct()
 	{
-		$value = $this->getValue();
-		if ($value) {
+		if ($this->isImported() && !$this->hasError()) {
 			try {
-				unlink($value);
+				unlink($this->getImportedFilepath());
 			}
 			catch (ExecutionContextException $e) {}
 		}

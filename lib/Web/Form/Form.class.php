@@ -220,7 +220,7 @@ class Form
 	{
 		$yield = '';
 		foreach ($this->getControls() as $control) {
-			if ($control->isHidden())
+			if ($control instanceof HiddenFormControl || $control instanceof HiddenFormControlSet)
 				$yield .= $control->toHtml();
 		}
 
@@ -232,7 +232,7 @@ class Form
 	 */
 	function getHeelHtml()
 	{
-		echo '</form>';
+		return '</form>';
 	}
 
 	function hasErrors()

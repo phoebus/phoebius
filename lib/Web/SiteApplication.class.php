@@ -38,7 +38,7 @@ class SiteApplication
 	 * @var IRouter
 	 */
 	private $router;
-	
+
 	/**
 	 * @var MvcDispatcher
 	 */
@@ -112,7 +112,7 @@ class SiteApplication
 	protected function handle404(Exception $e)
 	{
 		$response = $this->request->getResponse();
-		
+
 		$response->setStatus(new HttpStatus(HttpStatus::CODE_404));
 
 		$clname = get_class($e);
@@ -141,10 +141,16 @@ EOT;
 		$response->setStatus(new HttpStatus(HttpStatus::CODE_500));
 
 		$clname = get_class($e);
+		$file = str_replace(
+			array(PHOEBIUS_APP_ROOT . DIRECTORY_SEPARATOR, PHOEBIUS_BASE_ROOT . DIRECTORY_SEPARATOR),
+			'',
+			$e->getFile()
+		);
 
 		$out = <<<EOT
 	<h1>Internal Server Error</h1>
-	{$clname} : {$e->getMessage()}
+	{$clname} : {$e->getMessage()} <br />
+	at {$file}:{$e->getLine()}
 	<hr />
 	<h2>Call Stack</h2>
 	<pre>{$e->getTraceAsString()}</pre>
