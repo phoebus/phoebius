@@ -61,6 +61,11 @@ final class SelectMultiFormControl extends SetFormControl
 		return $this;
 	}
 
+	function getSelectedValues()
+	{
+		return $this->getValue();
+	}
+
 	function getDefaultValue()
 	{
 		return $this->defaultValue;
