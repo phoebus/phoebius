@@ -47,57 +47,31 @@ class CheckboxFormControlSet extends OptionFormControlSet
 		parent::setDefaultValue($value);
 	}
 
-	function importValue($value)
+	function setImportedValue($value)
 	{
-		if (!is_array($value)) {
-			$this->setError(FormControlError::invalid());
-			$value =
-				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
-					? $this->getDefaultValue()
-					: array();
-		}
-
 		// remove unknown values
 		$value = array_intersect($this->getAvailableValues(), $value);
 
-		// combine all ids (as non checked) and incoming (as checked)
-		$allIds =
-			array_replace(
-				array_fill_keys($this->getAvailableValues(), null),
-				array_combine($value, $value)
-			);
-		$controls = array();
-		foreach ($allIds as $id => $value) {
-			$control = new CheckboxFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
-			$control->importValue($value);
-
-			Assert::isFalse($control->hasError());
-
-			$controls[] = $control;
-		}
-
-		$this->setControls($controls);
-
-		return !$this->hasError();
+		parent::setImportedValue($value);
 	}
 
-	protected function makeDefaults()
+	function getControls()
 	{
-		$default = $this->getDefaultValue();
-		$allIds =
-			array_replace(
-				array_fill_keys($this->getAvailableValues(), null),
-				array_combine($default, $default)
-			);
-		$controls = array();
-		foreach ($allIds as $id => $value) {
-			$control = new CheckboxFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
-			$control->setDefaultValue($value);
+		$yield = array();
+		$values = $this->getSelectedValues();
+		$isImported = $this->isImported();
 
-			$controls[] = $control;
+		foreach ($this->getOptions() as $value => $label) {
+			$control = new CheckboxFormControl($this->getInnerName(), $label, $value);
+			if (in_array($value, $values)) {
+				if ($isImported)
+					$control->importValue($value);
+				else
+					$control->setDefaultValue($value);
+			}
 		}
 
-		$this->setControls($controls);
+		return $yield;
 	}
 }
 

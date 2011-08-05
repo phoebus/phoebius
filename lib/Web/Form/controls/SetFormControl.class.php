@@ -74,7 +74,7 @@ abstract class SetFormControl extends FormControlScalar
 	 */
 	function getSelectedValues()
 	{
-		Assert::isNotEmpty($this->ids, 'ids not yet set');
+		Assert::isNotEmpty($this->ids, 'options not yet set');
 
 		$value = $this->getValue();
 		if ($value) return array($value);

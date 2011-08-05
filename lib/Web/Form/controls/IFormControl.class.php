@@ -40,12 +40,6 @@ interface IFormControl
 	function getLabel();
 
 	/**
-	 * whether control is optional
-	 * @return boolean
-	 */
-	function isOptional();
-
-	/**
 	 * tries to import the value
 	 * @param mixed $value
 	 * @return boolean whether import was successful or not (caused import errors)

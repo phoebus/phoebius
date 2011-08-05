@@ -33,8 +33,15 @@ class FileFormControl extends InputFormControl
 
 	// asserts: UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
 
+	/**
+	 * @var int
+	 */
 	private $maxSize;
-	private $noEmpty = true;
+
+	/**
+	 * @var int
+	 */
+	private $minSize;
 
 	/**
 	 * @return FileFormControl
@@ -53,11 +60,11 @@ class FileFormControl extends InputFormControl
 		return $this;
 	}
 
-	function setNoEmptyFile($flag = true)
+	function setMinSize($bytes)
 	{
-		Assert::isBoolean($flag);
+		Assert::isPositiveInteger($bytes);
 
-		$this->noEmpty = $flag;
+		$this->minSize = $bytes;
 
 		return $this;
 	}
@@ -145,7 +152,7 @@ class FileFormControl extends InputFormControl
 
 				case UPLOAD_ERR_NO_TMP_DIR:
 				case UPLOAD_ERR_CANT_WRITE: {
-					Assert::isUnreachable('Unable to save tmp file');
+					Assert::isUnreachable('Unable to save tmp file (error %s)', $value['error']);
 					break;
 				}
 			}
@@ -157,7 +164,7 @@ class FileFormControl extends InputFormControl
 			if (!$this->isOptional())
 				$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
 		}
-		else if ($this->noEmpty && !$value['size']) {
+		else if ($this->minSize && $value['size'] < $this->minSize) {
 			$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MIN_SIZE));
 		}
 		else if ($this->maxSize && $this->maxSize < $value['size']) {

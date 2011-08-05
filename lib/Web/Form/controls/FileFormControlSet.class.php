@@ -17,22 +17,16 @@
  ************************************************************************************************/
 
 /**
- * File set
+ * File set. Caveat: this set imports only succesfully uploaded files.
+ *
+ * TODO:
+ *  - allow import of files with upload errors
+ *  - introduce size/mime constraints
+ *
  * @ingroup File
  */
 class FileFormControlSet extends InputFormControlSet
 {
-
-	/**
-	 * @var bool
-	 */
-	private $importMissing = false;
-
-	/**
-	 * @var bool
-	 */
-	private $importWrong = false;
-
 	/**
 	 * @return FileFormControlSet
 	 */

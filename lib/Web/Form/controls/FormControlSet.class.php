@@ -17,25 +17,12 @@
  ************************************************************************************************/
 
 /**
- * Represents a control set.
- *
- * Caveats for the set:
- *  - "missing" means nothing - set cannot be empty by design
- *  - "invalid" means what is should - scope value has wrong type, unable even to try the import
- *  - "wrong" means there are import errors withing inner controls (if not supressed). You may disable importing of such
- *  - set is always optional as a control in case when user didn't selected anything in a set
- *  - inner control is a control collected by the set
- *
+ * Represents a control set. foreach()-friendly.
  * @ingroup Form
  */
 abstract class FormControlSet extends BaseFormControl implements IteratorAggregate, Countable
 {
-	const NAME_PATTERN = '/^[a-z0-9_]+$/i';
-
-	/**
-	 * @var IFormControl[]
-	 */
-	private $controls = array();
+	const NAME_PATTERN = '/^[a-z0-9_-]+$/i';
 
 	/**
 	 * Gets the instances of inner control
@@ -45,7 +32,10 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 
 	function __construct($name, $label)
 	{
-		Assert::isTrue(preg_match(self::NAME_PATTERN, $name));
+		Assert::isTrue(
+			preg_match(self::NAME_PATTERN, $name),
+			'name of a set should contain alphanumeric symbols, glyphs and underscored only'
+		);
 
 		parent::__construct($name, $label);
 
@@ -84,8 +74,8 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 	function importValue($value)
 	{
 		if ($value && !is_array($value)) {
-			$this->setError(FormControlError::invalid());
 			$value = array();
+			$this->setError(FormControlError::invalid());
 		}
 		else if (!$value) {
 			$value = array();
@@ -110,12 +100,18 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 
 	function toHtml(array $htmlAttributes = array())
 	{
-		Assert::isUnreachable('Use foreach(%s as $control) instead', get_class($this));
+		Assert::isUnreachable(
+			'Use foreach(%s as $control) instead',
+			get_class($this)
+		);
 	}
 
 	protected function setError(FormControlError $error)
 	{
-		Assert::isFalse($error->is(FormControlError::MISSING), '%s cannot be missing', get_class($this));
+		Assert::isFalse(
+			$error->is(FormControlError::MISSING),
+			'%s cannot be missing', get_class($this)
+		);
 
 		return parent::setError($error);
 	}

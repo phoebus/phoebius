@@ -34,7 +34,10 @@ final class SelectMultiFormControl extends SetFormControl
 
 	function __construct($name, $label)
 	{
-		Assert::isTrue(preg_match(FormControlSet::NAME_PATTERN, $name));
+		Assert::isTrue(
+			preg_match(FormControlSet::NAME_PATTERN, $name),
+			'name of a set should contain alphanumeric symbols, glyphs and underscored only'
+		);
 
 		parent::__construct($name, $label);
 	}
@@ -46,10 +49,12 @@ final class SelectMultiFormControl extends SetFormControl
 				$value = array($value);
 
 			Assert::isTrue(
-				sizeof($value)
-				== sizeof(array_intersect($this->getAvailableValues(), $value))
+				sizeof($value) == sizeof(array_intersect($this->getAvailableValues(), $value)),
+				'trying to set a default value that is out of options range'
 			);
 		}
+		else
+			$value = array();
 
 		$this->defaultValue = $value;
 
@@ -61,20 +66,11 @@ final class SelectMultiFormControl extends SetFormControl
 		return $this->defaultValue;
 	}
 
-	function getSelectedValues()
-	{
-		$value = $this->getValue();
-		return
-			$value
-				? $value
-				: array();
-	}
-
 	function importValue($value)
 	{
 		if ($value && !is_array($value)) {
+			$value = array();
 			$this->setError(FormControlError::invalid());
-			return false;
 		}
 
 		if (!$value)
@@ -84,13 +80,12 @@ final class SelectMultiFormControl extends SetFormControl
 
 		if (!$value && !$this->isOptional()) {
 			$this->setError(FormControlError::missing());
-			return false;
 		}
 
 
 		$this->setImportedValue($value);
 
-		return true;
+		return !$this->hasError();
 	}
 
 	function toHtml(array $htmlAttributes = array())

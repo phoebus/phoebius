@@ -22,6 +22,9 @@
  */
 abstract class OptionalValueFormControl extends InputFormControl
 {
+	/**
+	 * @var scalar
+	 */
 	private $value;
 
 	function __construct($name, $label, $value)
@@ -31,6 +34,16 @@ abstract class OptionalValueFormControl extends InputFormControl
 		$this->value = $value;
 
 		parent::__construct($name, $label);
+	}
+
+	function setDefaultValue($value)
+	{
+		Assert::isTrue(
+			!$value || $value == $this->value,
+			'trying to set a default value that is out of options range'
+		);
+
+		return parent::setDefaultValue($value);
 	}
 
 	/**
@@ -71,8 +84,8 @@ abstract class OptionalValueFormControl extends InputFormControl
 	protected function setImportedValue($value)
 	{
 		if ($value !== null && $value != $this->getFixedValue()) {
-			$this->setError(FormControlError::invalid());
 			$value = null;
+			$this->setError(FormControlError::invalid());
 		}
 
 		parent::setImportedValue($value);

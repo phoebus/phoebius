@@ -17,7 +17,7 @@
  ************************************************************************************************/
 
 /**
- * Represetns a hidden value
+ * Represents a hidden value
  * @ingroup Form
  */
 class HiddenFormControl extends InputFormControl

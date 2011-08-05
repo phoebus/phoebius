@@ -25,26 +25,6 @@ abstract class OptionFormControlSet extends FormControlSet
 	private $values = array();
 	private $options = array();
 
-	final function enableImportMissing($flag = true)
-	{
-		Assert::isUnreachable('nonsense');
-	}
-
-	final function importsMissing()
-	{
-		return false;
-	}
-
-	final function enableImportWrong($flag = true)
-	{
-		Assert::isUnreachable('nonsense');
-	}
-
-	final function importsWrong()
-	{
-		return false;
-	}
-
 	/**
 	 * Sets the value=>label set
 	 * @param array $labels
@@ -104,11 +84,6 @@ abstract class OptionFormControlSet extends FormControlSet
 	function getUnselectedValues()
 	{
 		return array_diff($this->values, $this->getSelectedValues());
-	}
-
-	final protected function spawnSingle()
-	{
-		Assert::isUnreachable('nonsense');
 	}
 }
 

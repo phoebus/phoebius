@@ -33,11 +33,6 @@ abstract class BaseFormControl implements IFormControl
 	private $label;
 
 	/**
-	 * @var bool
-	 */
-	private $isOptional;
-
-	/**
 	 * @var mixed
 	 */
 	private $defaultValue;
@@ -48,7 +43,7 @@ abstract class BaseFormControl implements IFormControl
 	private $isImported;
 
 	/**
-	 * @var scalar
+	 * @var mixed
 	 */
 	private $importedValue;
 
@@ -56,11 +51,6 @@ abstract class BaseFormControl implements IFormControl
 	 * @var FormControlError
 	 */
 	private $error;
-
-	/**
-	 * @var string|null
-	 */
-	private $errorMessage;
 
     /**
      * @var FormControlError[]
@@ -84,33 +74,6 @@ abstract class BaseFormControl implements IFormControl
 	function getLabel()
 	{
 		return $this->label;
-	}
-
-	function isOptional()
-	{
-		return $this->isOptional;
-	}
-
-	/**
-	 * Marks control as optional
-	 * @return BaseFormControl
-	 */
-	function markOptional()
-	{
-		$this->isOptional = true;
-
-		return $this;
-	}
-
-	/**
-	 * Marks control as required
-	 * @return BaseFormControl
-	 */
-	function markRequired()
-	{
-		$this->isOptional = false;
-
-		return $this;
 	}
 
     /**
@@ -148,7 +111,7 @@ abstract class BaseFormControl implements IFormControl
         if ($id instanceof FormControlError)
             $id = $id->getValue();
 
-        Assert::hasIndex($this->registeredErrors, $id);
+        Assert::hasIndex($this->registeredErrors, $id, '%s error is not registered', $id);
 
         return $this->registeredErrors[$id];
     }
@@ -214,14 +177,18 @@ abstract class BaseFormControl implements IFormControl
         return $this->error;
 	}
 
+	/**
+	 * Drops errored state of a control
+	 * @return void
+	 */
 	protected function dropError()
 	{
 		$this->error = null;
 	}
 
     /**
-     * @param $value
-     * @param bool $considerBehaviour
+     * Sets the value and marks it as imported. Also takes error behaviour (via registered
+     * errors) into consideration according to the current error of the control.
      * @return void
      */
 	protected function setImportedValue($value)
@@ -240,16 +207,28 @@ abstract class BaseFormControl implements IFormControl
 		$this->importedValue = $value;
 	}
 
+	/**
+	 * Checks the imported state of a control
+	 * @return bool
+	 */
 	protected function isImported()
 	{
 		return $this->isImported;
 	}
 
+	/**
+	 * Gets the imported value
+	 * @return mixed
+	 */
 	protected function getImportedValue()
 	{
 		return $this->importedValue;
 	}
 
+	/**
+	 * Drops imported state
+	 * @return void
+	 */
 	protected function dropImportedValue()
 	{
 		$this->isImported = false;

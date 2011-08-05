@@ -36,7 +36,10 @@ class RadioFormControlSet extends OptionFormControlSet
 	function setDefaultValue($value)
 	{
 		Assert::isScalar($value, 'default value shall be scalar');
-		Assert::isTrue(in_array($value, $this->getAvailableValues()));
+		Assert::isTrue(
+			in_array($value, $this->getAvailableValues()),
+			'trying to set a default value that is out of options range'
+		);
 
 		$this->defaultValue = $value;
 
@@ -72,53 +75,36 @@ class RadioFormControlSet extends OptionFormControlSet
 	function importValue($value)
 	{
 		if ($value && !is_scalar($value)) {
+			$value = null;
 			$this->setError(FormControlError::invalid());
-			$value =
-				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
-					? $this->getDefaultValue()
-					: null;
 		}
-
-		if (!in_array($value, $this->getAvailableValues())) {
+		else if (!in_array($value, $this->getAvailableValues())) {
+			$value = null;
 			$this->setError(FormControlError::invalid());
-			$value =
-				$this->getError()->getBehaviour()->is(FormControlErrorBehaviour::USE_DEFAULT)
-					? $this->getDefaultValue()
-					: null;
 		}
 
-		// combine all ids (as non checked) and incoming (as checked)
-		$allIds = array_fill_keys($this->getAvailableValues(), null);
-		$allIds[$value] = $value;
-		$controls = array();
-		foreach ($allIds as $id => $value) {
-			$control = new RadioFormControlSet($this->getInnerName(), $this->getLabelFor($id), $id);
-			$control->importValue($value);
-
-			Assert::isFalse($control->hasError());
-
-			$controls[] = $control;
-		}
-
-		$this->setControls($controls);
+		$this->setImportedValue($value);
 
 		return !$this->hasError();
 	}
 
-	protected function makeDefaults()
+	function getControls()
 	{
-		$default = $this->getDefaultValue();
-		$allIds = array_fill_keys($this->getAvailableValues(), null);
-		$allIds[$default] = $default;
-		$controls = array();
-		foreach ($allIds as $id => $value) {
-			$control = new RadioFormControl($this->getInnerName(), $this->getLabelFor($id), $id);
-			$control->setDefaultValue($value);
+		$yield = array();
+		$checkedValue = $this->getValue();
+		$isImported = $this->isImported();
 
-			$controls[] = $control;
+		foreach ($this->getOptions() as $value => $label) {
+			$control = new CheckboxFormControl($this->getInnerName(), $label, $value);
+			if ($checkedValue == $value) {
+				if ($isImported)
+					$control->importValue($value);
+				else
+					$control->setDefaultValue($value);
+			}
 		}
 
-		$this->setControls($controls);
+		return $yield;
 	}
 }
 
