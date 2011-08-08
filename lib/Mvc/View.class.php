@@ -42,14 +42,26 @@
  */
 class View
 {
+	/**
+	 * @var string
+	 */
 	private $name;
-	private $data;
-	
+
+	/**
+	 * @var array
+	 */
+	private $data = array();
+
 	/**
 	 * @var View
 	 */
 	private $master;
-	
+
+	/**
+	 * @var string
+	 */
+	private $innerContent;
+
 	/**
 	 * Name of the view. Should be accessible through include_path
 	 * @param string $name name of a view
@@ -58,11 +70,11 @@ class View
 	function __construct($name, array $data = array())
 	{
 		Assert::isTrue(
-			@fopen($name, "r", true), 
+			@fopen($name, "r", true),
 			'don`t know where view %s is located',
 			$name
 		);
-		
+
 		$this->name = $name;
 		$this->data = $data;
 	}
@@ -117,15 +129,15 @@ class View
 		ob_start();
 		$this->import($this->name);
 		$content = ob_get_clean();
-		
+
 		if ($this->master) {
 			$this->master->innerContent = $content;
 			$content = $this->master->render();
 		}
-		
+
 		return $content;
 	}
-	
+
 	/**
 	 * Imports a view file by its name
 	 */
@@ -144,11 +156,12 @@ class View
 	}
 
 	/**
-	 * Renders a partial view 
+	 * Renders a partial view
+	 * @return string
 	 */
 	function renderPartial($viewName, array $data = array())
 	{
-		return 
+		return
 			$this->spawn($viewName, $data)
 				->render();
 	}

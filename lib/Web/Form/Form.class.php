@@ -75,6 +75,11 @@ class Form
 		$this->enctype = new FormEnctype(FormEnctype::ENCODED);
 	}
 
+	function __get($name)
+	{
+		return $this->getControl($name);
+	}
+
 	function getId()
 	{
 		return $this->id;
@@ -106,11 +111,6 @@ class Form
 	function getMethod()
 	{
 		return $this->method;
-	}
-
-	function __get($name)
-	{
-		return $this->getControl($name)->getValue();
 	}
 
 	/**

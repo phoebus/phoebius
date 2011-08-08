@@ -49,7 +49,7 @@ abstract class ActionBasedController implements IController
 	 */
 	protected function getRequest()
 	{
-		$this->request;
+		return $this->request;
 	}
 
 	/**
@@ -57,7 +57,7 @@ abstract class ActionBasedController implements IController
 	 */
 	protected function getRouteData()
 	{
-		$this->routeData;
+		return $this->routeData;
 	}
 
 	function handle(RouteData $routeData, WebRequest $request)

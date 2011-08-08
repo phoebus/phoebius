@@ -22,8 +22,8 @@ try {
 }
 catch (FormSubmitException $e) {
 	// not matched or invalidated
-	$form->sign($request);
 }
+$form->sign($request);
 return new View("auth", array('form' => $form));
 
 
@@ -46,6 +46,6 @@ function __construct(Photo $photo, HttpUrl $url)
 	$this->addControl(FormControl::selectMultiple("license", array(0 => 'free', 1 => 'pay'), array(0, 1)));
 	$this->addControl(FormControl::radioGroup("priority", array(0 => 'low', 1 => 'normal', 2 => 'high'), 0));
 
-	$this->addButton("save", "Save", array($this, 'onSave'), false);
-	$this->addButton("delete", "Delete", array($this, 'onDelete'), true);
+	$this->addButton("save", "Save");
+	$this->addButton("delete", "Delete");
 }
