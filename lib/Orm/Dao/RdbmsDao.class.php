@@ -79,7 +79,7 @@ class RdbmsDao implements IOrmEntityAccessor
 			$this->identityMap = new OrmIdentityMap($this->logicalSchema);
 		}
 	}
-	
+
 	/**
 	 * @return IQueryable
 	 */
@@ -161,7 +161,7 @@ class RdbmsDao implements IOrmEntityAccessor
 			$query =
 				EntityQuery::create($this->entity)
 					->setLimit(1)
-					->where(Expression::eq($this->identifier, $id));
+					->setCondition(Expression::eq($this->identifier, $id));
 
 			try {
 				$row = $this->getRow($query);

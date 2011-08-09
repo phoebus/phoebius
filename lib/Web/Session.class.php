@@ -24,63 +24,73 @@
 class Session
 {
 	const CHUNK_SIZE = 4096;
-	
+
 	private $sessionId;
 	private $response;
 	private $data = array();
-	
+
 	function __construct($sessionId, WebResponse $response)
 	{
 		$this->sessionId = $sessionId;
 		$this->response = $response;
 		$this->chunkId = $this->getChunkId(0, 0);
 	}
-	
+
+	function __isset($name)
+	{
+		return isset ($this->data[$name]);
+	}
+
+	function __unset($name)
+	{
+		unset ($this->data[$name]);
+	}
+
 	function __get($name)
 	{
-		if(isset($this->data[$name])) 
+		if (isset ($this->data[$name]))
 			return $this->data[$name];
 	}
-	
+
 	function __set($name, $value)
 	{
 		$this->data[$name] = $value;
 	}
-	
+
 	function import(array $dataChunks)
 	{
-		if (!isset($dataChunks[$this->chunkId])) 
+		if (!isset ($dataChunks[$this->chunkId]))
 			return;
-		
+
 		$length = $dataChunks[$this->chunkId];
 		$s = '';
-		
+
 		for ($i = 0; $i < $length; $i++) {
 			$chunkId = $this->getChunkId($i, $length);
-			
-			if (!isset($dataChunks[$chunkId])) 
+
+			if (!isset($dataChunks[$chunkId]))
 				return;
 
 			$s .= $dataChunks[$chunkId];
 		}
-		
+
 		try {
 			$data = $this->decrypt($s);
 		}
 		catch (Exception $e) {
 			return;
 		}
-		
+
 		$this->data = $data;
 	}
-	
-	function save($ttl = null)
+
+	function save($ttl = 0)
 	{
 		foreach ($this->split() as $key => $value) {
-			$this->response->setCookie(new Cookie($key, $value, $ttl));
+			$this->response->addCookie(new Cookie($key, $value, $ttl));
 		}
 	}
-	
+
 	private function split()
 	{
 		$chunks = str_split($this->encrypt(), self::CHUNK_SIZE);
@@ -88,24 +98,24 @@ class Session
 		foreach ($chunks as $i => $chunk) {
 			$dataChunks[$this->getChunkId($i, sizeof($chunks))] = $chunk;
 		}
-		
+
 		// sign
 		$dataChunks[$this->chunkId] = sizeof($chunks);
-		
+
 		return $dataChunks;
 	}
-	
+
 	private function getChunkId($chunkPos, $chunksNumber)
 	{
 		return substr(sha1($this->sessionId.$chunkPos.$chunksNumber), 0, 4);
 	}
-	
-	private function encrypt() 
+
+	private function encrypt()
 	{
 		$c = new XorCipherer($this->sessionId);
 		return $c->encrypt(serialize($this->data));
 	}
-	
+
 	private function decrypt($s)
 	{
 		$c = new XorCipherer($this->sessionId);
