@@ -75,6 +75,11 @@ class Form
 		$this->enctype = new FormEnctype(FormEnctype::ENCODED);
 	}
 
+	function __isset($name)
+	{
+		return isset ($this->controls[$name]);
+	}
+
 	function __get($name)
 	{
 		return $this->getControl($name);
