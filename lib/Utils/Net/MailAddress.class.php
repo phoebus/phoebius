@@ -8,10 +8,10 @@
 * Copyright (c) 2009 Scand Ltd.
 *
 * This program is free software; you can redistribute it and/or modify it under the terms
-* of the GNU Lesser General Public License as published by the Free Software Foundation;
+* of the GNU Lesser General License as published by the Free Software Foundation;
 * either version 3 of the License, or (at your option) any later version.
 *
-* You should have received a copy of the GNU Lesser General Public License along with
+* You should have received a copy of the GNU Lesser General License along with
 * this program; if not, see <http://www.gnu.org/licenses/>.
 *
 ********************************************************************************************** */
@@ -31,48 +31,48 @@ final class MailAddress
 	private $person = null;
 	private $charset = 'UTF-8';
 
-	public static function create()
+	static function create()
 	{
 		return new self;
 	}
 
-	public function setAddress($address)
+	function setAddress($address)
 	{
 		$this->address = $address;
 
 		return $this;
 	}
 
-	public function getAddress()
+	function getAddress()
 	{
 		return $this->address;
 	}
 
-	public function setPerson($person)
+	function setPerson($person)
 	{
 		$this->person = $person;
 
 		return $this;
 	}
 
-	public function getPerson()
+	function getPerson()
 	{
 		return $this->person;
 	}
 
-	public function setCharset($charset)
+	function setCharset($charset)
 	{
 		$this->charset = $charset;
 
 		return $this;
 	}
 
-	public function getCharset()
+	function getCharset()
 	{
 		return $this->charset;
 	}
 
-	public function toString()
+	function __toString()
 	{
 		$specials = preg_quote('()<>@,;:".[]\\', '/');
 		$cr = '\015';

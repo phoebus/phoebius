@@ -53,6 +53,11 @@ class View
 	private $data = array();
 
 	/**
+	 * @var array
+	 */
+	private $masterData = array();
+
+	/**
 	 * @var View
 	 */
 	private $master;
@@ -63,11 +68,18 @@ class View
 	private $innerContent;
 
 	/**
+	 * @return View
+	 */
+	static function create($name)
+	{
+		return new self ($name);
+	}
+
+	/**
 	 * Name of the view. Should be accessible through include_path
 	 * @param string $name name of a view
-	 * @param array $data data to be passed to view
 	 */
-	function __construct($name, array $data = array())
+	function __construct($name)
 	{
 		Assert::isTrue(
 			@fopen($name, "r", true),
@@ -76,7 +88,6 @@ class View
 		);
 
 		$this->name = $name;
-		$this->data = $data;
 	}
 
 	/**
@@ -124,15 +135,16 @@ class View
 	 * Renders the view and returns the resulting string
 	 * @return string
 	 */
-	function render()
+	function render(array $data = array())
 	{
 		ob_start();
+		$this->data = $data;
 		$this->import($this->name);
 		$content = ob_get_clean();
 
 		if ($this->master) {
 			$this->master->innerContent = $content;
-			$content = $this->master->render();
+			$content = $this->master->render($this->masterData);
 		}
 
 		return $content;
@@ -152,7 +164,8 @@ class View
 	 */
 	function useMasterView($masterViewName, array $data = array())
 	{
-		$this->master = $this->spawn($masterViewName, $data);
+		$this->master = $this->spawn($masterViewName);
+		$this->masterData = array_replace($this->data, $data);
 	}
 
 	/**
@@ -163,7 +176,7 @@ class View
 	{
 		return
 			$this->spawn($viewName, $data)
-				->render();
+				->render(array_replace($this->data, $data));
 	}
 
 	/**
@@ -173,7 +186,7 @@ class View
 	function spawn($view, array $data = array())
 	{
 		$class = get_class($this);
-		return new $class ($view, array_replace($this->data, $data));
+		return new $class ($view);
 	}
 }
 

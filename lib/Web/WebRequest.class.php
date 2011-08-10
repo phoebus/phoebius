@@ -85,7 +85,7 @@ class WebRequest implements ArrayAccess
 	}
 
 	/**
-	 * @return IWebResponse
+	 * @return WebResponse
 	 */
 	function getResponse()
 	{

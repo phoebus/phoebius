@@ -24,9 +24,14 @@
 class ViewResult implements IActionResult
 {
 	/**
-	 * @var UITemplateControl
+	 * @var View
 	 */
 	private $view;
+
+	/**
+	 * @var array
+	 */
+	private $data = array();
 
 	/**
 	 * @var string
@@ -38,9 +43,10 @@ class ViewResult implements IActionResult
 	 */
 	private $charset = 'UTF-8';
 
-	function __construct(View $view)
+	function __construct(View $view, array $data = array())
 	{
 		$this->view = $view;
+		$this->data = $data;
 	}
 
 	function setContentType($contentType)
@@ -63,7 +69,7 @@ class ViewResult implements IActionResult
 
 	function handleResult(WebResponse $response)
 	{
-		$result = $this->view->render();
+		$result = $this->view->render($this->data);
 
 		$response
 			->addHeader('Content-Type', $this->contentType . ';charset=' . $this->charset)

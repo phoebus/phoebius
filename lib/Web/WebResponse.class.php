@@ -27,31 +27,31 @@ class WebResponse
 	 * @var WebRequest
 	 */
 	private $request;
-	
+
 	/**
 	 * @var boolean
 	 */
 	private $isStarted = false;
-	
+
 	/**
-	 * Status code of the response
+	 * @var HttpStatus
 	 */
 	private $status;
-	
+
 	/**
 	 * Headers to send
-	 * @var array
+	 * @var string[]
 	 */
 	private $headers = array();
-	
+
 	/**
 	 * Cookies to send
-	 * @var array
+	 * @var Cookie[]
 	 */
 	private $cookies = array();
-	
+
 	/**
-	 * @var array of Session
+	 * @var Session[]
 	 */
 	private $sessions = array();
 
@@ -68,7 +68,7 @@ class WebResponse
 	{
 		$this->request = $request;
 	}
-	
+
 	function __destruct()
 	{
 		if (!$this->isFinished)
@@ -82,12 +82,12 @@ class WebResponse
 	function setStatus(HttpStatus $status)
 	{
 		Assert::isFalse($this->isStarted, 'response headers already sent');
-		
+
 		$this->status = $status;
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Adds a cookie. Note that it is better to use WebResponse::getSession() to store temporary
 	 * data
@@ -96,9 +96,9 @@ class WebResponse
 	function addCookie(Cookie $cookie)
 	{
 		Assert::isFalse($this->isStarted, 'response headers already sent');
-		
+
 		$this->cookies[] = $cookie;
-		
+
 		return $this;
 	}
 
@@ -112,12 +112,12 @@ class WebResponse
 		Assert::isFalse($this->isStarted, 'response headers already sent');
 		Assert::isScalar($header);
 		Assert::isScalar($value);
-		
+
 		$this->headers[$header] = $value;
 
 		return $this;
 	}
-	
+
 	/**
 	 * Gets the response session. Don't forget to save it (Session::save()).
 	 * @return Session
@@ -127,12 +127,12 @@ class WebResponse
 		Assert::isFalse($this->isStarted, 'request already started');
 
 		$id .= sha1(PHOEBIUS_APP_ID);
-		
+
 		if (!isset($this->sessions[$id])) {
 			$this->sessions[$id] = $s = new Session($id, $this);
 			$s->import($this->request->getCookieVars());
 		}
-		
+
 		return $this->sessions[$id];
 	}
 
@@ -147,7 +147,7 @@ class WebResponse
 		}
 		else {
 			$protocol = $this->request->getProtocol();
-	
+
 			if ($protocol == 'HTTP/1.1') {
 				$this->setStatus(new HttpStatus(HttpStatus::CODE_303));
 			}
@@ -157,12 +157,12 @@ class WebResponse
 		}
 
 		$this->addHeader('Location', (string)$url);
-		
+
 		return $this;
 	}
 
 	/**
-	 * Writes a string to response. Note: this forces a response object to initialize 
+	 * Writes a string to response. Note: this forces a response object to initialize
 	 * response by sending response headers (until response buffer is turned on - currently
 	 * unimplemented).
 	 * @param string $string
@@ -180,7 +180,7 @@ class WebResponse
 	}
 
 	/**
-	 * Writes a file contents directly to response. Note: this forces a response object to initialize 
+	 * Writes a file contents directly to response. Note: this forces a response object to initialize
 	 * response by sending response headers (until response buffer is turned on - currently
 	 * unimplemented).
 	 * @param string $filepath
@@ -191,7 +191,7 @@ class WebResponse
 		if (!$this->isStarted) {
 			$this->start();
 		}
-		
+
 		readfile($filepath);
 
 		return $this;
@@ -204,7 +204,7 @@ class WebResponse
 	function finish()
 	{
 		Assert::isFalse($this->isFinished, 'already finished');
-		
+
 		if (!$this->isStarted) {
 			$this->start();
 		}
@@ -217,28 +217,28 @@ class WebResponse
 
 		$this->isFinished = true;
 	}
-	
+
 	final protected function start()
 	{
 		Assert::isFalse($this->isStarted, 'response already started');
-		
+
 		if ($this->status) {
 			$protocol =
 				$this->request
 				? $this->request->getProtocol()
 				: 'HTTP/1.0';
-	
+
 			header($protocol . ' ' . $this->status->getValue() . ' ' . $this->status->getStatusMessage(), true);
 		}
-		
+
 		foreach ($this->headers as $name => $value) {
 			header($name . ': ' . $value, true);
 		}
-		
+
 		foreach ($this->cookies as $cookie) {
 			setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpire(), $cookie->getPath());
 		}
-		
+
 		$this->isStarted = true;
 	}
 }
