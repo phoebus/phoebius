@@ -71,6 +71,9 @@ class ViewResult implements IActionResult
 	{
 		$result = $this->view->render($this->data);
 
+		// html obfuscation
+		//$result = preg_replace('{>\s+<}s', '><', $result);
+
 		$response
 			->addHeader('Content-Type', $this->contentType . ';charset=' . $this->charset)
 			->write($result)
