@@ -109,12 +109,14 @@ abstract class ActionBasedController implements IController
 			return $value;
 		}
 
-		if ($argument->getClass()->getName() == 'WebRequest') {
-			return $this->request;
-		}
+		if ($class = $argument->getClass()) {
+			if ($class->getName() == 'WebRequest') {
+				return $this->request;
+			}
 
-		if ($argument->getClass()->getName() == 'RouteData') {
-			return $this->routeData;
+			if ($class->getName() == 'RouteData') {
+				return $this->routeData;
+			}
 		}
 
 		// check whether it is optional or have the default value
@@ -293,6 +295,8 @@ abstract class ActionBasedController implements IController
 	 */
 	protected function getMethodName($action)
 	{
+		$action = preg_replace('{\-(\w)}e', 'strtoupper("\\1")', $action);
+
 		return 'action_' . ($action);
 	}
 }

@@ -260,6 +260,8 @@ final class _PathPattern
 	private $particles = array();
 	private $placeholders = array();
 
+	private $isGreedy = false;
+
 	function __construct($pattern)
 	{
 		Assert::isScalar($pattern);
@@ -280,6 +282,12 @@ final class _PathPattern
 
 		if (sizeof($path_parts) < sizeof($this->particles)) {
 			return false;
+		}
+
+		if ($this->isGreedy) {
+			$greedyCapture = array_slice($path_parts, sizeof($this->particles) - 1);
+			$path_parts = array_slice($path_parts, 0, sizeof($this->particles) - 1);
+			$path_parts[] = join(self::DELIMITER, $greedyCapture);
 		}
 
 		$data = array();
@@ -318,7 +326,7 @@ final class _PathPattern
 
 				Assert::isTrue(
 					preg_match($this->particles[$i], $placeholderValue),
-					'value `%sz for placeholder `%s` should match regex %s',
+					'value `%s` for placeholder `%s` should match regex %s',
 					$placeholderValue, $placeholderValue, $this->particles[$i]
 				);
 
@@ -335,11 +343,21 @@ final class _PathPattern
 	private function setupPattern()
 	{
 		foreach (explode(self::DELIMITER, $this->pattern) as $part) {
+			Assert::isFalse(
+				$this->isGreedy,
+				'only the last placeholder can be greedy, pattern %s is wrong',
+				$this->pattern
+			);
+
 			$placeholder = null;
 
-			if (preg_match('/:[a-zA-Z0-9]+$/', $part)) {
+			if (preg_match('/:[a-zA-Z0-9]+\*?$/', $part)) {
 				$p = explode(":", $part);
 				$placeholder = end($p);
+				if (substr($placeholder, -1) == '*') {
+					$this->isGreedy = true;
+					$placeholder = substr($placeholder, 0, -1);
+				}
 				$part = join(":", array_slice($p, 0, -1));
 
 				if (!$part) {

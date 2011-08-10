@@ -18,7 +18,7 @@
 
 /**
  * Invokes a Controller class (that implements IController) with the provided route data
- * 
+ *
  * @ingroup Mvc
  */
 class MvcDispatcher
@@ -27,17 +27,17 @@ class MvcDispatcher
 	{
 		if (!isset($routeData['controller']))
 			return $this->handleError($routeData, $request);
-		
+
 		$controllerName = $routeData['controller'];
 		$controllerClassName = $this->getControllerClassName($controllerName, $routeData);
-		
+
 		if (!class_exists($controllerClassName))
 			return $this->handleError($routeData, $request);
 
 		$controllerObject = $this->getControllerInstance($controllerClassName, $routeData);
 
 		$controllerObject->handle($routeData, $request);
-	}	
+	}
 
 	/**
 	 * Gets a new instance of the requested controller
@@ -63,17 +63,19 @@ class MvcDispatcher
 	 */
 	protected function getControllerClassName($controllerName, RouteData $routeData)
 	{
+		$controllerName = preg_replace('{\-(\w)}e', 'strtoupper("\\1")', $controllerName);
+
 		return ucfirst($controllerName) . 'Controller';
 	}
-	
+
 	private function handleError(RouteData $routeData, WebRequest $request)
 	{
 		if (!isset($routeData['defaultController']))
 			throw new DispatchControllerException($routeData, $request);
-		
+
 		$controllerName = $routeData['defaultController'];
 		$controllerClassName = $this->getControllerClassName($controllerName, $routeData);
-		
+
 		Assert::isTrue(
 			class_exists($controllerClassName, true),
 			'missing %s as defaultController',

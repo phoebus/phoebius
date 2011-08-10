@@ -30,11 +30,6 @@ class PostForm extends Form
 	private $buttons = array();
 
 	/**
-	 * @var XorCipher
-	 */
-	private $signer;
-
-	/**
 	 * @var bool
 	 */
 	private $signed;
@@ -48,6 +43,11 @@ class PostForm extends Form
 	 * @var array
 	 */
 	private $privateValues = array();
+
+	/**
+	 * @var XorCipher
+	 */
+	protected $signer;
 
 	/**
 	 * @param string $id Form identifier

@@ -31,7 +31,7 @@
 // * BUGS_EMAIL - email bugs to be send to.
 //
 
-define('PHOEBIUS_VERSION', '1.4.0-dev');
+define('PHOEBIUS_VERSION', '2.0.0-dev');
 define('PHOEBIUS_BASE_ROOT', dirname(__FILE__));
 
 if (!defined('PHOEBIUS_APP_ID')) {
@@ -62,6 +62,8 @@ define('PHOEBIUS_FULL_PRODUCT_NAME', 'Phoebius framework v'.PHOEBIUS_VERSION);
 
 
 date_default_timezone_set('Europe/London');
+mb_internal_encoding("UTF-8");
+mb_regex_encoding("UTF-8");
 
 define('PHOEBIUS_TYPE_EXTENSION', '.class.php');
 define('PHOEBIUS_VIEW_EXTENSION', '.view.php');
