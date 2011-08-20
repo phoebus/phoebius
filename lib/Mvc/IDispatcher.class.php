@@ -17,11 +17,18 @@
  ************************************************************************************************/
 
 /**
- * @ingroup Mvc_Exceptions
+ * Represents a dispatcher
+ *
+ * @ingroup Mvc
  */
-class DispatchActionException extends DispatchException
+interface IDispatcher
 {
-	// nothing
+	/**
+	 * Runs the controller object to handle the incoming context
+	 *
+	 * @return void
+	 */
+	function dispatch(RouteData $routeData, WebRequest $request);
 }
 
 ?>

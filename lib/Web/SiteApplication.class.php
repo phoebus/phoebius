@@ -55,7 +55,7 @@ class SiteApplication
 	function __construct(IRouter $router)
 	{
 		$this->router = $router;
-		$this->dispatcher = new MvcDispatcher();
+		$this->dispatcher = new ActionDispatcher();
 		$this->request = new WebRequest($_GET, $_POST, $_COOKIE, $_FILES, $_SERVER, $_ENV);
 	}
 
@@ -89,7 +89,7 @@ class SiteApplication
 		try {
 			try {
 				$routeData = $this->router->process($this->request);
-				$this->dispatcher->handle($routeData, $this->request);
+				$this->dispatcher->dispatch($routeData, $this->request);
 			}
 			catch (DispatchException $e) {
 				$this->handle404($e);

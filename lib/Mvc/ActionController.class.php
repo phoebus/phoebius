@@ -17,11 +17,42 @@
  ************************************************************************************************/
 
 /**
- * @ingroup Mvc_Exceptions
+ * @ingroup Mvc
  */
-class DispatchControllerException extends DispatchException
+abstract class ActionController
 {
-	// nothing
+
+	/**
+	 * @var RouteData
+	 */
+	private $routeData;
+
+	/**
+	 * @var WebRequest
+	 */
+	private $request;
+
+	function __construct(RouteData $routeData, WebRequest $webRequest)
+	{
+		$this->routeData = $routeData;
+		$this->request = $webRequest;
+	}
+
+	/**
+	 * @return WebRequest
+	 */
+	protected function getRequest()
+	{
+		return $this->request;
+	}
+
+	/**
+	 * @return RouteData
+	 */
+	protected function getRouteData()
+	{
+		return $this->routeData;
+	}
 }
 
 ?>

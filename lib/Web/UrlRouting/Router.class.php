@@ -28,13 +28,27 @@
  */
 class Router implements IRouter
 {
-	private $routeData = array();
+	/**
+	 * Default data. Can be overridden by routes
+	 * @var array
+	 */
+	private $defaultRouteData = array();
+
+	/**
+	 * Queue of routes
+	 * @var Route[]
+	 */
 	private $routes = array();
+
+	/**
+	 * Named routes index
+	 * @var Route[]
+	 */
 	private $routeNames = array();
 
 	function __construct(array $defaultRouteData = array())
 	{
-		$this->routeData = $defaultRouteData;
+		$this->defaultRouteData = $defaultRouteData;
 	}
 
 	/**
@@ -50,28 +64,21 @@ class Router implements IRouter
 			if (is_array($result)) {
 				return
 					new RouteData(
-						$route, $this,
+						$route,
+						$this,
 						array_replace(
-							$this->routeData,
+							$this->defaultRouteData,
 							$result
 						)
 					);
 			}
 		}
 
-		if (!empty($this->routeData)) {
-			return new RouteData(new Route(), $this, $this->routeData);
+		if ($this->defaultRouteData) {
+			return new RouteData(new Route(), $this, $this->defaultRouteData);
 		}
 
 		throw new RouteException($request->getHttpUrl());
-	}
-
-	/**
-	 * @return HttpUrl
-	 */
-	function makeUrl($routeName, array $data = array(), HttpUrl $url = null)
-	{
-		return $this->getRoute($routeName)->makeUrl($data, $url);
 	}
 
 	/**

@@ -38,7 +38,7 @@ class ContentResult implements IActionResult
 		$this->content = $content;
 	}
 
-	function handleResult(WebResponse $response)
+	function handle(WebResponse $response)
 	{
 		$response
 			->write($this->content)

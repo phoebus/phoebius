@@ -19,11 +19,15 @@
 /**
  * @ingroup Mvc_Exceptions
  */
-abstract class DispatchException extends StateException
+class DispatchException extends StateException
 {
-	function __construct(RouteData $routeData, WebRequest $webRequest)
+	function __construct($message, RouteData $routeData, WebRequest $webRequest)
 	{
-		parent::__construct('Cannot dispatch '.$webRequest->getHttpUrl()->getVirtualPath().' using route data: '.print_r($routeData, true));
+		parent::__construct(
+			'Cannot dispatch '.$webRequest->getHttpUrl()->getVirtualPath()
+			.' using route data: '.print_r($routeData->toArray(), true)
+			.': ' . $message
+		);
 	}
 }
 

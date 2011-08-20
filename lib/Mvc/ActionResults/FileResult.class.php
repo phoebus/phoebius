@@ -69,7 +69,7 @@ class FileResult implements IActionResult
 		$this->unlinkOnFileFlush = $unlinkOnFinish;
 	}
 
-	function handleResult(WebResponse $response)
+	function handle(WebResponse $response)
 	{
 		if ($this->contentType) {
 			$response->addHeader('Content-Type', $this->contentType);

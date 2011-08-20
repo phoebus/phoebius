@@ -67,7 +67,7 @@ class ViewResult implements IActionResult
 		return $this;
 	}
 
-	function handleResult(WebResponse $response)
+	function handle(WebResponse $response)
 	{
 		$result = $this->view->render($this->data);
 

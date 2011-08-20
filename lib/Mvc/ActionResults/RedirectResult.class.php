@@ -27,7 +27,7 @@ class RedirectResult implements IActionResult
 	 * @var HttpUrl
 	 */
 	private $url;
-	
+
 	/**
 	 * @var HttpStatus
 	 */
@@ -38,14 +38,14 @@ class RedirectResult implements IActionResult
 	 */
 	function __construct($url, HttpStatus $status = null)
 	{
-		if (is_scalar($url)) 
+		if (is_scalar($url))
 			$url = new HttpUrl($url);
 
 		$this->url = $url;
 		$this->status = $status;
 	}
 
-	function handleResult(WebResponse $response)
+	function handle(WebResponse $response)
 	{
 		$response
 			->redirect($this->url, $this->status)
