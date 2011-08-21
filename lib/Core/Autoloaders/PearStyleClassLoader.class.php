@@ -16,16 +16,22 @@
  *
  ************************************************************************************************/
 
+// legacy check
+require_once 'IncludePathClassLoader.class.php';
+
 /**
- * Comparison results
+ * Class loader that follows PEAR notation of class location.
  *
- * @ingroup Core_Patterns
+ * @ingroup Core_Bootstrap
  */
-final class CompareResult
+class PearStyleClassLoader extends IncludePathClassLoader
 {
-	const EQUALS = 0;
-	const GREATER_THAN = 1;
-	const LESS_THAN = -1;
+	function load($class)
+	{
+		$classpath = str_replace('_', '/', $class);
+
+		parent::load($classpath);
+	}
 }
 
 ?>

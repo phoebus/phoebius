@@ -17,27 +17,13 @@
  ************************************************************************************************/
 
 /**
+ * Thrown when assertion fails
+ * @see Assert
  * @ingroup Core_Exceptions
  */
-class ArgumentTypeException extends ArgumentException
+class AssertException extends Exception
 {
-	/**
-	 * @var string
-	 */
-	private $expectedType;
-
-	/**
-	 * @param string $argumentName
-	 * @param string $message
-	 */
-	function __construct($argumentName, $expectedType, $message = 'unexpected argument type')
-	{
-		Assert::isScalar($expectedType);
-
-		parent::__construct($argumentName, $expectedType, $message);
-
-		$this->expectedType = $expectedType;
-	}
+	// nothing here
 }
 
 ?>

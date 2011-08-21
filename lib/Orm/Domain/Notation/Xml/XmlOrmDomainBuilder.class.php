@@ -68,7 +68,7 @@ class XmlOrmDomainBuilder
 		$this->ormDomain = new OrmDomain;
 		$this->load();
 		$this->generateDomain();
-		
+
 		$this->xmlElement = null;
 
 		return $this->ormDomain;
@@ -87,7 +87,7 @@ class XmlOrmDomainBuilder
 				LIBXML_DTDATTR | LIBXML_DTDLOAD | LIBXML_DTDVALID
 			);
 		}
-		catch (ExecutionContextException $e) {
+		catch (ErrorException $e) {
 			$xmlError = libxml_get_last_error();
 			throw new OrmModelIntegrityException(
 				'Malformed XML: ' . $xmlError->message . ' in ' . $this->xmlFilename . ':' . $xmlError->line
@@ -116,7 +116,7 @@ class XmlOrmDomainBuilder
 
 		return $nodes;
 	}
-	
+
 	private $entitiesNodes = array();
 	private $currentClass = null;
 
@@ -128,52 +128,52 @@ class XmlOrmDomainBuilder
 		if (isset($this->xmlElement['db-schema'])) {
 			$this->ormDomain->setDbSchema((string) $this->xmlElement['db-schema']);
 		}
-		
-		// scan entity nodes (expanding inclusions) 
+
+		// scan entity nodes (expanding inclusions)
 		// and put them into internal hashmap
 		foreach ($this->getChildNodeSet($this->xmlElement->entities, 'entity') as $entity) {
 			$this->entitiesNodes[(string) $entity['name']] = $entity;
 		}
-		
+
 		// then traverse over them, and build each recursively
 		foreach (array_keys($this->entitiesNodes) as $name) {
 			$this->importEntity($name);
 		}
 	}
-	
+
 	private function importEntity($name) {
 		if (!isset($this->entitiesNodes[$name])) {
 			return null;
 		}
-		
+
 		if ($this->ormDomain->classExists($name)) {
 			return $this->ormDomain->getClass($name);
 		}
-		
+
 		$entity = $this->entitiesNodes[$name];
 		$prevClass = $this->currentClass;
 		$this->processingStack[$name] = $class = $this->currentClass = $this->generateEntity($entity);
-		
+
 		$this->ormDomain->addClass($class);
-	
+
 		// process an identifier (if specified). However, entity CAN BE identifierless
 		if (isset($entity->properties->identifier)) {
 			$id = $this->generateIdentifier($entity->properties->identifier);
 			$class->setIdentifier($id);
 		}
-		
+
 		foreach ($this->getChildNodeSet($entity->properties, 'property') as $property) {
 			$property = $this->generateProperty($property);
 			$class->addProperty($property);
 		}
-		
+
 		foreach ($this->getChildNodeSet($entity->properties, 'container') as $container) {
 			$container = $this->generateContainer($class, $container);
 			$class->addProperty($container);
 		}
-		
+
 		$this->currentClass = $prevClass;
-		
+
 		return $class;
 	}
 
@@ -311,7 +311,7 @@ class XmlOrmDomainBuilder
 	private function generateContainer(OrmClass $type, SimpleXMLElement $xmlContainer)
 	{
 		$referredTypeName = (string)$xmlContainer['type'];
-		
+
 		if (!$referredType = $this->importEntity($referredTypeName)) {
 			if (TypeUtils::isExists($referredTypeName) && TypeUtils::isInherits($referredTypeName, 'IDaoRelated')) {
 				$referredType = call_user_func(array($referredTypeName, 'orm'));
@@ -430,7 +430,7 @@ class XmlOrmDomainBuilder
 	{
 		$name = (string) $element['type'];
 		$parameters = $this->getTypeParameters($element);
-		
+
 		if (($class = $this->importEntity($name))) { // force recursion
 			if ($class->hasDao() && $class->getIdentifier()) {
 				return new AssociationPropertyType(

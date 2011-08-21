@@ -120,7 +120,7 @@ class MySqlDB extends DB
 			try {
 				mysql_close($this->link);
 			}
-			catch (ExecutionContextException $e) {
+			catch (ErrorException $e) {
 				// nothing here
 			}
 

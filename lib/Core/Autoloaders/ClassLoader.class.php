@@ -17,12 +17,27 @@
  ************************************************************************************************/
 
 /**
- * Base exception for all custom exceptions thrown inside framework application context
- * @ingroup Core_Exceptions
+ * Abstract class loader
+ *
+ * @ingroup Core_Bootstrap
  */
-abstract class ApplicationException extends Exception
+abstract class ClassLoader
 {
-	// nothing here
-}
+	abstract function load($class);
 
-?>
+	protected function loaded($class)
+	{
+		return class_exists($class, false) || interface_exists($class, false);
+	}
+
+	protected function fail($class)
+	{
+		if (class_exists('ClassNotFoundException', false))
+			throw new ClassNotFoundException($class);
+		else
+			eval (
+				'class ClassNotFoundException extends Exception {} '
+				. ' throw new ClassNotFoundException ("' . $class . '");'
+			);
+	}
+}

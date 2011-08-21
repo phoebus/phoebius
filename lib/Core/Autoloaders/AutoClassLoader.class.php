@@ -16,23 +16,77 @@
  *
  ************************************************************************************************/
 
+// legacy check
+require_once 'ClassLoader.class.php';
+
 /**
- * Resolver for classes located on PEAR notation
+ * Autoloader
  *
  * @ingroup Core_Bootstrap
  */
-class PearStyleAutoloader extends IncludePathAutoloader
+final class AutoClassLoader extends ClassLoader
 {
+	/**
+	 * @var AutoClassLoader
+	 */
+	private static $instance;
+
+	/**
+	 * @var ClassLoader[]
+	 */
+	private $loaders = array();
+
+	/**
+	 * @static
+	 * @return AutoClassLoader
+	 */
+	static function getInstance()
+	{
+		return self::$instance;
+	}
+
+	function addLoader(ClassLoader $loader)
+	{
+		$this->loaders[] = $loader;
+
+		return $this;
+	}
+
 	function load($class)
 	{
 		if (strpos($class, "\0") !== false) {
 			return;
 		}
 
-		$classpath = str_replace('_', '/', $class);
+		foreach ($this->loaders as $loader) {
+			try {
+				$loader->load($class);
 
-		parent::load($classpath);
+				if ($this->loaded($class));
+					return true;
+			}
+			catch (ClassNotFoundException $e) {}
+		}
+
+		$this->fail($class);
+	}
+
+	function register()
+	{
+		spl_autoload_register(array($this, 'load'));
+
+		return $this;
+	}
+
+	function unregister()
+	{
+		spl_autoload_unregister(array($this, 'load'));
+
+		return $this;
+	}
+
+	private function __construct()
+	{
+		// singleton
 	}
 }
-
-?>

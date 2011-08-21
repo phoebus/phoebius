@@ -126,13 +126,13 @@ class Date implements IBoxable, IOrmPropertyAssignable
 	static function compare(Date $left, Date $right)
 	{
 		if ($left->equals($right)) {
-			return CompareResult::EQUALS;
+			return 0;
 		}
 		else {
 			return (
 				$left->int > $right->int
-					? CompareResult::GREATER_THAN
-					: CompareResult::LESS_THAN
+					?  1
+					: -1
 			);
 		}
 	}

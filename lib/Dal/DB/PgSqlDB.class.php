@@ -97,7 +97,7 @@ class PgSqlDB extends DB
 				);
 			}
 		}
-		catch (ExecutionContextException $e) {
+		catch (ErrorException $e) {
 
 			LoggerPool::log(parent::LOG_VERBOSE, 'connection to postgresql failed: %s', $e->getMessage());
 
@@ -124,7 +124,7 @@ class PgSqlDB extends DB
 			try {
 				pg_close($this->link);
 			}
-			catch (ExecutionContextException $e) {
+			catch (ErrorException $e) {
 				// nothing here
 			}
 

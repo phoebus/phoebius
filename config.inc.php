@@ -153,4 +153,9 @@ foreach ($phoebiusNamespaces as $namespace) {
 	);
 }
 
+require_once 'AutoClassLoader.class.php';
+require_once 'IncludePathClassLoader.class.php';
 
+AutoClassLoader::getInstance()
+	->addLoader(new IncludePathClassLoader())
+	->register();

@@ -16,27 +16,50 @@
  *
  ************************************************************************************************/
 
+// legacy check
+require_once 'ClassLoader.class.php';
+
 /**
- * @ingroup Core_Exceptions
+ * Simple class loader that searches a class in a file with name <class>.<extension> within the
+ * include_path.
+ *
+ * @ingroup Core_Bootstrap
  */
-class DuplicationException extends ArgumentException
+class IncludePathClassLoader extends ClassLoader
 {
-	private $value;
+	private $extension = PHOEBIUS_CLASS_EXT;
 
-	function __construct($argName, $argValue, $message = 'key violation')
+	function setExtension($extension)
 	{
-		parent::__construct($argName, $message);
+		$this->extension = '.' . trim($extension, '.');
 
-		$this->value = $argValue;
+		return $this;
 	}
 
-	/**
-	 * @return mixed
-	 */
-	function getArgumentValue()
+	function getExtension()
 	{
-		return $this->value;
+		return $this->extension;
+	}
+
+	function load($class)
+	{
+		if (strpos($class, "\0") !== false) {
+			return;
+		}
+
+		$filename = $class . $this->extension;
+
+		try {
+			include_once $filename;
+		}
+		catch (Exception $e) {
+			if (strstr($e->getMessage(), "Failed opening '{$filename}'"))
+				$this->fail($class);
+			else
+				throw $e;
+		}
+
+		if (!$this->loaded($class))
+			$this->fail($class);
 	}
 }
-
-?>

@@ -17,32 +17,14 @@
  ************************************************************************************************/
 
 /**
- * Debugging utilities
- * @ingroup Utils
+ * Thrown when autoloaders unable
+ * @ingroup Core_Exceptions
  */
-final class DebugUtils extends StaticClass
+class ClassNotFoundException extends Exception
 {
-	/**
-	 * Same as PHP's sprintf, but supports non-scalar arguments, that are expanded in print_r
-	 * manner
-	 * @param string $string the string to be processed
-	 * @param mixed ...
-	 */
-	static function sprintf($string)
+	function __construct($class)
 	{
-		if (func_num_args() > 1) {
-			$params = func_get_args();
-			foreach ($params as &$param) {
-				if (!is_scalar($param)) {
-					// FIXME call __toString here
-					$param = print_r($param, true);
-				}
-			}
-
-			$string = call_user_func_array('sprintf', $params);
-		}
-
-		return $string;
+		parent::__construct($class . ' not found');
 	}
 }
 

@@ -19,17 +19,18 @@
 /**
  * @ingroup Core_Exceptions
  */
-class FileNotFoundException extends StateException
+class FileNotFoundException extends Exception
 {
-	private $filePath;
+	private $file;
 
-	function __construct($filePath, $message = 'file not found')
+	function __construct($file)
 	{
-		Assert::isScalar($filePath);
+		Assert::isScalar($file);
 
-		parent::__construct($message);
+		$this->file = $file;
 
-		$this->filePath = $filePath;
+		parent::__construct($file . ' not found');
+
 	}
 }
 

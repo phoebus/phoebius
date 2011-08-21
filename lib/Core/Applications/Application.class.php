@@ -16,6 +16,13 @@
  *
  ************************************************************************************************/
 
+Assert::notImplemented();
+
+Application:
+	- WebApplication
+        - AutoApplication
+	- CliApplication
+
 /**
  * Application infrastructure initializer.
  *

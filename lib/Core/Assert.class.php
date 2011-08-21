@@ -90,6 +90,29 @@ final class Assert extends StaticClass
 	}
 
 	/**
+	 * Checks if the specified key is not defined inside an array
+	 * @return void
+	 */
+	static function hasNoIndex(array $list, $key, $message = null)
+	{
+		if (!array_key_exists($key, $list)) {
+			if (!$message) {
+				$args = array(
+					'%s is already defined inside an array %s',
+					$key,
+					$list
+				);
+			}
+			else {
+				$args = func_get_args();
+				$args = array_slice($args, 2);
+			}
+
+			self::triggerError($args);
+		}
+	}
+
+	/**
 	 * Checks if assertion is empty
 	 * @param mixed $assertion
 	 * @param string $message optional string to be printed when assertion check fails
@@ -472,8 +495,38 @@ final class Assert extends StaticClass
 			$args[0] = 'assertion failed';
 		}
 
-		$string = call_user_func_array(array ('DebugUtils', 'sprintf'), $args);
-		throw new Exception($string);
+		$string = call_user_func_array(array (__CLASS__, 'sprintf'), $args);
+		throw new AssertException($string);
+	}
+
+	private static function sprintf($string)
+	{
+		if (func_num_args() > 1) {
+			$params = func_get_args();
+			foreach ($params as &$param) {
+				if (is_object($param)) {
+					if (method_exists($param, '__toString')) {
+						$param = $param->__toString();
+					}
+					else if (method_exists($param, 'toString')) {
+						$param = $param->toString();
+					}
+					else {
+						$param = get_class($param);
+					}
+				}
+				else if (is_array($param)) {
+					$param = 'Array[' . sizeof($param) . ']';
+				}
+				else {
+					$param = print_r($param, true);
+				}
+			}
+
+			$string = call_user_func_array('sprintf', $params);
+		}
+
+		return $string;
 	}
 }
 

@@ -20,7 +20,7 @@
  * Represents the state exception
  * @ingroup Core_Exceptions
  */
-class StateException extends ApplicationException
+class StateException extends Exception
 {
 	// nothing here
 }

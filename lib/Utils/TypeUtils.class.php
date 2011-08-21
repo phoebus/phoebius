@@ -64,19 +64,20 @@ final class TypeUtils extends StaticClass
 	static function isExists($object)
 	{
 		$name = self::resolveName($object);
+		$class = null;
 
 		try {
 			$class = class_exists($name, true);
 		}
 		catch (Exception $e) {}
-		
+
 		if (!$class) {
 			try {
 				$interface = interface_exists($name, true);
 			}
 			catch (Exception $e) {}
 		}
-		
+
 		return $class || $interface;
 	}
 

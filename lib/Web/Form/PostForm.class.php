@@ -193,7 +193,7 @@ class PostForm extends Form
 		try {
 			$data = unserialize($decrypted);
 		}
-		catch (ExecutionContextException $e) {
+		catch (ErrorException $e) {
 			return false;
 		}
 

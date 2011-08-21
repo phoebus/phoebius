@@ -39,9 +39,7 @@ final class DBSchema implements ISqlCastable
 	{
 		$name = $table->getName();
 
-		if (isset($this->tables[$name])) {
-			throw new DuplicationException('table', $name);
-		}
+		Assert::hasNoIndex($this->tables, $name, 'table %s already inside', $name);
 
 		$this->tables[$name] = $table;
 
@@ -75,21 +73,21 @@ final class DBSchema implements ISqlCastable
 	{
 		return $this->tables;
 	}
-	
+
 	/**
 	 * Drops the table from the schema
 	 * @param string $name
-	 * 
+	 *
 	 * @return DBSchema an object itself
 	 */
-	function dropTable($name) 
+	function dropTable($name)
 	{
 		Assert::isScalar($name);
 
 		if (!isset($this->tables[$name])) {
 			throw new ArgumentException('name', 'not found');
 		}
-		
+
 		unset ($this->tables[$name]);
 
 		return $this;
@@ -107,19 +105,19 @@ final class DBSchema implements ISqlCastable
 		$constraintDDLs = new SqlQuerySet;
 		$indexDDLs = new SqlQuerySet;
 		$extraDDLs = new SqlQuerySet;
-		
+
 		foreach ($this->tables as $table) {
 			$DDLs->addQueries($table->getQueries());
-			
+
 			$constraintDDLs->addQueries($table->getConstraintQueries());
-			
+
 			$indexDDLs->addQueries($table->getIndexQueries());
-			
+
 			if ($dialect) {
 				$extraDDLs->addQueries($dialect->getExtraTableQueries($table));
 			}
 		}
- 
+
 		$DDLs
 			->merge($constraintDDLs)
 			->merge($indexDDLs)

@@ -182,7 +182,7 @@ class FileFormControl extends InputFormControl
 			try {
 				unlink($this->getImportedFilepath());
 			}
-			catch (ExecutionContextException $e) {}
+			catch (ErrorException $e) {}
 		}
 	}
 
