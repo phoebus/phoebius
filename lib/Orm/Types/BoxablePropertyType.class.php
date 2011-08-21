@@ -65,15 +65,10 @@ class BoxablePropertyType extends PrimitivePropertyType
 			return null;
 		}
 		else {
-			try {
-				return call_user_func_array(
-					array($this->boxableType, 'cast'),
-					array($value)
-				);
-			}
-			catch (TypeCastException $e) {
-				Assert::isUnreachable('wrong `%s` cast to %s', $value, $this->boxableType);
-			}
+			return call_user_func_array(
+				array($this->boxableType, 'cast'),
+				array($value)
+			);
 		}
 	}
 

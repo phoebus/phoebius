@@ -36,8 +36,8 @@ abstract class ClassLoader
 			throw new ClassNotFoundException($class);
 		else
 			eval (
-				'class ClassNotFoundException extends Exception {} '
-				. ' throw new ClassNotFoundException ("' . $class . '");'
+				'class ClassNotFoundException extends Exception {}'
+				. 'throw new ClassNotFoundException ("' . $class . ' not found");'
 			);
 	}
 }

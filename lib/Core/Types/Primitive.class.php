@@ -29,7 +29,7 @@ abstract class Primitive implements IBoxable, IOrmPropertyAssignable
 	private $value;
 
 	/**
-	 * @throws TypeCastException
+	 * @throws CastException
 	 * @param scalar $value value to be wrapped
 	 */
 	function __construct($value)
@@ -48,7 +48,7 @@ abstract class Primitive implements IBoxable, IOrmPropertyAssignable
 			$this->value = $value;
 		}
 		else {
-			throw new TypeCastException($this, $value);
+			throw new CastException($this, $value);
 		}
 
 		return $this;

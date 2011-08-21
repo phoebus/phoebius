@@ -21,14 +21,8 @@
  */
 class FileNotFoundException extends Exception
 {
-	private $file;
-
 	function __construct($file)
 	{
-		Assert::isScalar($file);
-
-		$this->file = $file;
-
 		parent::__construct($file . ' not found');
 
 	}

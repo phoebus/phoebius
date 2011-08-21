@@ -52,11 +52,7 @@ final class Boolean extends Scalar
 				$value = false;
 			}
 			else {
-				throw new TypeCastException(
-					$this,
-					$value,
-					'not an Boolean value specified'
-				);
+				throw new CastException($this, $value);
 			}
 		}
 

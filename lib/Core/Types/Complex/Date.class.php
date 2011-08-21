@@ -385,7 +385,7 @@ class Date implements IBoxable, IOrmPropertyAssignable
 	/**
 	 * Imports date represented as unix timestamp value filling in dependant helper fields
 	 *
-	 * @throws TypeCastException if unix timestamp is wrong
+	 * @throws CastException if unix timestamp is wrong
 	 * @return void
 	 */
 	protected function import($int)
@@ -396,7 +396,7 @@ class Date implements IBoxable, IOrmPropertyAssignable
 			$this->int = $int;
 		}
 		else {
-			throw new TypeCastException(__CLASS__, 'specified string is not a valid date');
+			throw new CastException($this, $int);
 		}
 	}
 

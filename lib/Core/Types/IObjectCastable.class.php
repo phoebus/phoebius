@@ -28,7 +28,7 @@ interface IObjectCastable
 	 *
 	 * @param scalar
 	 * @return IObjectCastable
-	 * @throws TypeCastException
+	 * @throws CastException
 	 */
 	static function cast($value);
 

@@ -235,7 +235,7 @@ class ActionDispatcher implements IDispatcher
 					array($value)
 				);
 			}
-			catch (TypeCastException $e){}
+			catch (CastException $e){}
 		}
 		else if ($class->implementsInterface('IDaoRelated') && is_scalar($value)) {
 			try {

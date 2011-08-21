@@ -20,35 +20,11 @@
  * Cast failure
  * @ingroup Core_Exceptions
  */
-class TypeCastException extends ArgumentTypeException
+class CastException extends Exception
 {
-	/**
-	 * @var string
-	 */
-	private $type;
-
-	/**
-	 * @var mixed
-	 */
-	private $value;
-
-	function __construct($type, $value, $message = 'type cast failed')
+	function __construct($type, $value)
 	{
-		$this->type =
-			is_object($type)
-				? get_class($type)
-				: $type;
-		$this->value = $value;
-
-		parent::__construct('value', $this->type, $message);
-	}
-
-	/**
-	 * @return mixed
-	 */
-	function getValue()
-	{
-		return $this->value;
+		parent::__construct('unable to cast ' . $value . ' to ' . $type);
 	}
 }
 
