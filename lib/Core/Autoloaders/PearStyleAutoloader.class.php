@@ -17,18 +17,22 @@
  ************************************************************************************************/
 
 /**
- * Factory for producing exceptions that wrap PHP errors.
+ * Resolver for classes located on PEAR notation
  *
  * @ingroup Core_Bootstrap
  */
-interface IErrorExceptionFactory
+class PearStyleAutoloader extends IncludePathAutoloader
 {
-	/**
-	 * Converts error to exception
-	 *
-	 * @return ErrorException
-	 */
-	static function makeException($errstr, $errno, $errfile, $errline);
+	function load($class)
+	{
+		if (strpos($class, "\0") !== false) {
+			return;
+		}
+
+		$classpath = str_replace('_', '/', $class);
+
+		parent::load($classpath);
+	}
 }
 
 ?>

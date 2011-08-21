@@ -464,14 +464,14 @@ final class Assert extends StaticClass
 	}
 
 	/**
-	 * Halts the execuition with the message. trigger_error and E_USER_ERROR is used
+	 * Halts the execuition with the message.
 	 */
 	private static function triggerError(array $args)
 	{
 		if (empty($args) || empty($args[0])) {
 			$args[0] = 'assertion failed';
 		}
-		
+
 		$string = call_user_func_array(array ('DebugUtils', 'sprintf'), $args);
 		throw new Exception($string);
 	}

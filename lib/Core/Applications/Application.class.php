@@ -32,7 +32,7 @@
  *
  * @ingroup App_Web
  */
-class SiteApplication
+abstract class Application
 {
 	/**
 	 * @var IRouter

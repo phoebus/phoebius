@@ -105,10 +105,10 @@ class SiteUrl extends HttpUrl
 	function getSubdomain()
 	{
 		if ($this->baseHost) {
-			return substr($this->host, 0, -(1 + strlen($this->baseHost)));
+			return substr($this->getHost(), 0, -(1 + strlen($this->baseHost)));
 		}
 		else {
-			return $this->host;
+			return $this->getHost();
 		}
 	}
 

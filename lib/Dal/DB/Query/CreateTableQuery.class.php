@@ -54,7 +54,7 @@ final class CreateTableQuery implements ISqlQuery
 
 		$queryParts[] = join(',', $this->commaSeparatedQueryParts);
 
-		$queryParts[] = StringUtils::DELIM_STANDART;
+		$queryParts[] = PHP_EOL;
 		$queryParts[] = ');';
 
 		return join('', $queryParts);
@@ -81,7 +81,7 @@ final class CreateTableQuery implements ISqlQuery
 	private function makeColumn(DBColumn $column, IDialect $dialect)
 	{
 		$this->commaSeparatedQueryParts[] =
-			StringUtils::DELIM_STANDART
+			PHP_EOL
 			. "\t"
 			. $column->toDialectString($dialect);
 	}

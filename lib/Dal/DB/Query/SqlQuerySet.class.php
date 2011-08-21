@@ -35,45 +35,45 @@ class SqlQuerySet implements ISqlQuery
 	{
 		$this->addQueries($queries);
 	}
-	
+
 	function addQuery(ISqlQuery $query)
 	{
 		$this->queries[] = $query;
-		
+
 		return $this;
 	}
-	
+
 	function addQueries(array $queries)
 	{
 		foreach ($queries as $query) {
 			$this->addQuery($query);
 		}
-		
+
 		return $this;
 	}
-	
+
 	function getQueries()
 	{
 		return $this->queries;
 	}
-	
-	function merge(SqlQuerySet $set) 
+
+	function merge(SqlQuerySet $set)
 	{
 		$this->queries = array_merge($this->queries, $set->queries);
-		
+
 		return $this;
 	}
 
 	function toDialectString(IDialect $dialect)
 	{
 		$sql = array();
-		
+
 		foreach ($this->queries as $query) {
 			$sql[] = $query->toDialectString($dialect);
 		}
-		
+
 		return join(
-			StringUtils::DELIM_STANDART . StringUtils::DELIM_STANDART, 
+			PHP_EOL . PHP_EOL,
 			$sql
 		);
 	}

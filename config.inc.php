@@ -19,54 +19,69 @@
 //
 // Overriddable constants:
 //
-// * PHOEBIUS_APP_ID - should be set in case when different application
-//						use the same Phoebius framework distribtuib
+// * PHOEBIUS_APPLICATION_ID - should be set in case when different application
+//						use the same Phoebius framework
 // * PHOEBIUS_TMP_ROOT - path to the tmp directory
-// * PHOEBIUS_LOADER - id of the Phoebius loader to use: ondemand, pathcache, classcache.
-//						See the loader/ directory, and consider overridable constants of
-//						desireable loader.
-// * PHOEBIUS_APP_ROOT - directory where the application resides; by default is the same as the
-//							the directory where Phoebius framework distribution resides
-// * PHOEBIUS_APP_VIEWS_ROOT - views' directory; PHOEBIUS_APP_ROOT/views by default.
-// * BUGS_EMAIL - email bugs to be send to.
 //
-
-define('PHOEBIUS_VERSION', '2.0.0-dev');
-define('PHOEBIUS_BASE_ROOT', dirname(__FILE__));
-
-if (!defined('PHOEBIUS_APP_ID')) {
-	define('PHOEBIUS_APP_ID', 'default');
-}
-
-if (!defined('PHOEBIUS_TMP_ROOT')) {
-	define(
-		'PHOEBIUS_TMP_ROOT',
-		sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Phoebius-v' . PHOEBIUS_VERSION . '-' . PHOEBIUS_APP_ID
-	);
-}
-
-if (!defined('PHOEBIUS_LOADER')) {
-	define('PHOEBIUS_LOADER', 'ondemand');
-}
-
-if (!defined('PHOEBIUS_APP_ROOT')) {
-	define('PHOEBIUS_APP_ROOT', PHOEBIUS_BASE_ROOT);
-}
-
-if (!defined('PHOEBIUS_APP_VIEWS_ROOT')) {
-	define('PHOEBIUS_APP_VIEWS_ROOT', PHOEBIUS_APP_ROOT . DIRECTORY_SEPARATOR . 'views');
-}
-
-define('PHOEBIUS_SHORT_PRODUCT_NAME', 'Phoebius v'.PHOEBIUS_VERSION);
-define('PHOEBIUS_FULL_PRODUCT_NAME', 'Phoebius framework v'.PHOEBIUS_VERSION);
-
+// Constants to be set:
+// * PHOEBIUS_APPLICATION_ENV
+// * PHOEBIUS_APPLICATION_ROOT
+//
 
 date_default_timezone_set('Europe/London');
 mb_internal_encoding("UTF-8");
 mb_regex_encoding("UTF-8");
 
-define('PHOEBIUS_TYPE_EXTENSION', '.class.php');
-define('PHOEBIUS_VIEW_EXTENSION', '.view.php');
+ob_start();
+error_reporting(E_ALL);
+
+// to catch fatal errors, register a shutdown function
+// and check error_get_last() within it. On the other hand,
+// do not even thing to throw exceptions out of it,
+// you can only notify via mail or smth like that
+set_error_handler('phoebius_error_catcher', E_ALL);
+function phoebius_error_catcher()
+{
+	$error = error_get_last();
+
+	// Handle error suppression with @ operator
+	if (!$error || !error_reporting()) {
+		return false;
+	}
+
+	throw new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
+}
+
+define('PHOEBIUS_VERSION', '2.0.0-dev');
+define('PHOEBIUS_PRODUCT_NAME', 'Phoebius framework v'.PHOEBIUS_VERSION);
+
+define('PHOEBIUS_CLASS_EXT', '.class.php');
+define('PHOEBIUS_VIEW_EXT', '.view.php');
+define('PHOEBIUS_CONFIG_PHP_EXT', '.config.php');
+define('PHOEBIUS_CONFIG_YML_EXT', '.yml');
+define('PHOEBIUS_CONFIG_XML_EXT', '.yml');
+
+define('PHOEBIUS_BASE_ROOT', dirname(__FILE__));
+
+if (!defined('PHOEBIUS_APPLICATION_ID')) {
+	define('PHOEBIUS_APPLICATION_ID', 'default');
+}
+
+if (!defined('PHOEBIUS_TMP_ROOT')) {
+	define(
+		'PHOEBIUS_TMP_ROOT',
+		sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Phoebius-v' . PHOEBIUS_VERSION . '-' . PHOEBIUS_APPLICATION_ID
+	);
+}
+
+if (!is_dir(PHOEBIUS_TMP_ROOT)) {
+	try {
+		mkdir(PHOEBIUS_TMP_ROOT, 0777, true);
+	}
+	catch (ErrorException $e) {
+		die('kernel panic: insufficient privileges to ' . PHOEBIUS_TMP_ROOT);
+	}
+}
 
 $phoebiusNamespaces = array(
 	'Core',
@@ -131,7 +146,6 @@ $phoebiusNamespaces = array(
 	'OQL2/SyntaxTree/Mutators',
 	'OQL2/SyntaxTree/Statements',
 );
-
 foreach ($phoebiusNamespaces as $namespace) {
 	set_include_path(
 		PHOEBIUS_BASE_ROOT . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $namespace
@@ -139,20 +153,4 @@ foreach ($phoebiusNamespaces as $namespace) {
 	);
 }
 
-require PHOEBIUS_BASE_ROOT . '/loader/' . PHOEBIUS_LOADER . '.loader.php';
 
-Exceptionizer::getInstance()
-	->register(E_ALL | E_STRICT, false, 'ExecutionContextException')
-	->setException(E_USER_ERROR, 'CompilationContextException');
-
-
-try {
-	$result = is_dir(PHOEBIUS_TMP_ROOT);
-
-	if (!$result) {
-		mkdir(PHOEBIUS_TMP_ROOT, 0777, true);
-	}
-}
-catch (ExecutionContextException $e) {
-	die('Insufficient privileges to a temporary root (' . PHOEBIUS_TMP_ROOT . '): ' . $e->getMessage());
-}
