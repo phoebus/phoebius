@@ -27,17 +27,17 @@ abstract class DBConstraint implements ISqlCastable
 	 * @var string
 	 */
 	private $name;
-	
+
 	/**
 	 * @var array
 	 */
 	private $fields;
-	
+
 	/**
 	 * @var DBTable
 	 */
 	private $table;
-	
+
 	/**
 	 * @param array of string $fields
 	 */
@@ -45,12 +45,12 @@ abstract class DBConstraint implements ISqlCastable
 	{
 		Assert::isScalar($name);
 		Assert::isNotEmpty($fields, 'constraint cannot be across zero fields');
-		
+
 		$this->name = $name;
 		$this->table = $table;
 		$this->fields = $fields;
 	}
-	
+
 	function getFields()
 	{
 		return $this->fields;
@@ -87,7 +87,7 @@ abstract class DBConstraint implements ISqlCastable
 	{
 		return 'CONSTRAINT ' . $dialect->quoteIdentifier($this->name);
 	}
-	
+
 	/**
 	 * Gets the list of covered fields as string
 	 * @param IDialect $dialect
@@ -95,8 +95,8 @@ abstract class DBConstraint implements ISqlCastable
 	 */
 	protected function getFieldsAsString(IDialect $dialect)
 	{
-		$fields = new SqlFieldArray($this->fields);
-		
+		$fields = new SqlFieldList($this->fields);
+
 		return $fields->toDialectString($dialect);
 	}
 }

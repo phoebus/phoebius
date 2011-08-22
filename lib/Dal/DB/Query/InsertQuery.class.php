@@ -80,9 +80,10 @@ class InsertQuery extends RowModificationQuery implements ISqlQuery
 	 */
 	private function getCompiledFields(IDialect $dialect)
 	{
-		$list = new SqlFieldArray($this->getRow()->getKeys());
-
-		return $list->toDialectString($dialect);
+		return
+			SqlFieldList::create()
+				->setList($this->getRow()->getFields())
+				->toDialectString($dialect);
 	}
 
 	/**
@@ -90,9 +91,10 @@ class InsertQuery extends RowModificationQuery implements ISqlQuery
 	 */
 	private function getCompiledValues(IDialect $dialect)
 	{
-		$list = new SqlValueExpressionArray($this->getRow()->getValues());
-
-		return $list->toDialectString($dialect);
+		return
+			SqlValueExpressionList::create()
+				->setList($this->getRow()->getValues())
+				->toDialectString($dialect);
 	}
 }
 

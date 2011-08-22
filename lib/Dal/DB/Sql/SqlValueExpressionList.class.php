@@ -22,14 +22,65 @@
  * @see ISqlValueExpression
  * @ingroup Dal_DB_Sql
  */
-class SqlValueExpressionArray extends TypedValueArray implements ISqlCastable
+class SqlValueExpressionList implements ISqlCastable
 {
 	/**
-	 * @param array $array initial ISqlValueExpression objects to be added to the value list
+	 * @var ISqlValueExpression[]
 	 */
-	function __construct(array $values = array())
+	private $list = array();
+
+	static function create()
 	{
-		parent::__construct('ISqlValueExpression', $values);
+		return new self;
+	}
+
+	/**
+	 * @return ISqlValueExpression
+	 */
+	function getFirst()
+	{
+		Assert::isNotEmpty($this->list);
+
+		return reset($this->list);
+	}
+
+	/**
+	 * @return ISqlValueExpression
+	 */
+	function getLast()
+	{
+		Assert::isNotEmpty($this->list);
+
+		return end($this->list);
+	}
+
+	function add(ISqlValueExpression $expression)
+	{
+		$this->list[] = $expression;
+
+		return $this;
+	}
+
+	function setList(array $list)
+	{
+		foreach ($list as $value) {
+			$this->add($value);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @return ISqlValueExpression[]
+	 */
+	function getList()
+	{
+		return $this->list;
+	}
+
+	function isEmpty()
+	{
+		return empty ($this->list);
 	}
 
 	function toDialectString(IDialect $dialect)

@@ -20,21 +20,46 @@
  * Represents a key=>value associative array of ISqlValueExpression.
  * @ingroup Dal_DB_Sql
  */
-final class SqlRow extends TypedCollection implements ISqlCastable
+final class SqlRow implements ISqlCastable
 {
 	/**
-	 * @param array set of value to be appened to the collection
+	 * @var ISqlValueExpression
 	 */
-	function __construct(array $array = array())
+	private $values = array();
+
+	function setValue($field, ISqlValueExpression $value)
 	{
-		parent::__construct('ISqlValueExpression', $array);
+		Assert::isScalar($field);
+
+		$this->values[$field] = $value;
+
+		return $this;
+	}
+
+	function setValues(array $values)
+	{
+		foreach ($values as $field => $value) {
+			$this->setValue($field, $value);
+		}
+
+		return $this;
+	}
+
+	function getFields()
+	{
+		return array_keys($this->values);
+	}
+
+	function getValues()
+	{
+		return $this->values;
 	}
 
 	function toDialectString(IDialect $dialect)
 	{
 		$fieldValueCompiledPairs = array();
 
-		foreach ($this->toArray() as $field => $value) {
+		foreach ($this->values as $field => $value) {
 			$fieldValueCompiledPairs[] =
 				  $dialect->quoteIdentifier($field) . '='
 				. $value->toDialectString($dialect);

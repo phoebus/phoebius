@@ -82,7 +82,7 @@ Database schema difference generator options:
 
   --compare=<schema>     domain XML to compare against.
                          This forces a --diff option to be switched on automatically.
-  
+
   --diff-file=<file>     write SQL difference script to <file>.
                          This forces a --diff option to be switched on automatically.
 
@@ -214,22 +214,22 @@ foreach ($args as $arg) {
 				$schemaFile = $v;
 				break;
 			}
-			
+
 			//
 			// diff
 			//
-			
+
 			case '--diff': {
 				$diff = true;
 				break;
 			}
-			
+
 			case '--compare': {
 				$diff = true;
 				$diffDomainFile = $v;
 				break;
 			}
-			
+
 			case '--diff-file': {
 				$diff = true;
 				$diffSqlFile = $v;
@@ -264,18 +264,18 @@ if (!$xmlSchema) {
 // loading config
 if ($config) {
 	$config = realpath($config);
-	
+
 	if (!$config) {
 		stop ('Config not found');
 	}
 }
 else {
 	message('Config is not specified...');
-	message('Trying to pick config.inc.php...');
-	$config = getcwd() . DIRECTORY_SEPARATOR . 'config.inc.php';
+	message('Trying to pick initalize.inc.php...');
+	$config = getcwd() . DIRECTORY_SEPARATOR . 'initalize.inc.php';
 	if (!file_exists($config)) {
 		message('Failed, using the default config.');
-		$config = realpath(dirname(__FILE__) . '/../config.inc.php');
+		$config = realpath(dirname(__FILE__) . '/../initalize.inc.php');
 	}
 }
 
@@ -352,22 +352,22 @@ try {
 				$dbObject->getDialect()
 			);
 	}
-	
+
 	if ($diff) {
 		message('Making diff...');
-		
+
 		$diffDomainFile = realpath($diffDomainFile);
 		if (!$diffDomainFile) {
 			stop ("Diff domain file is not specified");
 		}
-		
+
 		if (!$diffSqlFile) {
 			stop ("Diff schema file is not specified");
 		}
 		$dir = dirname($diffSqlFile);
 		if (!is_dir($dir))
 			mkdir ($dir, 0755, true);
-		
+
 		if (!$db && $ormDomain->getDbSchema()) {
 			$db = $ormDomain->getDbSchema();
 		}
@@ -387,15 +387,15 @@ try {
 		message ('Loading diff schema: ' . $diffDomainFile);
 		$domainBuilder = new XmlOrmDomainBuilder($diffDomainFile);
 		$diffOrmDomain = $domainBuilder->build();
-		
+
 		message ('Writing diff to ' . $diffSqlFile);
 		$dbDiff = new DBDiff();
-		
+
 		$schemaBuilderOld = new DBSchemaBuilder($diffOrmDomain);
 		$schemaOld = $schemaBuilderOld->build();
 		$schemaBuilderNew = new DBSchemaBuilder($ormDomain);
 		$schemaNew = $schemaBuilderNew->build();
-		
+
 		$dbDiff->make($schemaOld, $schemaNew);
 		file_put_contents($diffSqlFile, $dbDiff->toDialectString($dbObject->getDialect()));
 	}

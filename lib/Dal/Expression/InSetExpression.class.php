@@ -87,7 +87,8 @@ class InSetExpression implements ISubjective, IExpression
 			return null;
 		}
 
-		$values = new SqlValueExpressionArray($this->set);
+		$values = SqlValueExpressionList::create()
+					->setList($this->set);
 
 		$compiledSlices = array();
 

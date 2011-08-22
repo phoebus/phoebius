@@ -21,31 +21,40 @@
  *
  * @ingroup Orm_Query_Projections
  */
-final class ProjectionChain extends TypedValueArray implements IProjection
+final class ProjectionChain implements IProjection
 {
 	/**
-	 * @param array $array initial IProjection objects to be append to the value list
+	 * @var IProjection[]
 	 */
-	function __construct(array $array = array())
+	private $chain = array();
+
+	function add(IProjection $projection)
 	{
-		parent::__construct('IProjection', $array);
+		$this->chain[] = $projection;
+
+		return $this;
+	}
+
+	function isEmpty()
+	{
+		return empty ($this->chain);
 	}
 
 	function fill(SelectQuery $selectQuery, EntityQueryBuilder $entityQueryBuilder)
 	{
-		foreach ($this->toArray() as $projection) {
+		foreach ($this->chain as $projection) {
 			$projection->fill($selectQuery, $entityQueryBuilder);
 		}
 	}
 
 	function __clone()
 	{
-		$elements = $this->toArray();
+		$elements = $this->chain;
 
-		$this->erase();
+		$this->chain = array();
 
 		foreach ($elements as $element) {
-			$this->append(clone $element);
+			$this->chain[] = clone $element;
 		}
 	}
 }

@@ -109,7 +109,8 @@ class SqlFunction implements ISqlValueExpression, ISubjective
 		array_shift($args);
 
 		$this->name = $name;
-		$this->args = $args;
+		$this->args = SqlValueExpressionList::create()
+						->setList($args);
 	}
 
 	/**
@@ -141,8 +142,7 @@ class SqlFunction implements ISqlValueExpression, ISubjective
 			$compiledSlices[] = $this->aggregate;
 		}
 
-		$args = new SqlValueExpressionArray($this->args);
-		$compiledSlices[] = $args->toDialectString($dialect);
+		$compiledSlices[] = $this->args->toDialectString($dialect);
 
 		$compiledSlices[] = ')';
 
@@ -155,8 +155,11 @@ class SqlFunction implements ISqlValueExpression, ISubjective
 	{
 		$clone = new self ($this->name);
 
-		foreach ($this->args as $arg) {
-			$clone->args[] = $object->subject($arg, $this);
+		$args = $this->args->getList();
+		$this->args = new SqlValueExpressionList();
+
+		foreach ($args as $arg) {
+			$clone->args->add($object->subject($arg, $this));
 		}
 
 		return $clone;

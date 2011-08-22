@@ -29,17 +29,17 @@ class DBIndex implements ISqlCastable
 	 * @var string
 	 */
 	private $name;
-	
+
 	/**
 	 * @var DBTable
 	 */
 	private $table;
-	
+
 	/**
 	 * @var array
 	 */
 	private $fields;
-	
+
 	/**
 	 * @param array of string $fields
 	 */
@@ -47,12 +47,12 @@ class DBIndex implements ISqlCastable
 	{
 		Assert::isScalar($name);
 		Assert::isNotEmpty($fields, 'index cannot be across zero fields');
-	
+
 		$this->name = $name;
 		$this->table = $table;
 		$this->fields = $fields;
 	}
-	
+
 	/**
 	 * Gets the list of columns to be indexed
 	 */
@@ -80,16 +80,16 @@ class DBIndex implements ISqlCastable
 	{
 		return $this->name;
 	}
-	
+
 	function toDialectString(IDialect $dialect)
 	{
-		return 
-			'INDEX ' 
+		return
+			'INDEX '
 			. $dialect->quoteIdentifier($this->name)
 			. ' ON ' . $dialect->quoteIdentifier($this->table->getName())
 			. ' (' . $this->getFieldsAsString($dialect) . ')';
 	}
-	
+
 	/**
 	 * Gets the list of covered fields as string
 	 * @param IDialect $dialect
@@ -97,8 +97,8 @@ class DBIndex implements ISqlCastable
 	 */
 	protected function getFieldsAsString(IDialect $dialect)
 	{
-		$fields = new SqlFieldArray($this->fields);
-		
+		$fields = new SqlFieldList($this->fields);
+
 		return $fields->toDialectString($dialect);
 	}
 }

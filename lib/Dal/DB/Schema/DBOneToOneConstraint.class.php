@@ -24,12 +24,12 @@
 class DBOneToOneConstraint extends DBConstraint
 {
 	/**
-	 * @var SqlFieldArray
+	 * @var SqlFieldList
 	 */
 	private $fields;
 
 	/**
-	 * @var SqlFieldArray
+	 * @var SqlFieldList
 	 */
 	private $pkFields;
 
@@ -68,12 +68,12 @@ class DBOneToOneConstraint extends DBConstraint
 					join(', ', $pkFields)
 				);
 
-				$this->fields = new SqlFieldArray($fields);
-				$this->pkFields = new SqlFieldArray($pkFields);
+				$this->fields = new SqlFieldList($fields);
+				$this->pkFields = new SqlFieldList($pkFields);
 
 				$this->referencedTable = $referencedTable;
 				$this->associationBreakAction = $associationBreakAction;
-				
+
 				parent::__construct($name, $table, $fields);
 
 				return;

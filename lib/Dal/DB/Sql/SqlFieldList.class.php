@@ -21,8 +21,43 @@
  *
  * @ingroup Dal_DB_Sql
  */
-final class SqlFieldArray extends ValueArray implements ISqlCastable
+final class SqlFieldList implements ISqlCastable
 {
+	private $list = array();
+
+	static function create()
+	{
+		return new self;
+	}
+
+	function add($field)
+	{
+		Assert::isScalar($field);
+
+		$this->list[$field] = $field;
+
+		return $this;
+	}
+
+	function setList(array $list)
+	{
+		foreach ($list as $field) {
+			$this->add($field);
+		}
+
+		return $this;
+	}
+
+	function getList()
+	{
+		return $this->list;
+	}
+
+	function isEmpty()
+	{
+		return empty ($this->list);
+	}
+
 	function toDialectString(IDialect $dialect)
 	{
 		$quotedFields = array();

@@ -27,7 +27,7 @@ class DBTable
 	 * @var string
 	 */
 	private $name;
-	
+
 	/**
 	 * @var DBPrimaryKeyConstraint
 	 */
@@ -42,7 +42,7 @@ class DBTable
 	 * @var array of DBConstraint
 	 */
 	private $constraints = array();
-	
+
 	/**
 	 * @var array of DBIndex
 	 */
@@ -64,7 +64,7 @@ class DBTable
 			'name', 'columns', 'constraints', 'indexes'
 		);
 	}
-	
+
 	function __wakeup()
 	{
 		foreach ($this->constraints as $constraint) {
@@ -88,16 +88,14 @@ class DBTable
 	 * Adds a named DBColumn object to the table
 	 *
 	 * @param DBColumn $column a column to add to the table
-	 * @throws DuplicationException thrown when another column with the same name already added
+	 * @throws AssertException thrown when another column with the same name already added
 	 * @return DBTable itself
 	 */
 	function addColumn(DBColumn $column)
 	{
 		$name = $column->getName();
 
-		if (isset($this->columns[$name])) {
-			throw new DuplicationException('column', $name);
-		}
+		Assert::hasNoIndex($this->columns, $name, 'column %s already inside', $name);
 
 		$this->columns[$name] = $column;
 
@@ -136,7 +134,7 @@ class DBTable
 		if (!isset($this->columns[$name])) {
 			throw new ArgumentException('name', 'not found');
 		}
-		
+
 		unset ($this->columns[$name]);
 
 		return $this;
@@ -166,33 +164,20 @@ class DBTable
 	 * Adds a table constraint
 	 *
 	 * @param DBConstraint $constraint constraint to add
-	 * @throws DuplicationException thrown when another constaint with the same name already added
+	 * @throws AssertException thrown when another constaint with the same name already added
 	 * @return DBTable itself
 	 */
 	function addConstraint(DBConstraint $constraint)
 	{
 		$name = $constraint->getName();
 
-		if ($name) {
-			if (isset($this->constraints[$name])) {
-				throw new DuplicationException('constraint', $name);
-			}
-		}
-		else {
-			$name = 
-				'constraint_' .
-				join('_', $constraint->getFields()) 
-				. (sizeof($this->constraints) + 1);
-			$constraint->setName($name);
-		}
+		Assert::hasNoIndex($this->constraints, $name, 'constraint %s already inside', $name);
 
 		$this->constraints[$name] = $constraint;
-		
+
 		if ($constraint instanceof DBPrimaryKeyConstraint) {
-			if ($this->pk) {
-				throw new DuplicationException('constraint', $name);
-			}
-			
+			Assert::isNull($this->pk, 'PK constraint already set');
+
 			$this->pk = $constraint;
 		}
 
@@ -213,11 +198,11 @@ class DBTable
 		if (!isset($this->constraints[$name])) {
 			throw new ArgumentException('name', 'not found');
 		}
-		
+
 		if ($this->constraints[$name] === $this->pk) {
 			$this->pk = null;
 		}
-		
+
 		unset ($this->constraints[$name]);
 
 		return $this;
@@ -237,25 +222,14 @@ class DBTable
 	 * Adds a table index
 	 *
 	 * @param DBIndex $index index to add
-	 * @throws DuplicationException thrown when another index with the same name already added
+	 * @throws AssertException thrown when another index with the same name already added
 	 * @return DBTable itself
 	 */
 	function addIndex(DBIndex $index)
 	{
 		$name = $index->getName();
 
-		if ($name) {
-			if (isset($this->indexes[$name])) {
-				throw new DuplicationException('index', $name);
-			}
-		}
-		else {
-			$name = 
-				'index_' .
-				join('_', $index->getFields()) 
-				. (sizeof($this->indexes) + 1);
-			$index->setName($name);
-		}
+		Assert::hasNoIndex($this->indexes, $name, 'index %s already inside', $name);
 
 		$this->indexes[$name] = $index;
 
@@ -276,7 +250,7 @@ class DBTable
 		if (!isset($this->indexes[$name])) {
 			throw new ArgumentException('name', 'not found');
 		}
-		
+
 		unset ($this->indexes[$name]);
 
 		return $this;
@@ -291,41 +265,41 @@ class DBTable
 	{
 		return $this->indexes;
 	}
-	
+
 	function getQueries()
 	{
 		$yield = array(
 			new CreateTableQuery($this, true),
 		);
-		
+
 		if ($this->pk) {
 			$yield[] = new CreateConstraintQuery($this->pk);
 		}
-		
+
 		return $yield;
 	}
-	
+
 	function getConstraintQueries()
 	{
 		$queries = array();
-		
+
 		foreach ($this->constraints as $constraint) {
 			if ($constraint !== $this->pk) {
 				$queries[] = new CreateConstraintQuery($constraint);
 			}
 		}
-		
+
 		return $queries;
 	}
-	
+
 	function getIndexQueries()
 	{
 		$queries = array();
-		
+
 		foreach ($this->indexes as $index) {
 			$queries[] = new CreateIndexQuery($index);
 		}
-		
+
 		return $queries;
 	}
 }

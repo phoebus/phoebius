@@ -32,7 +32,7 @@ final class DBSchema implements ISqlCastable
 	 * Adds the DBTable object to the schema
 	 *
 	 * @param DBTable $table table to add
-	 * @throws DuplicationException thrown when another DBTable with the same name already added
+	 * @throws AssertException thrown when another DBTable with the same name already added
 	 * @return DBSchema itself
 	 */
 	function addTable(DBTable $table)

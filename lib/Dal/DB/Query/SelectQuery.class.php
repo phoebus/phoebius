@@ -36,13 +36,13 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 
 	/**
 	 * SELECT ... FROM
-	 * @var SqlValueExpressionArray
+	 * @var SqlValueExpressionList
 	 */
 	private $get;
 
 	/**
 	 * FROM ...
-	 * @var SqlValueExpressionArray
+	 * @var SqlValueExpressionList
 	 */
 	private $sources;
 
@@ -60,7 +60,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 
 	/**
 	 * GROUP BY ...
-	 * @var SqlValueExpressionArray
+	 * @var SqlValueExpressionList
 	 */
 	private $groups;
 
@@ -94,10 +94,10 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 
 	function __construct()
 	{
-		$this->get = new SqlValueExpressionArray;
-		$this->sources = new SqlValueExpressionArray;
+		$this->get = new SqlValueExpressionList;
+		$this->sources = new SqlValueExpressionList;
 		$this->order = new OrderChain;
-		$this->groups = new SqlValueExpressionArray;
+		$this->groups = new SqlValueExpressionList;
 	}
 
 	function __clone()
@@ -119,12 +119,12 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 	function setDistinct($flag = true)
 	{
 		Assert::isBoolean($flag);
-		
+
 		$this->distinct = $flag;
 
 		return $this;
 	}
-	
+
 	/**
 	 * If query is distinct
 	 * @return Boolean
@@ -192,7 +192,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 	 */
 	function addSelectExpression(ISqlValueExpression $expression)
 	{
-		$this->get->append($expression);
+		$this->get->add($expression);
 
 		return $this;
 	}
@@ -242,7 +242,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 	 */
 	function addSource(SelectQuerySource $source)
 	{
-		$this->sources->append($source);
+		$this->sources->add($source);
 
 		return $this;
 	}
@@ -273,7 +273,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 	 */
 	function addGroupBy(ISqlValueExpression $expression)
 	{
-		$this->groups->append($expression);
+		$this->groups->add($expression);
 
 		return $this;
 	}
@@ -300,7 +300,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 	 */
 	function addOrderBy(OrderBy $expression)
 	{
-		$this->order->append($expression);
+		$this->order->add($expression);
 
 		return $this;
 	}
@@ -314,7 +314,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 
 		return $this;
 	}
-	
+
 	function getLimit()
 	{
 		return $this->limit;
@@ -329,7 +329,7 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 
 		return $this;
 	}
-	
+
 	function getOffset()
 	{
 		return $this->offset;
