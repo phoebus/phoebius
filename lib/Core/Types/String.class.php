@@ -21,8 +21,22 @@
  *
  * @ingroup Core_Types
  */
-class String extends Scalar
+class String extends Primitive
 {
+	static function getOrmPropertyType(AssociationMultiplicity $multiplicity)
+	{
+		$type = new DBType(
+			DBType::VARCHAR,
+			/* is nullable */$multiplicity->isNullable(),
+			/* size */null,
+			/* precision */null,
+			/* scale */null,
+			/* is generated */false
+		);
+
+		return $type->getOrmPropertyType();
+	}
+
 	static function cast($value)
 	{
 		return new self ($value);

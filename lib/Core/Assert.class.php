@@ -505,14 +505,13 @@ final class Assert extends StaticClass
 			$params = func_get_args();
 			foreach ($params as &$param) {
 				if (is_object($param)) {
-					if (method_exists($param, '__toString')) {
-						$param = $param->__toString();
+					$obj = $param;
+					$param = get_class($obj);
+					if (method_exists($obj, '__toString')) {
+						$param .= ':' . $obj->__toString();
 					}
-					else if (method_exists($param, 'toString')) {
-						$param = $param->toString();
-					}
-					else {
-						$param = get_class($param);
+					else if (method_exists($obj, 'toString')) {
+						$param .= ':' . $obj->toString();
 					}
 				}
 				else if (is_array($param)) {

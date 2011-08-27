@@ -21,7 +21,7 @@
  *
  * @ingroup Core_Types
  */
-final class Boolean extends Scalar
+final class Boolean extends Primitive
 {
 	static function cast($value)
 	{

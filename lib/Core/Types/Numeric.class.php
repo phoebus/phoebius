@@ -21,13 +21,8 @@
  *
  * @ingroup Core_Types
  */
-abstract class Numeric extends Scalar
+abstract class Numeric extends Primitive
 {
-	static function cast($value)
-	{
-		return new self ($value);
-	}
-
 	function setValue($value)
 	{
 		if (is_string($value)) {

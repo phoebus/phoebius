@@ -17,30 +17,12 @@
  ************************************************************************************************/
 
 /**
- * Represens a box for any scalar
+ * Command line application
  *
- * @ingroup Core_Types
+ * @ingroup App_Web
  */
-class Scalar extends Primitive
+class CliApplication extends Application
 {
-	static function cast($value)
-	{
-		return new self ($value);
-	}
-
-	static function getOrmPropertyType(AssociationMultiplicity $multiplicity)
-	{
-		$type = new DBType(
-			DBType::VARCHAR,
-			/* is nullable */$multiplicity->isNullable(),
-			/* size */null,
-			/* precision */null,
-			/* scale */null,
-			/* is generated */false
-		);
-
-		return $type->getOrmPropertyType();
-	}
 }
 
 ?>

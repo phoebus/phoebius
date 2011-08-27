@@ -17,25 +17,25 @@
  ************************************************************************************************/
 
 /**
- * Represents a box for decimal primitives (float, integer, etc)
+ * Application infrastructure initializer.
  *
- * @ingroup Core_Types
+ * Grabs the standart incoming request, wraps it with appropriate objects, and handles the request
+ * by passing those objects to the corresponding route.
+ *
+ * Consider index.php example:
+ * @code
+ * $app = new SiteApplication(new ChainedRouter);
+ * $app->run();
+ * @endcode
+ *
+ * The best practise is to implement your own SiteApplication class by extending this one
+ *
+ * @ingroup App_Web
  */
-abstract class Decimal extends Numeric
+class WebApplication extends Application
 {
-	protected function isValidValue($value)
-	{
-		if (strlen((string)$value) > 0 && $value{0} == '+') {
-			$value = substr($value, 1);
-			if (empty($value)) {
-				$value = 0;
-			}
-		}
+	private $router;
 
-		return
-			// http://www.php.net/manual/en/function.is-numeric.php#76094
-			((string)(float)$value) === (preg_replace('/(\.0*)$/', '', (string)$value));
-	}
 }
 
 ?>
