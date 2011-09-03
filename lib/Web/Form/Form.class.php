@@ -53,11 +53,6 @@ class Form
 	private $errors = array();
 
 	/**
-	 * @var bool
-	 */
-	private $hasInnerErrors = false;
-
-	/**
 	 * @param string $id Form identifier
 	 * @param HttpUrl $action form action (url to which it will be sumbitted); may be null
 	 * @param RequestMethod $method action method, default is get
@@ -171,8 +166,6 @@ class Form
 					: null;
 
 			$result = $control->importValue($value);
-			if (!$result)
-				$this->hasInnerErrors = true;
 		}
 
 		return !$this->hasErrors();
@@ -181,7 +174,6 @@ class Form
 	function reset()
 	{
 		$this->errors = array();
-		$this->hasInnerErrors = false;
 		foreach ($this->controls as $control) {
 			$control->reset();
 		}
@@ -242,7 +234,7 @@ class Form
 
 	function hasErrors()
 	{
-		return !empty($this->errors) || $this->hasInnerErrors;
+		return !empty($this->errors) || $this->hasInnerErrors();
 	}
 
 	function hasFormErrors()
@@ -252,7 +244,10 @@ class Form
 
 	function hasInnerErrors()
 	{
-		return $this->hasInnerErrors;
+		foreach ($this->getControls() as $control) {
+			if ($control->hasError())
+				return true;
+		}
 	}
 
 	function hasError($id)
