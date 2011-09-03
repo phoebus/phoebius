@@ -17,18 +17,6 @@
  ************************************************************************************************/
 
 /**
- * Application infrastructure initializer.
- *
- * Grabs the standart incoming request, wraps it with appropriate objects, and handles the request
- * by passing those objects to the corresponding route.
- *
- * Consider index.php example:
- * @code
- * $app = new SiteApplication(new ChainedRouter);
- * $app->run();
- * @endcode
- *
- * The best practise is to implement your own SiteApplication class by extending this one
  *
  * @ingroup App_Web
  */

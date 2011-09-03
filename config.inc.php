@@ -28,12 +28,10 @@
 // * PHOEBIUS_APPLICATION_ROOT
 //
 
+error_reporting(E_ALL);
 date_default_timezone_set('Europe/London');
 mb_internal_encoding("UTF-8");
 mb_regex_encoding("UTF-8");
-
-ob_start();
-error_reporting(E_ALL);
 
 // to catch fatal errors, register a shutdown function
 // and check error_get_last() within it. On the other hand,
@@ -59,7 +57,7 @@ define('PHOEBIUS_CLASS_EXT', '.class.php');
 define('PHOEBIUS_VIEW_EXT', '.view.php');
 define('PHOEBIUS_CONFIG_PHP_EXT', '.config.php');
 define('PHOEBIUS_CONFIG_YML_EXT', '.yml');
-define('PHOEBIUS_CONFIG_XML_EXT', '.yml');
+define('PHOEBIUS_CONFIG_XML_EXT', '.xml');
 
 define('PHOEBIUS_BASE_ROOT', dirname(__FILE__));
 
@@ -85,6 +83,8 @@ if (!is_dir(PHOEBIUS_TMP_ROOT)) {
 
 $phoebiusNamespaces = array(
 	'Core',
+	'Core/Applications',
+	'Core/Autoloaders',
 	'Core/Exceptions',
 	'Core/Patterns',
 	'Core/Types',
