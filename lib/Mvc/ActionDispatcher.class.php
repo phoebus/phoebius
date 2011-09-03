@@ -73,14 +73,14 @@ class ActionDispatcher implements IDispatcher
 
 		$result = $this->invoke($controllerObject, $rc->getMethod($methodName));
 
-		if (is_scalar($result)) {
-			$result = new ContentResult($result);
-		}
-		else if (is_array($result)) {
+		if (empty($result) || is_array($result)) {
 			$result = new ViewResult(
 				new View("{$routeData['controller']}/{$routeData['action']}.view.php"),
-				$result
+				is_array($result) ? $result : array()
 			);
+		}
+		else if (is_scalar($result)) {
+			$result = new ContentResult($result);
 		}
 
 
