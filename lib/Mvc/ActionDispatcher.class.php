@@ -66,7 +66,7 @@ class ActionDispatcher implements IDispatcher
 
 		if (!$rc->hasMethod($methodName))
 			throw new DispatchException(
-				$className . '::' . $methodName . 'not found',
+				$className . '::' . $methodName . ' not found',
 				$routeData,
 				$request
 			);
@@ -76,7 +76,7 @@ class ActionDispatcher implements IDispatcher
 		if (is_scalar($result)) {
 			$result = new ContentResult($result);
 		}
-		else if (array($result)) {
+		else if (is_array($result)) {
 			$result = new ViewResult(
 				new View("{$routeData['controller']}/{$routeData['action']}.view.php"),
 				$result

@@ -16,19 +16,60 @@
  *
  ************************************************************************************************/
 
-class RouteData extends Collection
+class RouteData implements  ArrayAccess
 {
 	private $route;
 	private $router;
-	
+	private $values = array();
+
 	function __construct(Route $route, Router $router, array $values = array())
 	{
 		$this->routeObject = $route;
 		$this->router = $router;
-		
-		parent::__construct($values);
+		$this->values = $values;
 	}
-	
+
+	function __isset($name)
+	{
+		return isset($this->values[$name]);
+	}
+
+	function __get($name)
+	{
+		return $this->values[$name];
+	}
+
+	function __set($name, $value)
+	{
+		$this->values[$name] = $value;
+	}
+
+	function offsetExists($name)
+	{
+		return isset($this->values[$name]);
+	}
+
+	function offsetGet($name)
+	{
+		return $this->values[$name];
+	}
+
+	function offsetSet($name, $value)
+	{
+		$this->values[$name] = $value;
+	}
+
+	function offsetUnset($name)
+	{
+		unset($this->values[$name]);
+	}
+
+	function toArray()
+	{
+		return $this->values;
+	}
+
+
 	/**
 	 * @return Route
 	 */
@@ -36,7 +77,7 @@ class RouteData extends Collection
 	{
 		return $this->route;
 	}
-	
+
 	/**
 	 * @return Router
 	 */

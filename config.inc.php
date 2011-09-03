@@ -132,8 +132,9 @@ $phoebiusNamespaces = array(
 	'Web',
 	'Web/Form',
 	'Web/Form/controls',
+	'Web/Http',
 	'Web/UrlRouting',
-	'Web/Exceptions',
+	'Web/UrlRouting/Exceptions',
 
 	// OQL2
 	'OQL2',

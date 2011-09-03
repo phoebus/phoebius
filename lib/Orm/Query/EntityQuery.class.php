@@ -217,7 +217,7 @@ final class EntityQuery implements ISqlSelectQuery
 	 */
 	function addOrderBy(OrderBy $expression)
 	{
-		$this->order->append($expression);
+		$this->order->add($expression);
 
 		return $this;
 	}
@@ -228,7 +228,7 @@ final class EntityQuery implements ISqlSelectQuery
 
 		return $this;
 	}
-	
+
 	function getLimit()
 	{
 		return $this->limit;
@@ -240,7 +240,7 @@ final class EntityQuery implements ISqlSelectQuery
 
 		return $this;
 	}
-	
+
 	function getOffset()
 	{
 		return $this->offset;
