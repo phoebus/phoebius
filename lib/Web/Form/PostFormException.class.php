@@ -19,7 +19,7 @@
 /**
  * @ingroup Form
  */
-class PostFormException extends ApplicationException
+class PostFormException extends Exception
 {
 }
 

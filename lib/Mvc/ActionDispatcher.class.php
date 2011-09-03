@@ -224,7 +224,7 @@ class ActionDispatcher implements IDispatcher
 	protected function getClassValue($name, ReflectionClass $class, $value)
 	{
 		if (is_object($value)) {
-			if ($class->isSubclassOf($value)) {
+			if (is_a($value, $class->getName())) {
 				return $value;
 			}
 		}

@@ -71,6 +71,13 @@ interface IFormControl
 	function getError();
 
 	/**
+	 * @abstract
+	 * @param FormControlError $error
+	 * @return IFormControl
+	 */
+	function setError(FormControlError $error);
+
+	/**
 	 * @return string
 	 */
 	function getErrorMessage();

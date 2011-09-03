@@ -19,7 +19,7 @@
 /**
  * @ingroup Form
  */
-final class FormControlError extends Enumeration
+class FormControlError extends Enumeration
 {
 	const MISSING = 'missing'; // nothing to import
 	const INVALID = 'invalid'; // unexpected value type (won't be imported)
