@@ -69,7 +69,7 @@ abstract class RowModificationQuery
 	function setValues(array $values)
 	{
 		foreach ($values as $field => $value) {
-			$this->row->set($field, $value);
+			$this->row->setValue($field, $value);
 		}
 
 		return $this;

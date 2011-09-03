@@ -126,7 +126,7 @@ class WebResponse
 	{
 		Assert::isFalse($this->isStarted, 'request already started');
 
-		$id .= sha1(PHOEBIUS_APP_ID);
+		$id .= sha1(PHOEBIUS_APPLICATION_ID);
 
 		if (!isset($this->sessions[$id])) {
 			$this->sessions[$id] = $s = new Session($id, $this);

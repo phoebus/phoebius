@@ -20,7 +20,7 @@
  * Thrown when the database object requested by a query cannot be fetched
  * @ingroup Dal_DB_Exceptions
  */
-class DBObjectNotFoundException extends DataNotFoundException
+class DBObjectNotFoundException extends Exception
 {
 	/**
 	 * @var ISqlQuery
