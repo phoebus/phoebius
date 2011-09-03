@@ -273,7 +273,7 @@ class WebRequest implements ArrayAccess
 		}
 
 		// fasten to the current server to avoid key haching over different apps built on the framework
-		$items[] = PHOEBIUS_APP_ID;
+		$items[] = PHOEBIUS_APPLICATION_ID;
 
 		$string = join('', $items);
 
