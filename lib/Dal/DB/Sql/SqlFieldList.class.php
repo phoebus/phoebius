@@ -25,9 +25,14 @@ final class SqlFieldList implements ISqlCastable
 {
 	private $list = array();
 
-	static function create()
+	static function create(array $list = array())
 	{
-		return new self;
+		return new self ($list);
+	}
+
+	function __construct(array $list = array())
+	{
+		$this->setList($list);
 	}
 
 	function add($field)

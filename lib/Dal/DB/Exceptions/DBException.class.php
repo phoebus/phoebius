@@ -21,7 +21,7 @@
  * exception as base for others
  * @ingroup Dal_DB_Exceptions
  */
-abstract class DBException extends ApplicationException
+abstract class DBException extends Exception
 {
 	// nothing here
 }

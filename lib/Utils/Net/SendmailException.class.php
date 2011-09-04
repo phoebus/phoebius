@@ -19,7 +19,7 @@
 /**
  * @ingroup Util_Web
  */
-final class SendmailException extends ApplicationException
+final class SendmailException extends Exception
 {
 }
 
