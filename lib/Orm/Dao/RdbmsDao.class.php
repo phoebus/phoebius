@@ -401,7 +401,7 @@ class RdbmsDao implements IOrmEntityAccessor
 			->setValues($this->map->disassemble($entity))
 			->setCondition(
 				EntityQuery::create($this->entity)
-					->where(Expression::eq($this->identifier, $entity->_getId()))
+					->setCondition(Expression::eq($this->identifier, $entity->_getId()))
 					->toExpression()
 			)
 		);
