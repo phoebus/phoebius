@@ -45,7 +45,7 @@ abstract class CodeConstructor
 	 */
 	protected function getFileHeader()
 	{
-		$product = PHOEBIUS_FULL_PRODUCT_NAME;
+		$product = PHOEBIUS_PRODUCT_NAME;
 		$now = date('Y/m/d H:i');
 		$message = $this->getHeaderMessage();
 

@@ -95,7 +95,7 @@ final class Assert extends StaticClass
 	 */
 	static function hasNoIndex(array $list, $key, $message = null)
 	{
-		if (!array_key_exists($key, $list)) {
+		if (array_key_exists($key, $list)) {
 			if (!$message) {
 				$args = array(
 					'%s is already defined inside an array %s',

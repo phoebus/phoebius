@@ -47,7 +47,7 @@ class SqlSchemaConstructor
 	function make(IOutput $writeStream, IDialect $dialect)
 	{
 		$now = date('Y/m/d H:i');
-		$product = PHOEBIUS_FULL_PRODUCT_NAME;
+		$product = PHOEBIUS_PRODUCT_NAME;
 
 		$start = <<<EOT
 --

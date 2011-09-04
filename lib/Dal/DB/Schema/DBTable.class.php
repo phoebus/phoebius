@@ -95,7 +95,7 @@ class DBTable
 	{
 		$name = $column->getName();
 
-		Assert::hasNoIndex($this->columns, $name, 'column %s already inside', $name);
+		Assert::hasNoIndex($this->columns, $name, 'column %s already inside %s', $name, $this->getName());
 
 		$this->columns[$name] = $column;
 

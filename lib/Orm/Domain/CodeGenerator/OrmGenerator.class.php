@@ -122,7 +122,7 @@ class OrmGenerator
 			)
 			. DIRECTORY_SEPARATOR
 			. $ccc->getClassName()
-			. PHOEBIUS_TYPE_EXTENSION;
+			. PHOEBIUS_CLASS_EXT;
 
 		if (
 				!$ccc->isPublicEditable()
