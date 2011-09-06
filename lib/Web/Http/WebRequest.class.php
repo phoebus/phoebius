@@ -75,9 +75,10 @@ class WebRequest implements ArrayAccess
 		// GPCF
 		$this->allVars = array_replace_recursive($cookieVars, $getVars, $postVars, $filesVars);
 
+		list($host,) = explode(":", $this->serverVars['HTTP_HOST'], 2);
 		$this->httpUrl = SiteUrl::import(
 			$this->isSecured() ? 'https' : 'http',
-			$this->serverVars['HTTP_HOST'],
+			$host,
 			$this->serverVars['SERVER_PORT'],
 			$this->serverVars['REQUEST_URI'],
 			$baseHost, $baseUri
