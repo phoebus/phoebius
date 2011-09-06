@@ -38,16 +38,14 @@ mb_regex_encoding("UTF-8");
 // do not even thing to throw exceptions out of it,
 // you can only notify via mail or smth like that
 set_error_handler('phoebius_error_catcher', E_ALL);
-function phoebius_error_catcher()
+function phoebius_error_catcher($errno, $errstr, $errfile, $errline)
 {
-	$error = error_get_last();
-
 	// Handle error suppression with @ operator
-	if (!$error || !error_reporting()) {
+	if (!error_reporting()) {
 		return false;
 	}
 
-	throw new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']);
+	throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 define('PHOEBIUS_VERSION', '2.0.0-dev');

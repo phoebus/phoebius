@@ -57,14 +57,14 @@ class OrmMap implements IOrmEntityMapper
 				}
 
 				if ($property->getMultiplicity()->is(AssociationMultiplicity::ZERO_OR_ONE)) {
-					continue;
+					// do nothing
 				}
 
-				Assert::isUnreachable(
-					'%s::%s cannot be valueless',
-					get_class($entity),
-					$property->getName()
-				);
+//				Assert::isUnreachable(
+//					'%s::%s cannot be valueless',
+//					get_class($entity),
+//					$property->getName()
+//				);
 			}
 
 			$fields = array_combine(

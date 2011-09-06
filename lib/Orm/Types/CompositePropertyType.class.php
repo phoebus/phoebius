@@ -136,15 +136,15 @@ final class CompositePropertyType extends OrmPropertyType
 			$property->isIdentifier()
 		);
 	}
-	
+
 	function getProperties(OrmProperty $owner)
 	{
 		$yield = array();
-		
+
 		foreach ($this->entity->getLogicalSchema()->getProperties() as $property) {
 			$yield[] = $this->getVirtualProperty($property->getName(), $owner);
 		}
-		
+
 		return $yield;
 	}
 
@@ -189,8 +189,8 @@ final class CompositePropertyType extends OrmPropertyType
 	{
 		return count($this->getSqlTypes());
 	}
-	
-	function getEntityProperty(EntityPropertyPath $path, OrmProperty $owner) 
+
+	function getEntityProperty(EntityPropertyPath $path, OrmProperty $owner)
 	{
 		Assert::isFalse(
 			$path->isEmpty(),
@@ -198,9 +198,9 @@ final class CompositePropertyType extends OrmPropertyType
 			$path->getFullPath(),
 			$path->getCurrentPath()
 		);
-		
+
 		$vOwner = $this->getVirtualProperty($path->getNextChunk(), $owner);
-		
+
 		return $vOwner->getEntityProperty($path->peek());
 	}
 
