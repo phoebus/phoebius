@@ -440,7 +440,7 @@ class XmlOrmDomainBuilder
 				);
 			}
 			else {
-				return new CompositePropertyType($class);
+				return new CompositePropertyType($class, $multiplicity);
 			}
 		}
 		else if (DBType::hasMember($name)) {

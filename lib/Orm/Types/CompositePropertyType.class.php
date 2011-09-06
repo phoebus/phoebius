@@ -80,12 +80,18 @@ final class CompositePropertyType extends OrmPropertyType
 	private $sqlTypes;
 
 	/**
+	 * @var AssociationMultiplicity
+	 */
+	private $multiplicity;
+
+	/**
 	 * @param IMappable $entity entity to handle composite property
 	 */
-	function __construct(IMappable $entity)
+	function __construct(IMappable $entity, AssociationMultiplicity $multiplicity)
 	{
 		$this->entity = $entity;
 		$this->entityClass = $this->entity->getLogicalSchema()->getEntityName();
+		$this->multiplicity = $multiplicity;
 	}
 
 	/**
@@ -155,6 +161,13 @@ final class CompositePropertyType extends OrmPropertyType
 
 	function assemble(array $tuple, FetchStrategy $fetchStrategy)
 	{
+		if ($this->multiplicity->is(AssociationMultiplicity::ZERO_OR_ONE)) {
+			$nullFlag = array_pop($tuple);
+
+			if ($nullFlag)
+				return null;
+		}
+
 		return $this->entity->getMap()->assemble(
 			$this->entity->getLogicalSchema()->getNewEntity(),
 			$tuple,
@@ -164,7 +177,21 @@ final class CompositePropertyType extends OrmPropertyType
 
 	function disassemble($value)
 	{
-		return $this->entity->getMap()->disassemble($value);
+		if ($this->multiplicity->is(AssociationMultiplicity::ZERO_OR_ONE)) { // nullable
+			if ($value)
+				$tuple = $this->entity->getMap()->disassemble($value);
+			else
+				$tuple = array_fill(0, sizeof($this->getSqlTypes()) - 1, new SqlValue(null));
+
+			$tuple[] = new SqlBooleanValue($value ? false : true);
+
+			return $tuple;
+		}
+		else {
+			Assert::isNotNull($value, 'composite %s cannot be empty', $this->entityClass);
+
+			return $this->entity->getMap()->disassemble($value);
+		}
 	}
 
 	function getSqlTypes()
@@ -180,6 +207,9 @@ final class CompositePropertyType extends OrmPropertyType
 
 				$this->sqlTypes = array_merge($this->sqlTypes, $fields);
 			}
+
+			if ($this->multiplicity->is(AssociationMultiplicity::ZERO_OR_ONE))
+				$this->sqlTypes["_is_null"] = new DBType(DBType::BOOLEAN, true);
 		}
 
 		return $this->sqlTypes;
@@ -208,6 +238,7 @@ final class CompositePropertyType extends OrmPropertyType
 	{
 		return array(
 			$this->entityClass . '::orm()',
+			'new AssociationMultiplicity(AssociationMultiplicity::' . $this->multiplicity->getId() . ')',
 		);
 	}
 }
