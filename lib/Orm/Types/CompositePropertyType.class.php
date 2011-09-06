@@ -183,7 +183,7 @@ final class CompositePropertyType extends OrmPropertyType
 			else
 				$tuple = array_fill(0, sizeof($this->getSqlTypes()) - 1, new SqlValue(null));
 
-			$tuple[] = new SqlBooleanValue($value ? false : true);
+			$tuple[] = new SqlBooleanValue($value ? null : true);
 
 			return $tuple;
 		}
