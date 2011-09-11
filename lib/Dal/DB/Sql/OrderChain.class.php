@@ -40,6 +40,11 @@ class OrderChain implements ISubjective, ISqlCastable
 		return $this;
 	}
 
+	function getList()
+	{
+		return $this->chain->getList();
+	}
+
 	function isEmpty()
 	{
 		return $this->chain->isEmpty();

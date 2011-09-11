@@ -85,6 +85,11 @@ class Form
 		return $this->id;
 	}
 
+	function getAction()
+	{
+		return $this->action;
+	}
+
 	/**
 	 * @return FormEnctype
 	 */

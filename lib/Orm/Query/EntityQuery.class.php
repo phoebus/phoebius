@@ -275,7 +275,7 @@ final class EntityQuery implements ISqlSelectQuery
 			);
 		}
 
-		foreach ($this->order as $orderBy) {
+		foreach ($this->order->getList() as $orderBy) {
 			$selectQuery->addOrderBy(
 				$orderBy->toSubjected($queryBuilder)
 			);
@@ -306,7 +306,7 @@ final class EntityQuery implements ISqlSelectQuery
 	function toExpression()
 	{
 		if (!$this->condition) {
-			return new ExpressionChain;
+			return new ExpressionChain(ExpressionChainLogicalOperator::conditionAnd());
 		}
 
 		$eqb = new EntityQueryBuilder($this->entity);

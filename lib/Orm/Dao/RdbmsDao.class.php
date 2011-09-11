@@ -322,7 +322,7 @@ class RdbmsDao implements IOrmEntityAccessor
 	{
 		return
 			EntityQuery::create($this->entity)
-				->where(
+				->setCondition(
 					Expression::eq($this->identifier, $id)
 				)
 				->delete();
