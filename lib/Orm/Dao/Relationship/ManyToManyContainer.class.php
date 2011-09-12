@@ -62,7 +62,7 @@ class ManyToManyContainer extends Container
 
 		$query = clone $this->getQuery();
 		$alias = get_class($this) . '_counter';
-		$query->get(
+		$query->addProjection(
 			Projection::count(
 				$this->getChildren()->getLogicalSchema()->getIdentifier(),
 				$alias
@@ -104,7 +104,7 @@ class ManyToManyContainer extends Container
 		// delete relations
 		if (sizeof($this->getLostTracked())) {
 			EntityQuery::create($this->mtm->getProxy())
-				->where(
+				->setCondition(
 					Expression::in(
 						$this->mtm->getEncapsulantProxyProperty(),
 						$this->getLostTracked()
@@ -136,7 +136,7 @@ class ManyToManyContainer extends Container
 		Assert::isFalse($this->isReadonly(), 'cannot drop readonly collections');
 
 		$query = EntityQuery::create($this->mtm->getProxy())
-			->where(
+			->setCondition(
 				Expression::eq(
 					$this->mtm->getContainerProxyProperty(),
 					$this->getParentObject()
@@ -197,7 +197,7 @@ class ManyToManyContainer extends Container
 		);
 
 		$columnName = $this->mtm->getContainerProxyProperty()->getField();
-		$query->andWhere(
+		$query->setWhere(
 			Expression::eq(
 				new SqlColumn(
 					$columnName,

@@ -100,13 +100,15 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 
 	function toHtml(array $htmlAttributes = array())
 	{
-		Assert::isUnreachable(
-			'Use foreach(%s as $control) instead',
-			get_class($this)
-		);
+		$yield = '';
+		foreach ($this->getControls() as $control) {
+			$yield .= $control->toHtml($htmlAttributes);
+		}
+
+		return $yield;
 	}
 
-	protected function setError(FormControlError $error)
+	function setError(FormControlError $error)
 	{
 		Assert::isFalse(
 			$error->is(FormControlError::MISSING),
