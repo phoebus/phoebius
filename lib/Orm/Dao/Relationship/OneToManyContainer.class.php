@@ -98,7 +98,7 @@ class OneToManyContainer extends Container
 			$query = new EntityQuery($this->getChildren());
 			$this->fillQuery($query);
 
-			$query->andWhere(
+			$query->setCondition(
 				Expression::in(
 					$this->getChildren()->getLogicalSchema()->getIdentifier(),
 					$this->getLostTracked()

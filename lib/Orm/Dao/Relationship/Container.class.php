@@ -230,7 +230,7 @@ abstract class Container implements IteratorAggregate
 
 		$list = array();
 		foreach ($this->list as $object) {
-			$list[spl_object_hash($object)] = $object;
+			$list[$object->_getId()] = $object;
 		}
 
 		$this->list = array_values($list);
@@ -271,7 +271,7 @@ abstract class Container implements IteratorAggregate
 	protected function trackClones()
 	{
 		foreach ($this->list as $object) {
-			$this->tracked[] = spl_object_hash($object);
+			$this->tracked[$object->_getId()] = $object;
 		}
 	}
 
@@ -284,8 +284,7 @@ abstract class Container implements IteratorAggregate
 		$yield = array();
 
 		foreach ($this->list as $object) {
-			$hash = spl_object_hash($object);
-			if (!in_array($hash, $this->tracked)) {
+			if (!isset($this->tracked[$object->_getId()])) {
 				$yield[] = $object;
 			}
 		}
@@ -300,18 +299,12 @@ abstract class Container implements IteratorAggregate
 	 */
 	protected function getLostTracked()
 	{
-		$yield = array();
-		foreach ($this->tracked as $hash) {
-			foreach ($this->list as $object) {
-				if ($hash == spl_object_hash($object)) { // preserved
-					continue (2);
-				}
-			}
-
-			$yield[] = $object;
+		$lost = $this->tracked;
+		foreach ($this->list as $object) {
+			unset ($lost[$object->_getId()]);
 		}
 
-		return $yield;
+		return $lost;
 	}
 }
 

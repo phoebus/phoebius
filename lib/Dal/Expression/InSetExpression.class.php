@@ -93,6 +93,10 @@ class InSetExpression implements ISubjective, IExpression
 			return null;
 		}
 
+		if (is_array($this->set))
+			$this->set = SqlValueExpressionList::create()
+							->setList($this->set);
+
 		$values = $this->set->toDialectString($dialect);
 
 		if (!$values)
