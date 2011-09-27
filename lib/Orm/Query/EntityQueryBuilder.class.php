@@ -192,6 +192,13 @@ final class EntityQueryBuilder implements ISubjectivity
 				return new SqlIdentifier($subject);
 			}
 		}
+		else if (is_array($subject)) {
+			$list = SqlValueExpressionList::create();
+			foreach ($subject as $innerSubject)
+				$list->add($this->subject($innerSubject));
+
+			return $list;
+		}
 		else if (!is_null($subject)) {
 			Assert::isUnreachable(
 				'do not know how to subject %s',
@@ -225,7 +232,7 @@ final class EntityQueryBuilder implements ISubjectivity
 	private function getEntityProperty($property)
 	{
 		if (!isset($this->propertyCache[$property])) {
-			$this->propertyCache[$property] = 
+			$this->propertyCache[$property] =
 				$this->entity
 					->getLogicalSchema()
 					->getEntityProperty(new EntityPropertyPath($property, $this));
@@ -233,20 +240,20 @@ final class EntityQueryBuilder implements ISubjectivity
 
 		return $this->propertyCache[$property];
 	}
-	
+
 	/**
 	 * @return EntityQueryBuilder
 	 */
 	function joinEncapsulant($encapsulant)
 	{
 		Assert::isScalar($encapsulant);
-		
+
 		if (!isset($this->joined[$encapsulant])) {
 			$property = $this->entity->getLogicalSchema()->getProperty($encapsulant);
 			$type = $property->getType();
-			
+
 			Assert::isTrue($type instanceof AssociationPropertyType);
-			
+
 			$builder = $this->joined[$encapsulant] =
 				new self (
 					$type->getContainer(),

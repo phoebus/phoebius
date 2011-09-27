@@ -37,7 +37,7 @@ class InSetExpression implements ISubjective, IExpression
 	/**
 	 * @var array
 	 */
-	private $set;
+	private $set = array();
 
 	/**
 	 * @var InSetLogicalOperator
@@ -49,7 +49,7 @@ class InSetExpression implements ISubjective, IExpression
 	 * @param array $set set of values the subject should match
 	 * @param InSetLogicalOperator|null $operator logical operator
 	 */
-	function __construct($subject, array $set, InSetLogicalOperator $operator = null)
+	function __construct($subject, $set, InSetLogicalOperator $operator = null)
 	{
 		$this->subject = $subject;
 		$this->set = $set;
@@ -73,12 +73,18 @@ class InSetExpression implements ISubjective, IExpression
 	 */
 	private function convertSet(ISubjectivity $object)
 	{
-		$set = array();
-		foreach ($this->set as $item) {
-			$set[] = $object->subject($item);
+		if (!is_array($this->set)) {
+			return $object->subject($this->set);
 		}
+		else {
+			$set = $this->set;
 
-		return $set;
+			$finalSet = array();
+			foreach ($set as $item) {
+				$finalSet[] = $object->subject($item);
+			}
+			return $finalSet;
+		}
 	}
 
 	function toDialectString(IDialect $dialect)
@@ -87,8 +93,10 @@ class InSetExpression implements ISubjective, IExpression
 			return null;
 		}
 
-		$values = SqlValueExpressionList::create()
-					->setList($this->set);
+		$values = $this->set->toDialectString($dialect);
+
+		if (!$values)
+			return null;
 
 		$compiledSlices = array();
 
@@ -97,7 +105,7 @@ class InSetExpression implements ISubjective, IExpression
 		$compiledSlices[] = ')';
 		$compiledSlices[] = $this->operator->toDialectString($dialect);
 		$compiledSlices[] = '(';
-		$compiledSlices[] = $values->toDialectString($dialect);
+		$compiledSlices[] = $values;
 		$compiledSlices[] = ')';
 
 		$compiledString = join(' ', $compiledSlices);
