@@ -62,7 +62,7 @@ final class FormControl extends StaticClass
 	/**
 	 * @return HiddenFormControl
 	 */
-	static function hidden($name, $value)
+	static function hidden($name, $value = null)
 	{
 		return HiddenFormControl::create($name)
 				->setDefaultValue($value);
@@ -151,7 +151,7 @@ final class FormControl extends StaticClass
 	/**
 	 * @return TextareaFormControl
 	 */
-	static function textarea($name, $label, $value)
+	static function textarea($name, $label, $value = null)
 	{
 		return TextareaFormControl::create($name, $label)
 				->setDefaultValue($value);
