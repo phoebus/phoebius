@@ -71,7 +71,7 @@ class ImageFormControlSet extends FileFormControlSet
 	protected function spawnControl()
 	{
 		return ImageFormControl::create($this->getInnerName(), $this->getLabel())
-				->addAllowedTypes($this->allowedImageTypes);
+				->setAllowedTypes($this->allowedImageTypes);
 	}
 }
 

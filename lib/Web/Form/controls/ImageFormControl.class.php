@@ -50,6 +50,15 @@ final class ImageFormControl extends FileFormControl
 		return $this;
 	}
 
+	function setAllowedTypes(array $types)
+	{
+		$this
+				->dropAllowedTypes()
+				->addAllowedTypes($types);
+
+		return $this;
+	}
+
 	function dropAllowedTypes()
 	{
 		$this->allowedImageTypes = array();
