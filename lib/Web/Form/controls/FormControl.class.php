@@ -29,9 +29,10 @@ final class FormControl extends StaticClass
 	/**
 	 * @return CheckboxFormControl
 	 */
-	static function checkbox($name, $label, $value = '1')
+	static function checkbox($name, $label, $checked = false, $value = '1')
 	{
-		return CheckboxFormControl::create($name, $label, $value);
+		return CheckboxFormControl::create($name, $label, $value)
+					->setDefaultValue($checked ? $value : null);
 	}
 
 	/**
