@@ -53,11 +53,27 @@ final class FormControl extends StaticClass
 	}
 
 	/**
+	 * @return FileFormControl
+	 */
+	static function image($name, $label)
+	{
+		return ImageFormControl::create($name, $label);
+	}
+
+	/**
 	 * @return FileFormControlSet
 	 */
 	static function fileSet($name, $label, $defaultCount = 1)
 	{
 		return FileFormControlSet::create($name, $label, $defaultCount);
+	}
+
+	/**
+	 * @return ImageFormControlSet
+	 */
+	static function imageSet($name, $label, $defaultCount = 1)
+	{
+		return ImageFormControlSet::create($name, $label, $defaultCount);
 	}
 
 	/**
