@@ -19,20 +19,10 @@
 /**
  * Represents a file control
  * @ingroup File
+ * @see FileFormControlError
  */
 class FileFormControl extends InputFormControl
 {
-	// missing
-	const ERROR_MISSING_FILE = 'nothing was uploaded'; // UPLOAD_ERR_NO_FILE
-
-	// wrong
-	const ERROR_WRONG_MAX_SIZE = 'file exceeds the allowed size'; //UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE,
-	const ERROR_WRONG_MIN_SIZE = 'file is empty';
-	const ERROR_WRONG_UPLOAD_IS_PARTIAL = 'file was partially uploaded'; // UPLOAD_ERR_PARTIAL
-	const ERROR_WRONG_FILE = 'file of that type is not allowed'; // UPLOAD_ERR_EXTENSION
-
-	// asserts: UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
-
 	/**
 	 * @var int
 	 */
@@ -124,29 +114,29 @@ class FileFormControl extends InputFormControl
 		) {
 			$value = null;
 			if (!$this->isOptional())
-				$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
+				$this->setError(new FileFormControlError(FileFormControlError::MISSING));
 		}
 		else if ($value['error']) {
 			switch ($value['error']) {
 				case UPLOAD_ERR_NO_FILE: {
 					if (!$this->isOptional())
-						$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
+						$this->setError(new FileFormControlError(FileFormControlError::MISSING));
 					break;
 				}
 
 				case UPLOAD_ERR_INI_SIZE:
 				case UPLOAD_ERR_FORM_SIZE: {
-					$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MAX_SIZE));
+					$this->setError(new FileFormControlError(FileFormControlError::MAX_SIZE_EXCEEDED));
 					break;
 				}
 
 				case UPLOAD_ERR_PARTIAL: {
-					$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_UPLOAD_IS_PARTIAL));
+					$this->setError(new FileFormControlError(FileFormControlError::UPLOAD_IS_PARTIAL));
 					break;
 				}
 
 				case UPLOAD_ERR_EXTENSION: {
-					$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_FILE));
+					$this->setError(new FileFormControlError(FileFormControlError::DISALLOWED_FILE_TYPE));
 					break;
 				}
 
@@ -162,13 +152,13 @@ class FileFormControl extends InputFormControl
 		else if (!is_uploaded_file($value['tmp_name'])) {
 			$value = null;
 			if (!$this->isOptional())
-				$this->setError(FormControlError::missing()->setMessage(self::ERROR_MISSING_FILE));
+				$this->setError(new FileFormControlError(FileFormControlError::MISSING));
 		}
 		else if ($this->minSize && $value['size'] < $this->minSize) {
-			$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MIN_SIZE));
+			$this->setError(new FileFormControlError(FileFormControlError::TOO_SMALL));
 		}
 		else if ($this->maxSize && $this->maxSize < $value['size']) {
-			$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_MAX_SIZE));
+			$this->setError(new FileFormControlError(FileFormControlError::MAX_SIZE_EXCEEDED));
 		}
 
 		$this->setImportedValue($value);
