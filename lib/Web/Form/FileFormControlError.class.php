@@ -27,27 +27,6 @@ final class FileFormControlError extends FormControlError
 	const DISALLOWED_FILE_TYPE = 'file of that type is not allowed'; // UPLOAD_ERR_EXTENSION
 
 	// asserts: UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
-
-	private static $messages = array(
-		self::MAX_SIZE_EXCEEDED => 'file exceeds the allowed size',
-		self::TOO_SMALL => 'file size is too small',
-		self::UPLOAD_IS_PARTIAL => 'file was partially uploaded',
-		self::DISALLOWED_FILE_TYPE => 'file of that type is not allowed'
-	);
-
-	/**
-	 * @return string
-	 */
-	function getMessage()
-	{
-		$m = parent::getMessage();
-
-		if (!$m) {
-			$m = self::$messages[$this->getValue()];
-		}
-
-		return $m;
-	}
 }
 
 ?>

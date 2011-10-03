@@ -169,7 +169,7 @@ abstract class BaseFormControl implements IFormControl
      */
 	function setError(FormControlError $error)
 	{
-        if ($this->hasRegisteredError($error) && !$error->getMessage())
+        if ($this->hasRegisteredError($error))
             $error = $this->getRegisteredError($error);
 
 		$this->error = $error;

@@ -94,7 +94,13 @@ class FormControlError extends Enumeration
 	 */
 	function getMessage()
 	{
-		return $this->message;
+		$m = $this->message;
+
+		if (!$m) {
+			$m = $this->getValue();
+		}
+
+		return $m;
 	}
 }
 
