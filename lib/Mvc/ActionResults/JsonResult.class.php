@@ -30,6 +30,12 @@ class JsonResult extends ContentResult
 	{
 		parent::__construct(json_encode($json));
 	}
+
+	function handle(WebResponse $response)
+	{
+		$response->addHeader('Content-Type', 'application/json; charset=utf8');
+		parent::handle($response);
+	}
 }
 
 ?>
