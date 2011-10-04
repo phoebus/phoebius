@@ -143,6 +143,17 @@ class Form
 	}
 
 	/**
+	 * @param $name
+	 * @return Form
+	 */
+	function dropControl($name)
+	{
+		unset ($this->controls[$name]);
+
+		return $this;
+	}
+
+	/**
 	 * @param  $name
 	 * @return IFormControl
 	 */
