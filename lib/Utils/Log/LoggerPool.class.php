@@ -62,7 +62,8 @@ final class LoggerPool extends LazySingleton
 		$args = func_get_args();
 		$args = array_slice($args, 1);
 
-		$string = call_user_func_array('sprintf', $args);
+		if (sizeof($args) > 1)
+			$string = call_user_func_array('sprintf', $args);
 
 		self::getInstance()
 			->getNamed($name)
