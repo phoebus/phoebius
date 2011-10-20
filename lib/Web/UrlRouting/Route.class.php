@@ -319,10 +319,13 @@ final class _PathPattern
 				Assert::hasIndex(
 					$data, $this->placeholders[$i],
 					'specify value for placehodler `%s` to reverse path `%s`',
-					$this->placeholders[$i], $this->pattern
+					$placeholderName, $this->pattern
 				);
 
-				$placeholderValue = $data[$this->placeholders[$i]];
+				$placeholderValue = $data[$placeholderName];
+
+				if ($placeholderValue instanceof IdentifiableOrmEntity)
+					$placeholderValue = $placeholderValue->_getId();
 
 				Assert::isTrue(
 					preg_match($this->particles[$i], $placeholderValue),
@@ -330,7 +333,7 @@ final class _PathPattern
 					$placeholderValue, $placeholderValue, $this->particles[$i]
 				);
 
-				$path[] = $data[$this->placeholders[$i]];
+				$path[] = $placeholderValue;
 			}
 			else {
 				$path[] = $part;

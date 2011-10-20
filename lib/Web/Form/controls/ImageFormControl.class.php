@@ -94,7 +94,7 @@ final class ImageFormControl extends FileFormControl
 				};
 			}
 			catch (Exception $e) {
-				$this->setError(FormControlError::wrong()->setMessage(self::ERROR_WRONG_FILE));
+				$this->setError(new FileFormControlError(FileFormControlError::DISALLOWED_FILE_TYPE));
 			}
 		}
 	}

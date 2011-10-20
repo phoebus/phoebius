@@ -216,7 +216,7 @@ class RdbmsDao implements IOrmEntityAccessor
 		if (!empty($toFetchIds)) {
 			$query =
 				EntityQuery::create($this->entity)
-					->where(
+					->setCondition(
 						Expression::in($this->identifier, $toFetchIds)
 					);
 
