@@ -280,7 +280,7 @@ final class _PathPattern
 	{
 		$path_parts = explode(self::DELIMITER, $path);
 
-		if (sizeof($path_parts) < sizeof($this->particles)) {
+		if (sizeof($path_parts) != sizeof($this->particles)) {
 			return false;
 		}
 
