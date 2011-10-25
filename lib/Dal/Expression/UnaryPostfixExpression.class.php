@@ -53,7 +53,7 @@ class UnaryPostfixExpression implements ISubjective, IExpression
 	{
 		return new self (
 			$object->subject($this->subject, $this),
-			$this->logic
+			$this->operator
 		);
 	}
 

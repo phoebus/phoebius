@@ -21,26 +21,26 @@
 		{
 			return parent::instance(__CLASS__);
 		}
-		
+
 		/**
 		 * @return OqlLogicalObjectNode
 		**/
 		public function process(OqlSyntaxNode $node, OqlSyntaxNode $rootNode)
 		{
 			$iterator = OqlSyntaxTreeDeepRecursiveIterator::me();
-			
+
 			if (($operand = $iterator->reset($node)) === null)
 				return $node;
-			
+
 			if (($operator = $iterator->next()) === null)
 				return $node;
-			
+
 			// TODO: assertions?
-			
+
 			return OqlLogicalObjectNode::create()->setObject(
 				new UnaryPostfixExpression(
-					new UnaryPostfixLogicalOperator($operand->toValue()),
-					$operator->toValue()
+					$operand->toValue(),
+					new UnaryPostfixLogicalOperator($operator->toValue())
 				)
 			);
 		}

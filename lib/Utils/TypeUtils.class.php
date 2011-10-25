@@ -68,17 +68,18 @@ final class TypeUtils extends StaticClass
 
 		try {
 			$class = class_exists($name, true);
+			return true;
 		}
 		catch (Exception $e) {}
 
 		if (!$class) {
 			try {
 				$interface = interface_exists($name, true);
+				return true;
 			}
-			catch (Exception $e) {}
+			catch (Exception $e) {
+			}
 		}
-
-		return $class || $interface;
 	}
 
 	/**

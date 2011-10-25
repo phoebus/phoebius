@@ -140,7 +140,7 @@ final class EntityQuery implements ISqlSelectQuery
 	 */
 	function addProjection(IProjection $projection)
 	{
-		$this->projection->append($projection);
+		$this->projection->add($projection);
 
 		return $this;
 	}

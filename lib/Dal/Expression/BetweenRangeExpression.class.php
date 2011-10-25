@@ -58,9 +58,9 @@ class BetweenRangeExpression implements ISubjective, IExpression
 	function toSubjected(ISubjectivity $object)
 	{
 		return new self (
-			$object->convert($this->subject, $this),
-			$object->convert($this->from, $this),
-			$object->convert($this->to, $this)
+			$object->subject($this->subject, $this),
+			$object->subject($this->from, $this),
+			$object->subject($this->to, $this)
 		);
 	}
 
