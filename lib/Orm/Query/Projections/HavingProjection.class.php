@@ -31,7 +31,7 @@ final class HavingProjection implements IProjection
 	/**
 	 * @param IExpression $expression expression to use
 	 */
-	function __construct(IExpression $expression)
+	function __construct($expression)
 	{
 		$this->expression = $expression;
 	}

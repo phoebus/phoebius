@@ -42,7 +42,12 @@ class AggrProjection implements IProjection
 		$this->expression = $expression;
 		$this->alias = $alias;
 	}
-	
+
+	function getExpression()
+	{
+		return $this->expression;
+	}
+
 	/**
 	 * Gets the alias for projection
 	 * @return string|null
@@ -63,7 +68,18 @@ class AggrProjection implements IProjection
 
 	function fill(SelectQuery $selectQuery, EntityQueryBuilder $entityQueryBuilder)
 	{
-		$selectQuery->addSelectExpression($this->getSqlFunction($entityQueryBuilder));
+		if ($this->alias)
+			$entityQueryBuilder->registerIdentifier($this->alias);
+
+		$selectQuery->addSelectExpression(
+			new AliasedSqlValueExpression(
+				$this->getSqlFunction(
+					$this->getFunc(),
+					$entityQueryBuilder->subject($this->expression)
+				),
+				$this->alias
+			)
+		);
 	}
 
 	/**
@@ -72,16 +88,13 @@ class AggrProjection implements IProjection
 	 * @param EntityQuery $entityQuery
 	 * @return SqlFunction
 	 */
-	protected function getSqlFunction(EntityQueryBuilder $entityQueryBuilder)
+
+	protected function getSqlFunction($name, $expression)
 	{
-		return
-			new AliasedSqlValueExpression(
-				new SqlFunction(
-					$this->getFunc(),
-					$entityQueryBuilder->subject($this->expression)
-				),
-				$this->alias
-			);
+		return new SqlFunction(
+					$name,
+					$expression
+				);
 	}
 }
 

@@ -401,21 +401,6 @@ final class EntityQuery implements ISqlSelectQuery
 		);
 	}
 
-	/**
-	 * Gets the value of the entity's property. The value is obtained according to the current
-	 * setting of EntityQuery and the FetchStrategy set inside DAO of the entity
-	 * @param string name of the property
-	 * @return scalar
-	 */
-	function getProperty($property)
-	{
-		return $this->entity->getDao()->getProperty(
-			$this->makeSelect(
-				Projection::property($property)
-			)
-		);
-	}
-
 	function getPlaceholderValues(IDialect $dialect)
 	{
 		return array ();

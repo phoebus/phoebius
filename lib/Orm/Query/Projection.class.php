@@ -156,7 +156,7 @@ final class Projection extends StaticClass
 	 *
 	 * @return HavingProjection
 	 */
-	static function having(IExpression $expression)
+	static function having($expression)
 	{
 		return new HavingProjection($expression);
 	}
@@ -214,22 +214,22 @@ final class Projection extends StaticClass
 	{
 		return new AggrProjection($func, $property, $alias);
 	}
-	
+
 	static function sum($property, $alias = null)
 	{
 		return self::aggr('sum', $property, $alias);
 	}
-	
+
 	static function min($property, $alias = null)
 	{
 		return self::aggr('min', $property, $alias);
 	}
-	
+
 	static function max($property, $alias = null)
 	{
 		return self::aggr('max', $property, $alias);
 	}
-	
+
 	static function avg($property, $alias = null)
 	{
 		return self::aggr('avg', $property, $alias);
