@@ -62,7 +62,7 @@ class MySqlDB extends DB
 		}
 
 		$connectionArguments = array(
-			$this->getHost(),
+			$this->getHost() . (($port = $this->getPort()) ? ":$port" : ""),
 			$this->getUser(),
 			$this->getPassword(),
 			true,
@@ -257,12 +257,15 @@ class MySqlDB extends DB
 	 */
 	protected function performQuery(ISqlQuery $query, $isAsync)
 	{
+		if (!$this->isConnected())
+			$this->connect(false);
+
 		$queryAsString = $query->toDialectString($this->getDialect());
 
 		LoggerPool::log(parent::LOG_VERBOSE, 'sending query: %s', $queryAsString);
 		LoggerPool::log(parent::LOG_QUERY, $queryAsString);
 
-		$result = mysql_query(
+		$result = @mysql_query(
 			$queryAsString,
 			$this->link
 		);

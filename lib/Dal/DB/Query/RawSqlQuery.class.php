@@ -31,7 +31,7 @@
  *
  * @ingroup Dal_DB_Query
  */
-class RawSqlQuery implements ISqlQuery
+class RawSqlQuery implements ISqlSelectQuery
 {
 	/**
 	 * @var string
@@ -54,6 +54,16 @@ class RawSqlQuery implements ISqlQuery
 		$this->query = $query;
 
 		$this->placeholderValues = $placeholderValues;
+	}
+
+	function setLimit($limit = null)
+	{
+		Assert::isUnreachable();
+	}
+
+	function setOffset($offset = null)
+	{
+		Assert::isUnreachable();
 	}
 
 	/**
