@@ -262,7 +262,7 @@ abstract class Container implements IteratorAggregate
 	 * the default behaviour of nhibernate
 	 *
 	 * @param OrderBy ...
-	 * @return EntityQuery itself
+	 * @return Container itself
 	 */
 	function addOrderBy(OrderBy $expression)
 	{
