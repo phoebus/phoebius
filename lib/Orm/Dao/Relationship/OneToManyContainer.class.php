@@ -142,11 +142,17 @@ class OneToManyContainer extends Container
 
 	private function fillQuery(EntityQuery $query)
 	{
-		$query->setCondition(
-			Expression::eq(
-				$this->referentialProperty, $this->getParentObject()
-			)
-		);
+		$condition = Expression::eq(
+						$this->referentialProperty, $this->getParentObject()
+					);
+
+		if ($extraCondition = $this->getCondition())
+			$condition =
+				Expression::andChain()
+					->add($condition)
+					->add($extraCondition);
+
+		$query->setCondition($condition);
 	}
 }
 

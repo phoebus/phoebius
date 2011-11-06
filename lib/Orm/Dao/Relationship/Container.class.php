@@ -80,6 +80,11 @@ abstract class Container implements IteratorAggregate
 	private $query;
 
 	/**
+	 * @var IExpression
+	 */
+	private $condition;
+
+	/**
 	 * Fetches the collection
 	 *
 	 * @return Container an object itself
@@ -243,13 +248,19 @@ abstract class Container implements IteratorAggregate
 	 *
 	 * @return Container an object itself
 	 */
-	function setQuery(EntityQuery $query)
+	function setCondition(IExpression $expression)
 	{
-		Assert::isTrue($query->getQueryRoot() === $this->children);
-
-		$this->query = $query;
+		$this->condition = $expression;
 
 		return $this;
+	}
+
+	/**
+	 * @return IExpression|null
+	 */
+	function getCondition()
+	{
+		return $this->condition;
 	}
 
 	/**

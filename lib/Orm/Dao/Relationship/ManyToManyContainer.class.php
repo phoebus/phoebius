@@ -164,9 +164,26 @@ class ManyToManyContainer extends Container
 	/**
 	 * @return ISqlSelectQuery
 	 */
-	private function makeSqlSelectQuery(EntityQuery $query)
+	private function makeSqlSelectQuery(EntityQuery $entityQuery)
 	{
-		$query = $query->toSelectQuery();
+		$columnName = $this->mtm->getContainerProxyProperty()->getField();
+		$condition = Expression::eq(
+				new SqlColumn(
+					$columnName,
+					$this->mtm->getProxy()->getPhysicalSchema()->getTable()
+				),
+				new SqlValue($this->getParentObject()->_getId())
+			);
+
+		if ($extraCondition = $this->getCondition())
+			$condition =
+				Expression::andChain()
+					->add($condition)
+					->add($extraCondition);
+
+		$entityQuery->setCondition($condition);
+
+		$query = $entityQuery->toSelectQuery();
 
 		$joinMethod = SqlJoinMethod::INNER;
 		$childrenTable = $this->getChildren()->getPhysicalSchema()->getTable();
@@ -193,17 +210,6 @@ class ManyToManyContainer extends Container
 				),
 				new SqlJoinMethod($joinMethod),
 				$condition
-			)
-		);
-
-		$columnName = $this->mtm->getContainerProxyProperty()->getField();
-		$query->setWhere(
-			Expression::eq(
-				new SqlColumn(
-					$columnName,
-					$this->mtm->getProxy()->getPhysicalSchema()->getTable()
-				),
-				new SqlValue($this->getParentObject()->_getId())
 			)
 		);
 
