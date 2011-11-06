@@ -153,6 +153,9 @@ class MySqlDB extends DB
 
 	function getDialect()
 	{
+		if (!$this->isConnected())
+			$this->connect(false);
+
 		if (!$this->myDialect) {
 			$this->myDialect = new MySqlDialect($this->link);
 		}
