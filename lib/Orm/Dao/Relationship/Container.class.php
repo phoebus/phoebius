@@ -256,6 +256,36 @@ abstract class Container implements IteratorAggregate
 	}
 
 	/**
+	 * Appends the expression that will be used when sorting the resulting rows.
+	 *
+	 * We don't know why OrderBY is not a part of a separate projection, so we follow
+	 * the default behaviour of nhibernate
+	 *
+	 * @param OrderBy ...
+	 * @return EntityQuery itself
+	 */
+	function addOrderBy(OrderBy $expression)
+	{
+		$this->query->addOrderBy($expression);
+
+		return $this;
+	}
+
+	function setLimit($limit)
+	{
+		$this->query->setLimit($limit);
+
+		return $this;
+	}
+
+	function setOffset($offset)
+	{
+		$this->query->setOffset($offset);
+
+		return $this;
+	}
+
+	/**
 	 * @return IExpression|null
 	 */
 	function getCondition()
