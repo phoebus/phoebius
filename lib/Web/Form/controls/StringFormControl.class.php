@@ -26,6 +26,7 @@ class StringFormControl extends InputFormControl
 	const URL_PATTERN 	= '/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}((:[0-9]{1,5})?\/.*)?$/is';
 
 	private $pattern;
+	private $trim = true;
 
 	/**
 	 * @return StringFormControl
@@ -33,6 +34,15 @@ class StringFormControl extends InputFormControl
 	static function create($name, $label)
 	{
 		return new self ($name, $label);
+	}
+
+	function setImportTrim($flag = true)
+	{
+		Assert::isBoolean($flag);
+
+		$this->trim = $flag;
+
+		return $this;
 	}
 
     /**
@@ -56,6 +66,14 @@ class StringFormControl extends InputFormControl
 
 	function setImportedValue($value)
 	{
+		if ($this->trim) {
+			$value = trim($value);
+			if (!$value && !$this->isOptional()) {
+				$this->setError(FormControlError::missing());
+				return;
+			}
+		}
+
 		if ($this->pattern && !$this->hasError()) {
 			if (!preg_match($this->pattern, $value)) {
 				$this->setError(FormControlError::wrong());
