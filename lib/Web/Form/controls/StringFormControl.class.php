@@ -66,11 +66,10 @@ class StringFormControl extends InputFormControl
 
 	function setImportedValue($value)
 	{
-		if ($this->trim) {
+		if ($this->trim && !$this->hasError()) {
 			$value = trim($value);
 			if (!$value && !$this->isOptional()) {
 				$this->setError(FormControlError::missing());
-				return;
 			}
 		}
 
