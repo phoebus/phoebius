@@ -53,7 +53,7 @@ final class FormControl extends StaticClass
 	}
 
 	/**
-	 * @return FileFormControl
+	 * @return ImageFormControl
 	 */
 	static function image($name, $label)
 	{

@@ -26,6 +26,9 @@ final class ImageFormControl extends FileFormControl
 		IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_JPEG2000, IMAGETYPE_PNG
 	);
 
+	private $minWidth = null;
+	private $minHeight = null;
+
 	/**
 	 * @return ImageFormControl
 	 */
@@ -37,6 +40,20 @@ final class ImageFormControl extends FileFormControl
 	function addAllowedType($type)
 	{
 		$this->allowedImageTypes[] = $type;
+
+		return $this;
+	}
+
+	function setMinWidth($width = null)
+	{
+		$this->minWidth = $width;
+
+		return $this;
+	}
+
+	function setMinHeight($height = null)
+	{
+		$this->minHeight = $height;
 
 		return $this;
 	}
@@ -86,7 +103,15 @@ final class ImageFormControl extends FileFormControl
 						&& $size[0]/*width*/
 						&& $size[1]/*height*/
 						&& in_array($size[2], $this->allowedImageTypes)
+				) {
+					if (
+							   ($this->minWidth && $this->minWidth > $size[0])
+							|| ($this->minHeight && $this->minHeight > $size[1])
 					) {
+						$this->setError(new FileFormControlError(FileFormControlError::TOO_SMALL));
+						return;
+					}
+
 					parent::setImportedValue($value);
 				}
 				else {
