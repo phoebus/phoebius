@@ -33,7 +33,7 @@ class JsonResult extends ContentResult
 
 	function handle(WebResponse $response)
 	{
-		$response->addHeader('Content-Type', 'application/json; charset=utf8');
+		$response->addHeader('Content-Type', 'application/json; charset=utf-8');
 		parent::handle($response);
 	}
 }
