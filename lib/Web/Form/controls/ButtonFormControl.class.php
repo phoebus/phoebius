@@ -41,6 +41,19 @@ class ButtonFormControl extends OptionalValueFormControl
 	{
 		return 'submit';
 	}
+
+	function toHtml(array $htmlAttributes = array())
+	{
+		Assert::isFalse(isset($htmlAttributes['name']));
+		Assert::isFalse(isset($htmlAttributes['type']));
+		Assert::isFalse(isset($htmlAttributes['value']));
+
+		$htmlAttributes['name'] = $this->getName();
+		$htmlAttributes['type'] = $this->getType();
+		$htmlAttributes['value'] = $this->getFixedValue();
+
+		return HtmlUtil::getNode('input', $htmlAttributes);
+	}
 }
 
 ?>
