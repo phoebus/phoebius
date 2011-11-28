@@ -150,6 +150,9 @@ class OrmGenerator
 		$this->buildClass(new OrmAutoEntityClassCodeConstructor($class));
 		$this->buildClass(new OrmEntityClassCodeConstructor($class));
 
+		$this->buildClass(new OrmAutoDaoClassCodeConstructor($class));
+		$this->buildClass(new OrmDaoClassCodeConstructor($class));
+
 		$this->generateContainerFiles($class);
 	}
 

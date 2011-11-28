@@ -264,6 +264,11 @@ class OrmClass implements IPhysicallySchematic, ILogicallySchematic, IQueryable
 		return ucfirst($this->name);
 	}
 
+	function getDaoName()
+	{
+		return $this->getEntityName() . 'Dao';
+	}
+
 	function getFields()
 	{
 		$columns = array();
@@ -319,7 +324,7 @@ class OrmClass implements IPhysicallySchematic, ILogicallySchematic, IQueryable
 
 		return $this->map;
 	}
-	
+
 	function getEntityProperty(EntityPropertyPath $path)
 	{
 		return $this->getProperty($path->getCurrentChunk())->getEntityProperty($path);
