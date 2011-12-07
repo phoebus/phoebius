@@ -275,9 +275,10 @@ class RdbmsDao implements IOrmEntityAccessor
 			if (!$entity->isFetched()) {
 				$map->assemble($entity, $row, $this->getFetchStrategy());
 				$entity->setFetched();
-				$entitySet[] = $entity;
 				$this->identityMap->add($entity);
 			}
+
+			$entitySet[] = $entity;
 		}
 
 		$map->finish();
