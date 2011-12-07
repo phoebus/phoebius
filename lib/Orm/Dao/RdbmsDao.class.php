@@ -187,10 +187,13 @@ class RdbmsDao implements IOrmEntityAccessor
 		}
 
 		$entity = $this->touchEntity($row);
-		$this->map->assemble($entity, $row, $this->getFetchStrategy());
-		$entity->setFetched();
 
-		$this->identityMap->add($entity);
+		if (!$entity->isFetched()) {
+			$this->map->assemble($entity, $row, $this->getFetchStrategy());
+			$entity->setFetched();
+
+			$this->identityMap->add($entity);
+		}
 
 		return $entity;
 	}
@@ -268,10 +271,13 @@ class RdbmsDao implements IOrmEntityAccessor
 		$entitySet = array ();
 		$map = $this->map->getBatchMapper();
 		foreach ($rows as $row) {
-			$entity = $map->assemble($this->touchEntity($row), $row, $this->getFetchStrategy());
-			$entity->setFetched();
-			$entitySet[] = $entity;
-			$this->identityMap->add($entity);
+			$entity = $this->touchEntity($row);
+			if (!$entity->isFetched()) {
+				$map->assemble($entity, $row, $this->getFetchStrategy());
+				$entity->setFetched();
+				$entitySet[] = $entity;
+				$this->identityMap->add($entity);
+			}
 		}
 
 		$map->finish();
