@@ -30,6 +30,14 @@ class CheckboxFormControlSet extends OptionFormControlSet
 		return new self ($name, $label);
 	}
 
+	function __construct($name, $label)
+	{
+		parent::__construct($name, $label);
+
+		// initialize correct internals
+		$this->setDefaultValue(array());
+	}
+
 	function setDefaultValue($value)
 	{
 		if (!is_array($value)) {

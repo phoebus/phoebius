@@ -37,6 +37,14 @@ abstract class InputFormControlSet extends FormControlSet
 	 */
 	abstract protected function spawnControl();
 
+	function __construct($name, $label)
+	{
+		parent::__construct($name, $label);
+
+		// initialize correct internals
+		$this->setDefaultValue(array());
+	}
+
 	/**
 	 * Gets the inner controls
 	 * @return IFormControl[]

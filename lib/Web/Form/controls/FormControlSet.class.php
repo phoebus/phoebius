@@ -38,9 +38,6 @@ abstract class FormControlSet extends BaseFormControl implements IteratorAggrega
 		);
 
 		parent::__construct($name, $label);
-
-		// initialize correct internals
-		$this->setDefaultValue(array());
 	}
 
 	/**
