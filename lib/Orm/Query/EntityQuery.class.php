@@ -395,9 +395,8 @@ final class EntityQuery implements ISqlSelectQuery
 	function getCount()
 	{
 		return $this->entity->getDao()->getCell(
-			$this->makeSelect(
-				Projection::rowCount()
-			)
+			$this->makeSelect(Projection::rowCount())
+				->dropOrderBy()
 		);
 	}
 

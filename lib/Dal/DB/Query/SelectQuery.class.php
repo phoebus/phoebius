@@ -305,6 +305,13 @@ class SelectQuery implements ISqlSelectQuery, ISqlValueExpression
 		return $this;
 	}
 
+	function dropOrderBy()
+	{
+		$this->order = new OrderChain();
+
+		return $this;
+	}
+
 	function setLimit($limit)
 	{
 		if ($limit)
