@@ -95,7 +95,7 @@ class RadioFormControlSet extends OptionFormControlSet
 		$isImported = $this->isImported();
 
 		foreach ($this->getOptions() as $value => $label) {
-			$yield[] = $control = new RadioFormControl($this->getInnerName(), $label,
+			$yield[] = $control = new RadioFormControl($this->getName(), $label,
 				$value);
 			if ($checkedValue == $value) {
 				if ($isImported)
