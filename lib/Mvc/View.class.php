@@ -90,6 +90,12 @@ class View
 		$this->name = $name;
 	}
 
+	function __call($name, array $args)
+	{
+		if (isset($this->{$name}))
+			return call_user_func_array($this->{$name}, $args);
+	}
+
 	/**
 	 * A shorthand getter of the view data.
 	 *

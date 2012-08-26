@@ -160,7 +160,8 @@ class ActionDispatcher implements IDispatcher
 	 */
 	protected function filterArgumentValue(ActionController $controller, ReflectionMethod $method, ReflectionParameter $argument)
 	{
-		if (isset($this->request[$argument->name])) {
+		$get = $this->request->getGetVars();
+		if (isset($get[$argument->name])) {
 			$value = $this->getActualParameterValue($argument, $this->request[$argument->name]);
 		}
 		else if (isset($this->routeData[$argument->name])) {

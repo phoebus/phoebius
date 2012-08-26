@@ -43,10 +43,19 @@ class ViewResult implements IActionResult
 	 */
 	private $charset = 'UTF-8';
 
+	private $statusCode;
+
 	function __construct(View $view, array $data = array())
 	{
 		$this->view = $view;
 		$this->data = $data;
+	}
+
+	function setStatusCode(HttpStatus $statusCode)
+	{
+		$this->statusCode = $statusCode;
+
+		return $this;
 	}
 
 	function setContentType($contentType)
@@ -73,6 +82,9 @@ class ViewResult implements IActionResult
 
 		// html obfuscation
 		//$result = preg_replace('{>\s+<}s', '><', $result);
+
+		if ($this->statusCode)
+			$response->setStatus($this->statusCode);
 
 		$response
 			->addHeader('Content-Type', $this->contentType . ';charset=' . $this->charset)
