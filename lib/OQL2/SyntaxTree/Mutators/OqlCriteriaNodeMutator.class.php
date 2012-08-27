@@ -23,7 +23,7 @@
 			'having'	=> null,
 			'group by'	=> null
 		);
-		
+
 		/**
 		 * @return OqlCriteriaNodeMutator
 		**/
@@ -31,7 +31,7 @@
 		{
 			return parent::instance(__CLASS__);
 		}
-		
+
 		/**
 		 * @return OqlCriteriaNode
 		**/
@@ -39,45 +39,49 @@
 		{
 			$iterator = OqlSyntaxTreeRecursiveIterator::me();
 			$current = $iterator->reset($node);
-			
+
 			while ($current) {
 				if ($current->toValue() == 'from') {
 					$next = $iterator->next();
 					$entity = $next->toValue();
-					
+
 					$query = new EntityQuery($entity->getOrmEntity());
-					
+
 					break;
 				}
-				
+
 				$current = $iterator->next();
 			}
-			
+
 			Assert::isNotEmpty($query);
-			
+
 			$iterator = OqlSyntaxTreeRecursiveIterator::me();
 			$current = $iterator->reset($node);
-			
+
 			while ($current) {
 				// properties, group by, having projections
 				if ($current instanceof OqlObjectProjectionNode) {
 					$query->addProjection($current->toValue());
-				
+
 				// from, where, order by, limit, offset
 				} elseif ($current instanceof OqlTokenNode) {
 					Assert::hasIndex(self::$methodMap, $current->toValue());
-					
+
 					if ($setter = self::$methodMap[$current->toValue()]) {
 						$next = $iterator->next();
 						Assert::isNotNull($next);
-						
-						$query->{$setter}($next->toValue());
+
+						if ($next->toValue() instanceof OrderChain)
+							foreach ($next->toValue() as $_)
+								$query->{$setter}($_);
+						else
+							$query->{$setter}($next->toValue());
 					}
 				}
-				
+
 				$current = $iterator->next();
 			}
-			
+
 			return OqlCriteriaNode::create()->setObject($query);
 		}
 	}

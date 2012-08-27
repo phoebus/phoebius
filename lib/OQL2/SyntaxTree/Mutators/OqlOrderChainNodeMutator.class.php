@@ -21,7 +21,7 @@
 		{
 			return parent::instance(__CLASS__);
 		}
-		
+
 		/**
 		 * @return OqlOrderNode
 		**/
@@ -29,8 +29,8 @@
 		{
 			$chain = new OrderChain();
 			foreach ($list as $order)
-				$chain->append($order->toValue());
-			
+				$chain->add($order->toValue());
+
 			return OqlOrderNode::create()->
 				setObject($chain);
 		}
