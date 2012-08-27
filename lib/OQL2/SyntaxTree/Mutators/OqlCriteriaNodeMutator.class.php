@@ -72,7 +72,7 @@
 						Assert::isNotNull($next);
 
 						if ($next->toValue() instanceof OrderChain)
-							foreach ($next->toValue() as $_)
+							foreach ($next->toValue()->getList() as $_)
 								$query->{$setter}($_);
 						else
 							$query->{$setter}($next->toValue());
