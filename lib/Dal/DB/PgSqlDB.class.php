@@ -262,6 +262,7 @@ class PgSqlDB extends DB
 	protected function performQuery(ISqlQuery $query, $isAsync)
 	{
 		Assert::isBoolean($isAsync);
+		$isAsync=false;
 
 		$parameters = $query->getPlaceholderValues($this->getDialect());
 		$queryAsString = $query->toDialectString($this->getDialect());
@@ -275,39 +276,42 @@ class PgSqlDB extends DB
 
 		LoggerPool::log(parent::LOG_QUERY, $queryAsString);
 
-		while(pg_connection_busy($this->link));
-		$executeResult = pg_send_query($this->link, $queryAsString);
-		if (!$isAsync || !$executeResult) {
-			$result = pg_get_result($this->link);
-			$resultStatus = pg_result_status($result, PGSQL_STATUS_LONG);
-			if (
-					in_array($resultStatus, array (
-							PGSQL_EMPTY_QUERY, PGSQL_BAD_RESPONSE,
-							PGSQL_NONFATAL_ERROR, PGSQL_FATAL_ERROR
-						)
+		//while(pg_connection_busy($this->link));
+		$result = pg_query($this->link, $queryAsString);
+		if (!$result)
+			throw new DBConnectionException(
+				$this,
+				"can not send query: " . pg_last_error($this->link)
+			);
+
+		$resultStatus = pg_result_status($result, PGSQL_STATUS_LONG);
+		if (
+				in_array($resultStatus, array (
+						PGSQL_EMPTY_QUERY, PGSQL_BAD_RESPONSE,
+						PGSQL_NONFATAL_ERROR, PGSQL_FATAL_ERROR
 					)
-			) {
-				$errorCode = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
-				$errorMessage = pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY);
+				)
+		) {
+			$errorCode = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
+			$errorMessage = pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY);
 
-				if (PgSqlError::UNIQUE_VIOLATION == $errorCode) {
+			if (PgSqlError::UNIQUE_VIOLATION == $errorCode) {
 
-					LoggerPool::log(parent::LOG_VERBOSE, 'query caused a unique violation: %s', $errorMessage);
+				LoggerPool::log(parent::LOG_VERBOSE, 'query caused a unique violation: %s', $errorMessage);
 
-					throw new UniqueViolationException($query, $errorMessage);
-				}
-				else if (PgSqlError::RAISE_EXCEPTION == $errorCode) {
+				throw new UniqueViolationException($query, $errorMessage);
+			}
+			else if (PgSqlError::RAISE_EXCEPTION == $errorCode) {
 
-					LoggerPool::log(parent::LOG_VERBOSE, 'query raised exception: %s', $errorMessage);
+				LoggerPool::log(parent::LOG_VERBOSE, 'query raised exception: %s', $errorMessage);
 
-					throw new DBProcedureException($query, $errorMessage);
-				}
-				else {
+				throw new DBProcedureException($query, $errorMessage);
+			}
+			else {
 
-					LoggerPool::log(parent::LOG_VERBOSE, 'query caused an error #%s: %s', $errorCode, $errorMessage);
+				LoggerPool::log(parent::LOG_VERBOSE, 'query caused an error #%s: %s', $errorCode, $errorMessage);
 
-					throw new PgSqlQueryException($query, $errorMessage, $errorCode);
-				}
+				throw new PgSqlQueryException($query, $errorMessage, $errorCode);
 			}
 		}
 
