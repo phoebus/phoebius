@@ -188,7 +188,7 @@ class Date implements IBoxable, IOrmPropertyAssignable
 		}
 
 		return $this->spawn(
-			'-' . ((7 + $this->getWeekDay() - $weekStart->getValue()) % 7).' days'
+			'-' . ((7 + $this->getWeekDay()->getValue() - $weekStart->getValue()) % 7).' days'
 		);
 	}
 
@@ -211,7 +211,7 @@ class Date implements IBoxable, IOrmPropertyAssignable
 		}
 
 		return $this->spawn(
-			'+' . ((13 - $this->getWeekDay() + $weekStart->getValue()) % 7).' days'
+			'+' . ((13 - $this->getWeekDay()->getValue() + $weekStart->getValue()) % 7).' days'
 		);
 	}
 
