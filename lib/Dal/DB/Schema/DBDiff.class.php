@@ -145,22 +145,12 @@ final class DBDiff implements ISqlCastable
 			$yield[] = new DropTableQuery($table);
 		}
 
-		foreach ($this->createTables as $table) {
-			$yield[] = new CreateTableQuery($table);
-		}
-
 		foreach ($this->createColumns as $column) {
 			$yield[] = new CreateColumnQuery($column);
 		}
 
 		foreach ($this->createConstraints as $constraint) {
 			$yield[] = new CreateConstraintQuery($constraint);
-
-			foreach ($this->createTables as $table) {
-				foreach ($table->getConstraintQueries() as $query) {
-					$yield[] = $query;
-				}
-			}
 		}
 
 		foreach ($this->createIndexes as $index) {
@@ -168,6 +158,14 @@ final class DBDiff implements ISqlCastable
 		}
 
 		foreach ($this->createTables as $table) {
+			foreach ($table->getQueries() as $query) {
+				$yield[] = $query;
+			}
+
+			foreach ($table->getConstraintQueries() as $query) {
+				$yield[] = $query;
+			}
+
 			foreach ($table->getIndexQueries() as $query) {
 				$yield[] = $query;
 			}
