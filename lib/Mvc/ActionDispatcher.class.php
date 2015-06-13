@@ -111,7 +111,7 @@ class ActionDispatcher implements IDispatcher
 	 */
 	protected function getClassName($controller)
 	{
-		$controller = preg_replace('{\-(\w)}e', 'strtoupper("\\1")', $controller);
+		$controller = preg_replace_callback('{\-(\w)}', function($m){return strtoupper($m[1]);}, $controller);
 
 		return ucfirst($controller) . 'Controller';
 	}
