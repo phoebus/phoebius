@@ -323,7 +323,7 @@ class HttpUrl implements IStringCastable
 
 		// Port
 		$port = $this->getPort();
-		if ($port && $port != DEFAULT_HTTP_PORT && $port != DEFAULT_HTTPS_PORT) {
+		if ($port && $port != self::DEFAULT_HTTP_PORT && $port != self::DEFAULT_HTTPS_PORT) {
 				$out[] = ':' . $this->getPort();
 		}
 
