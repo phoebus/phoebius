@@ -144,7 +144,7 @@ class WebRequest implements ArrayAccess
 	function isSecured()
 	{
 		return 
-			(@$this->serverVars['HTTP_X_FORWARDED_PROTO'] == 'HTTP_X_FORWARDED_PROTO')
+			(@$this->serverVars['HTTP_X_FORWARDED_PROTO'] == 'https')
 			|| (@$this->serverVars['HTTP_CF_VISITOR']['scheme'] == 'https')
 			|| (isset($this->serverVars['HTTPS']) && !!$this->serverVars['HTTPS'])
 		;

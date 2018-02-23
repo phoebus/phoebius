@@ -322,19 +322,19 @@ class HttpUrl implements IStringCastable
 		$out[] = $this->getHost();
 
 		// Port
-		if ($this->getHost() && $this->getPort()) {
-			if (
-					   !(
-					   		   $this->getScheme() == 'http'
-					   		&& $this->getPort() == self::DEFAULT_HTTP_PORT
-					)
-					&& !(
-							   $this->getScheme() == 'https'
-							&& $this->getPort() == self::DEFAULT_HTTPS_PORT
-					)
-			) {
+		if ($this->getHost() && !in_array($this->getPort(), [DEFAULT_HTTP_PORT, DEFAULT_HTTPS_PORT])) {
+			// if (
+			// 		   !(
+			// 		   		   $this->getScheme() == 'http'
+			// 		   		&& $this->getPort() == self::DEFAULT_HTTP_PORT
+			// 		)
+			// 		&& !(
+			// 				   $this->getScheme() == 'https'
+			// 				&& $this->getPort() == self::DEFAULT_HTTPS_PORT
+			// 		)
+			// ) {
 				$out[] = ':' . $this->getPort();
-			}
+			// }
 		}
 
 		$out[] = $this->encodePath($this->getPath());
